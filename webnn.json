@@ -1,0 +1,210 @@
+{
+  "device": {
+    "category": "object"
+  },
+  "instance": {
+    "category": "object"
+  },
+  "instance descriptor": {
+    "category": "structure",
+    "extensible": true,
+    "members": []
+  },
+  "s type": {
+    "category": "enum",
+    "javascript": false,
+    "values": [
+        {"value": 0, "name": "invalid", "valid": false},
+        {"value": 1, "name": "surface descriptor from metal layer"},
+        {"value": 2, "name": "surface descriptor from windows HWND"},
+        {"value": 3, "name": "surface descriptor from xlib"},
+        {"value": 4, "name": "surface descriptor from canvas HTML selector"},
+        {"value": 5, "name": "shader module SPIRV descriptor"},
+        {"value": 6, "name": "shader module WGSL descriptor"},
+        {"value": 7, "name": "sampler descriptor dummy anisotropic filtering"},
+        {"value": 8, "name": "render pipeline descriptor dummy extension"}
+    ]
+  },
+  "error type": {
+    "category": "enum",
+    "values": [
+        {"value": 0, "name": "no error"},
+        {"value": 1, "name": "validation"},
+        {"value": 2, "name": "out of memory"},
+        {"value": 3, "name": "unknown"},
+        {"value": 4, "name": "device lost"}
+    ]
+  },
+  "char": {
+    "category": "native"
+  },
+  "void": {
+    "category": "native"
+  },
+  "uint32_t": {
+    "category": "native"
+  },
+  "int32_t": {
+    "category": "native"
+  },
+  "size_t": {
+    "category": "native"
+  },
+  "operand type": {
+    "category": "enum",
+    "values": [
+      {"value": 0, "name": "float32"},
+      {"value": 1, "name": "float16"},
+      {"value": 2, "name": "int32"},
+      {"value": 3, "name": "uint32"}
+    ]
+  },
+  "operand descriptor": {
+    "category": "structure",
+    "members": [
+      {"name": "type", "type": "operand type"},
+      {"name": "dimensions", "type": "int32_t", "annotation": "const*"},
+      {"name": "dimensions count", "type": "uint32_t", "default": 0}
+    ]
+  },
+  "operand": {
+    "category": "object"
+  },
+  "power preference": {
+    "category": "enum",
+    "values": [
+      {"value": 0, "name": "default"},
+      {"value": 1, "name": "low_power"},
+      {"value": 2, "name": "high_performance"}
+    ]
+  },
+  "compilation options": {
+    "category": "structure",
+    "members": [
+      {"name": "power preference", "type": "power preference"}
+    ]
+  },
+  "neural network context": {
+    "category": "object",
+    "methods": [
+      {
+        "name": "input",
+        "returns": "operand",
+        "args": [
+          {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"},
+          {"name": "desc", "type": "operand descriptor", "annotation": "const*"}
+        ]
+      },
+      {
+        "name": "constant",
+        "returns": "operand",
+        "args": [
+          {"name": "desc", "type": "operand descriptor", "annotation": "const*"},
+          {"name": "value", "type": "void", "annotation": "const*"},
+          {"name": "offset", "type": "size_t"},
+          {"name": "size", "type": "size_t"}
+        ]
+      },
+      {
+        "name": "matmul",
+        "returns": "operand",
+        "args": [
+          {"name": "a", "type": "operand"},
+          {"name": "b", "type": "operand"}
+        ]
+      },
+      {
+        "name": "createModel",
+        "returns": "model"
+      }
+    ]
+  },
+  "compile callback": {
+    "category": "callback",
+    "args": [
+      {"name": "compilation", "type": "compilation"}
+    ]
+  },
+  "model": {
+    "category": "object",
+    "methods": [
+      {
+        "name": "compile",
+        "args": [
+          {"name": "callback", "type": "compile callback"},
+          {"name": "options", "type": "compilation options", "annotation": "const*", "optional": true}
+        ]
+      }
+    ]
+  },
+  "input": {
+    "category": "structure",
+    "members": [
+      {"name": "dimensions count", "type": "uint32_t", "default": 0},
+      {"name": "dimensions", "type": "int32_t", "annotation": "const*", "optional": true},
+      {"name": "offset", "type": "size_t", "default": 0},
+      {"name": "size", "type": "size_t"},
+      {"name": "buffer", "type": "void", "annotation": "const*"}
+    ]
+  },
+  "output": {
+    "category": "structure",
+    "members": [
+      {"name": "dimensions count", "type": "uint32_t", "default": 0},
+      {"name": "dimensions", "type": "int32_t", "annotation": "const*", "optional": true},
+      {"name": "offset", "type": "size_t", "default": 0},
+      {"name": "size", "type": "size_t"},
+      {"name": "buffer", "type": "void", "annotation": "*", "optional": true}
+    ]
+  },
+  "inputs": {
+    "category": "object",
+    "methods": [
+      {
+        "name": "set input",
+        "args": [
+          {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"},
+          {"name": "input", "type": "input", "annotation": "const*"}
+        ]
+      }
+    ]
+  },
+  "outputs": {
+    "category": "object",
+    "methods": [
+      {
+        "name": "set output",
+        "args": [
+          {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"},
+          {"name": "buffer", "type": "output", "annotation": "const*"}
+        ]
+      },
+      {
+        "name": "get output",
+        "returns": "output",
+        "args": [
+          {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"}
+        ]
+      }
+    ]
+  },
+  "compute callback": {
+    "category": "callback",
+    "args": [
+      {"name": "outputs", "type": "outputs"}
+    ]
+  },
+  "compilation": {
+    "category": "object",
+    "methods": [
+      {
+        "name": "compute",
+        "args": [
+          {"name": "inputs", "type": "inputs"},
+          {"name": "callback", "type": "compute callback"},
+          {"name": "outputs", "type": "outputs", "optional": true}
+        ]
+      }
+    ]
+  }
+}
