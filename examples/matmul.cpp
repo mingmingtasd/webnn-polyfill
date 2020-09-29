@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <dawn/webgpu.h>
-#include <dawn/webgpu_cpp.h>
-#include <dawn/dawn_proc.h>
-#include <dawn_native/DawnNative.h>
+#include "SampleUtils.h"
 
 #include <stdio.h>
+#include <vector>
 
 void compute_callback(WGPUOutputs impl) {
   printf("outputs %p\n", (void*)impl);
@@ -37,11 +35,7 @@ void compilation_callback(WGPUCompilation impl) {
 }
 
 int main(int argc, const char* argv[]) {
-  DawnProcTable backendProcs = dawn_native::GetProcs();
-  dawnProcSetProcs(&backendProcs);
-  dawn_native::Adapter ml;
-  wgpu::NeuralNetworkContext nn;
-  nn.Acquire(ml.CreateNeuralNetworkContext());
+  wgpu::NeuralNetworkContext nn = CreateCppNeuralNetworkContext();
   std::vector<int32_t> shapeA = {2, 3};
   wgpu::OperandDescriptor descA = {wgpu::OperandType::Float32, shapeA.data(), (uint32_t)shapeA.size()};
   wgpu::Operand a = nn.Input("a", &descA);
