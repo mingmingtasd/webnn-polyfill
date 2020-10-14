@@ -14,8 +14,8 @@ namespace dawn_native {
     CompilationBase() = default;
     virtual ~CompilationBase() = default;
 
-    void Compute(InputsBase* inputs, WGPUComputeCallback callback, OutputsBase* outputs = nullptr) {
-      callback(reinterpret_cast<WGPUOutputs>(new OutputsBase()));
+    void Compute(InputsBase* inputs, WNNComputeCallback callback, OutputsBase* outputs = nullptr) {
+      callback(reinterpret_cast<WNNOutputs>(new OutputsBase()));
     }
   };
 }

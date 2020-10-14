@@ -451,7 +451,7 @@ def as_cType(name):
     if name.native:
         return name.concatcase()
     else:
-        return 'WGPU' + name.CamelCase()
+        return 'WNN' + name.CamelCase()
 
 
 def as_cTypeDawn(name):
@@ -524,7 +524,7 @@ def annotated(typ, arg):
 
 def as_cEnum(type_name, value_name):
     assert not type_name.native and not value_name.native
-    return 'WGPU' + type_name.CamelCase() + '_' + value_name.CamelCase()
+    return 'WNN' + type_name.CamelCase() + '_' + value_name.CamelCase()
 
 
 def as_cEnumDawn(type_name, value_name):
@@ -557,7 +557,7 @@ def as_MethodSuffix(type_name, method_name):
 
 def as_cProc(type_name, method_name):
     assert not type_name.native and not method_name.native
-    return 'WGPU' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
+    return 'WNN' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
 
 
 def as_cProcDawn(type_name, method_name):
@@ -580,7 +580,7 @@ def as_wireType(typ):
     if typ.category == 'object':
         return typ.name.CamelCase() + '*'
     elif typ.category in ['bitmask', 'enum']:
-        return 'WGPU' + typ.name.CamelCase()
+        return 'WNN' + typ.name.CamelCase()
     else:
         return as_cppType(typ.name)
 

@@ -73,24 +73,24 @@ namespace dawn_native {
         {% endfor %}
 
         struct ProcEntry {
-            WGPUProc proc;
+            WNNProc proc;
             const char* name;
         };
         static const ProcEntry sProcMap[] = {
             {% for (type, method) in c_methods_sorted_by_name %}
-                { reinterpret_cast<WGPUProc>(Native{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
+                { reinterpret_cast<WNNProc>(Native{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
             {% endfor %}
         };
         static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
     }
 
-    WGPUInstance NativeCreateInstance(WGPUInstanceDescriptor const* cDescriptor) {
+    WNNInstance NativeCreateInstance(WNNInstanceDescriptor const* cDescriptor) {
         const dawn_native::InstanceDescriptor* descriptor =
             reinterpret_cast<const dawn_native::InstanceDescriptor*>(cDescriptor);
-        return reinterpret_cast<WGPUInstance>(InstanceBase::Create(descriptor));
+        return reinterpret_cast<WNNInstance>(InstanceBase::Create(descriptor));
     }
 
-    WGPUProc NativeGetProcAddress(WGPUDevice, const char* procName) {
+    WNNProc NativeGetProcAddress(WNNDevice, const char* procName) {
         if (procName == nullptr) {
             return nullptr;
         }
@@ -103,15 +103,6 @@ namespace dawn_native {
 
         if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
             return entry->proc;
-        }
-
-        // Special case the two free-standing functions of the API.
-        if (strcmp(procName, "wgpuGetProcAddress") == 0) {
-            return reinterpret_cast<WGPUProc>(NativeGetProcAddress);
-        }
-
-        if (strcmp(procName, "wgpuCreateInstance") == 0) {
-            return reinterpret_cast<WGPUProc>(NativeCreateInstance);
         }
 
         return nullptr;

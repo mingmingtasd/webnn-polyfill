@@ -18,8 +18,8 @@
 #include "dawn/webgpu.h"
 
 typedef struct DawnProcTable {
-    WGPUProcGetProcAddress getProcAddress;
-    WGPUProcCreateInstance createInstance;
+    WNNProcGetProcAddress getProcAddress;
+    WNNProcCreateInstance createInstance;
 
     {% for type in by_category["object"] %}
         {% for method in c_methods(type) %}

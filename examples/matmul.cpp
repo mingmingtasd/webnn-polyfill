@@ -17,11 +17,11 @@
 #include <stdio.h>
 #include <vector>
 
-void compute_callback(WGPUOutputs impl) {
+void compute_callback(WNNOutputs impl) {
   printf("outputs %p\n", (void*)impl);
 }
 
-void compilation_callback(WGPUCompilation impl) {
+void compilation_callback(WNNCompilation impl) {
   wgpu::Compilation exe;
   exe.Acquire(impl);
   std::vector<float> bufferA(2*3);

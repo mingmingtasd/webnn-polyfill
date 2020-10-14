@@ -40,7 +40,7 @@ namespace {
 ProcTableAsClass::~ProcTableAsClass() {
 }
 
-void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, WGPUDevice* device) {
+void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, WNNDevice* device) {
     *device = GetNewDevice();
 
     {% for type in by_category["object"] %}
@@ -50,8 +50,8 @@ void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table, WGPUDevice* d
     {% endfor %}
 }
 
-void ProcTableAsClass::DeviceSetUncapturedErrorCallback(WGPUDevice self,
-                                                        WGPUErrorCallback callback,
+void ProcTableAsClass::DeviceSetUncapturedErrorCallback(WNNDevice self,
+                                                        WNNErrorCallback callback,
                                                         void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->deviceErrorCallback = callback;
@@ -60,8 +60,8 @@ void ProcTableAsClass::DeviceSetUncapturedErrorCallback(WGPUDevice self,
     OnDeviceSetUncapturedErrorCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::DeviceSetDeviceLostCallback(WGPUDevice self,
-                                                   WGPUDeviceLostCallback callback,
+void ProcTableAsClass::DeviceSetDeviceLostCallback(WNNDevice self,
+                                                   WNNDeviceLostCallback callback,
                                                    void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->deviceLostCallback = callback;
@@ -70,17 +70,17 @@ void ProcTableAsClass::DeviceSetDeviceLostCallback(WGPUDevice self,
     OnDeviceSetDeviceLostCallback(self, callback, userdata);
 }
 
-bool ProcTableAsClass::DevicePopErrorScope(WGPUDevice self,
-                                           WGPUErrorCallback callback,
+bool ProcTableAsClass::DevicePopErrorScope(WNNDevice self,
+                                           WNNErrorCallback callback,
                                            void* userdata) {
     return OnDevicePopErrorScopeCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::BufferMapAsync(WGPUBuffer self,
-                                      WGPUMapModeFlags mode,
+void ProcTableAsClass::BufferMapAsync(WNNBuffer self,
+                                      WNNMapModeFlags mode,
                                       size_t offset,
                                       size_t size,
-                                      WGPUBufferMapCallback callback,
+                                      WNNBufferMapCallback callback,
                                       void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->mapAsyncCallback = callback;
@@ -89,9 +89,9 @@ void ProcTableAsClass::BufferMapAsync(WGPUBuffer self,
     OnBufferMapAsyncCallback(self, callback, userdata);
 }
 
-void ProcTableAsClass::FenceOnCompletion(WGPUFence self,
+void ProcTableAsClass::FenceOnCompletion(WNNFence self,
                                          uint64_t value,
-                                         WGPUFenceOnCompletionCallback callback,
+                                         WNNFenceOnCompletionCallback callback,
                                          void* userdata) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
     object->fenceOnCompletionCallback = callback;
@@ -100,25 +100,25 @@ void ProcTableAsClass::FenceOnCompletion(WGPUFence self,
     OnFenceOnCompletionCallback(self, value, callback, userdata);
 }
 
-void ProcTableAsClass::CallDeviceErrorCallback(WGPUDevice device,
-                                               WGPUErrorType type,
+void ProcTableAsClass::CallDeviceErrorCallback(WNNDevice device,
+                                               WNNErrorType type,
                                                const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->deviceErrorCallback(type, message, object->userdata);
 }
 
-void ProcTableAsClass::CallDeviceLostCallback(WGPUDevice device, const char* message) {
+void ProcTableAsClass::CallDeviceLostCallback(WNNDevice device, const char* message) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->deviceLostCallback(message, object->userdata);
 }
 
-void ProcTableAsClass::CallMapAsyncCallback(WGPUBuffer buffer, WGPUBufferMapAsyncStatus status) {
+void ProcTableAsClass::CallMapAsyncCallback(WNNBuffer buffer, WNNBufferMapAsyncStatus status) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(buffer);
     object->mapAsyncCallback(status, object->userdata);
 }
 
-void ProcTableAsClass::CallFenceOnCompletionCallback(WGPUFence fence,
-                                                     WGPUFenceCompletionStatus status) {
+void ProcTableAsClass::CallFenceOnCompletionCallback(WNNFence fence,
+                                                     WNNFenceCompletionStatus status) {
     auto object = reinterpret_cast<ProcTableAsClass::Object*>(fence);
     object->fenceOnCompletionCallback(status, object->userdata);
 }

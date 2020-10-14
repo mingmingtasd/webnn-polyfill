@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef DAWNNATIVE_WGPU_STRUCTS_H_
-#define DAWNNATIVE_WGPU_STRUCTS_H_
+#ifndef DAWNNATIVE_WNN_STRUCTS_H_
+#define DAWNNATIVE_WNN_STRUCTS_H_
 
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/Forward.h"
@@ -64,4 +64,4 @@ namespace dawn_native {
 
 } // namespace dawn_native
 
-#endif  // DAWNNATIVE_WGPU_STRUCTS_H_
+#endif  // DAWNNATIVE_WNN_STRUCTS_H_

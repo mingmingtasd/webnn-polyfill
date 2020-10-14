@@ -49,7 +49,7 @@ namespace dawn_wire { namespace client {
             }
         {% endfor %}
 
-        bool DeviceMatches(const Device* device, WGPUChainedStruct const* chainedStruct);
+        bool DeviceMatches(const Device* device, WNNChainedStruct const* chainedStruct);
 
         {% for type in by_category["structure"] if type.may_have_dawn_object %}
             DAWN_DECLARE_UNUSED bool DeviceMatches(const Device* device, const {{as_cType(type.name)}}& obj) {
@@ -84,7 +84,7 @@ namespace dawn_wire { namespace client {
             }
         {% endfor %}
 
-        bool DeviceMatches(const Device* device, WGPUChainedStruct const* chainedStruct) {
+        bool DeviceMatches(const Device* device, WNNChainedStruct const* chainedStruct) {
             while (chainedStruct != nullptr) {
                 switch (chainedStruct->sType) {
                     {% for sType in types["s type"].values if sType.valid %}
@@ -98,7 +98,7 @@ namespace dawn_wire { namespace client {
                             break;
                         }
                     {% endfor %}
-                    case WGPUSType_Invalid:
+                    case WNNSType_Invalid:
                         break;
                     default:
                         UNREACHABLE();
@@ -156,7 +156,7 @@ namespace dawn_wire { namespace client {
                         } while (false);
 
                         if (DAWN_UNLIKELY(!sameDevice)) {
-                            device->InjectError(WGPUErrorType_Validation,
+                            device->InjectError(WNNErrorType_Validation,
                                                 "All objects must be from the same device.");
                             {% if method.return_type.category == "object" %}
                                 // Allocate an object without registering it on the server. This is backed by a real allocation on
@@ -234,30 +234,30 @@ namespace dawn_wire { namespace client {
     {% endfor %}
 
     namespace {
-        WGPUInstance ClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
+        WNNInstance ClientCreateInstance(WNNInstanceDescriptor const* descriptor) {
             UNREACHABLE();
             return nullptr;
         }
 
-        void ClientDeviceReference(WGPUDevice) {
+        void ClientDeviceReference(WNNDevice) {
         }
 
-        void ClientDeviceRelease(WGPUDevice) {
+        void ClientDeviceRelease(WNNDevice) {
         }
 
         struct ProcEntry {
-            WGPUProc proc;
+            WNNProc proc;
             const char* name;
         };
         static const ProcEntry sProcMap[] = {
             {% for (type, method) in c_methods_sorted_by_name %}
-                { reinterpret_cast<WGPUProc>(Client{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
+                { reinterpret_cast<WNNProc>(Client{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
             {% endfor %}
         };
         static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
     }  // anonymous namespace
 
-    WGPUProc ClientGetProcAddress(WGPUDevice, const char* procName) {
+    WNNProc ClientGetProcAddress(WNNDevice, const char* procName) {
         if (procName == nullptr) {
             return nullptr;
         }
@@ -270,15 +270,6 @@ namespace dawn_wire { namespace client {
 
         if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
             return entry->proc;
-        }
-
-        // Special case the two free-standing functions of the API.
-        if (strcmp(procName, "wgpuGetProcAddress") == 0) {
-            return reinterpret_cast<WGPUProc>(ClientGetProcAddress);
-        }
-
-        if (strcmp(procName, "wgpuCreateInstance") == 0) {
-            return reinterpret_cast<WGPUProc>(ClientCreateInstance);
         }
 
         return nullptr;

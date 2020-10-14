@@ -22,7 +22,7 @@
         "file": "webgpu/webgpu.h",
         "defines": [],
         "structs": {
-            "WGPUChainedStruct": [
+            "WNNChainedStruct": [
                 "next",
                 "sType"
             ],

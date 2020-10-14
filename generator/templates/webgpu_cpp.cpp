@@ -44,13 +44,13 @@ namespace wgpu {
 
     // ChainedStruct
 
-    static_assert(sizeof(ChainedStruct) == sizeof(WGPUChainedStruct),
+    static_assert(sizeof(ChainedStruct) == sizeof(WNNChainedStruct),
             "sizeof mismatch for ChainedStruct");
-    static_assert(alignof(ChainedStruct) == alignof(WGPUChainedStruct),
+    static_assert(alignof(ChainedStruct) == alignof(WNNChainedStruct),
             "alignof mismatch for ChainedStruct");
-    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof(WGPUChainedStruct, next),
+    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof(WNNChainedStruct, next),
             "offsetof mismatch for ChainedStruct::nextInChain");
-    static_assert(offsetof(ChainedStruct, sType) == offsetof(WGPUChainedStruct, sType),
+    static_assert(offsetof(ChainedStruct, sType) == offsetof(WNNChainedStruct, sType),
             "offsetof mismatch for ChainedStruct::sType");
     {% for type in by_category["structure"] %}
         {% set CppType = as_cppType(type.name) %}
@@ -125,28 +125,16 @@ namespace wgpu {
                 {% endif %}
             }
         {% endfor %}
-        void {{CppType}}::WGPUReference({{CType}} handle) {
+        void {{CppType}}::WNNReference({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("reference"))}}(handle);
             }
         }
-        void {{CppType}}::WGPURelease({{CType}} handle) {
+        void {{CppType}}::WNNRelease({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("release"))}}(handle);
             }
         }
     {% endfor %}
-
-    // Instance
-
-    Instance CreateInstance(const InstanceDescriptor* descriptor) {
-        const WGPUInstanceDescriptor* cDescriptor =
-            reinterpret_cast<const WGPUInstanceDescriptor*>(descriptor);
-        return Instance::Acquire(wgpuCreateInstance(cDescriptor));
-    }
-
-    Proc GetProcAddress(Device const& device, const char* procName) {
-        return reinterpret_cast<Proc>(wgpuGetProcAddress(device.Get(), procName));
-    }
 
 }

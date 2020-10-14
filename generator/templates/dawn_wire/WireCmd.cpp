@@ -85,8 +85,8 @@
 
 namespace {
 
-    struct WGPUChainedStructTransfer {
-        WGPUSType sType;
+    struct WNNChainedStructTransfer {
+        WNNSType sType;
         bool hasNext;
     };
 
@@ -112,7 +112,7 @@ namespace {
         {% elif record.extensible %}
             bool hasNextInChain;
         {% elif record.chained %}
-            WGPUChainedStructTransfer chain;
+            WNNChainedStructTransfer chain;
         {% endif %}
 
         //* Value types are directly in the command, objects being replaced with their IDs.
@@ -487,11 +487,11 @@ namespace dawn_wire {
             return DeserializeResult::Success;
         }
 
-        size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct);
-        void SerializeChainedStruct(WGPUChainedStruct const* chainedStruct,
+        size_t GetChainedStructExtraRequiredSize(const WNNChainedStruct* chainedStruct);
+        void SerializeChainedStruct(WNNChainedStruct const* chainedStruct,
                                     char** buffer,
                                     const ObjectIdProvider& provider);
-        DeserializeResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
+        DeserializeResult DeserializeChainedStruct(const WNNChainedStruct** outChainNext,
                                                    const volatile char** buffer,
                                                    size_t* size,
                                                    DeserializeAllocator* allocator,
@@ -506,7 +506,7 @@ namespace dawn_wire {
             {% endif %}
         {% endfor %}
 
-        size_t GetChainedStructExtraRequiredSize(const WGPUChainedStruct* chainedStruct) {
+        size_t GetChainedStructExtraRequiredSize(const WNNChainedStruct* chainedStruct) {
             ASSERT(chainedStruct != nullptr);
             size_t result = 0;
             while (chainedStruct != nullptr) {
@@ -524,15 +524,15 @@ namespace dawn_wire {
                         // Invalid enum. Reserve space just for the transfer header (sType and hasNext).
                         // Stop iterating because this is an error.
                         // TODO(crbug.com/dawn/369): Unknown sTypes are silently discarded.
-                        ASSERT(chainedStruct->sType == WGPUSType_Invalid);
-                        result += sizeof(WGPUChainedStructTransfer);
+                        ASSERT(chainedStruct->sType == WNNSType_Invalid);
+                        result += sizeof(WNNChainedStructTransfer);
                         return result;
                 }
             }
             return result;
         }
 
-        void SerializeChainedStruct(WGPUChainedStruct const* chainedStruct,
+        void SerializeChainedStruct(WNNChainedStruct const* chainedStruct,
                                     char** buffer,
                                     const ObjectIdProvider& provider) {
             ASSERT(chainedStruct != nullptr);
@@ -560,30 +560,30 @@ namespace dawn_wire {
                     default: {
                         // Invalid enum. Serialize just the transfer header with Invalid as the sType.
                         // TODO(crbug.com/dawn/369): Unknown sTypes are silently discarded.
-                        ASSERT(chainedStruct->sType == WGPUSType_Invalid);
-                        WGPUChainedStructTransfer* transfer = reinterpret_cast<WGPUChainedStructTransfer*>(*buffer);
-                        transfer->sType = WGPUSType_Invalid;
+                        ASSERT(chainedStruct->sType == WNNSType_Invalid);
+                        WNNChainedStructTransfer* transfer = reinterpret_cast<WNNChainedStructTransfer*>(*buffer);
+                        transfer->sType = WNNSType_Invalid;
                         transfer->hasNext = false;
 
-                        *buffer += sizeof(WGPUChainedStructTransfer);
+                        *buffer += sizeof(WNNChainedStructTransfer);
                         return;
                     }
                 }
             } while (chainedStruct != nullptr);
         }
 
-        DeserializeResult DeserializeChainedStruct(const WGPUChainedStruct** outChainNext,
+        DeserializeResult DeserializeChainedStruct(const WNNChainedStruct** outChainNext,
                                                    const volatile char** buffer,
                                                    size_t* size,
                                                    DeserializeAllocator* allocator,
                                                    const ObjectIdResolver& resolver) {
             bool hasNext;
             do {
-                if (*size < sizeof(WGPUChainedStructTransfer)) {
+                if (*size < sizeof(WNNChainedStructTransfer)) {
                     return DeserializeResult::FatalError;
                 }
-                WGPUSType sType =
-                    reinterpret_cast<const volatile WGPUChainedStructTransfer*>(*buffer)->sType;
+                WNNSType sType =
+                    reinterpret_cast<const volatile WNNChainedStructTransfer*>(*buffer)->sType;
                 switch (sType) {
                     {% for sType in types["s type"].values if sType.valid and sType.name.CamelCase() not in client_side_structures %}
                         {% set CType = as_cType(sType.name) %}
@@ -640,31 +640,31 @@ namespace dawn_wire {
     {% endfor %}
 
         // Implementations of serialization/deserialization of WPGUDeviceProperties.
-        size_t SerializedWGPUDevicePropertiesSize(const WGPUDeviceProperties* deviceProperties) {
-            return sizeof(WGPUDeviceProperties) +
-                   WGPUDevicePropertiesGetExtraRequiredSize(*deviceProperties);
+        size_t SerializedWNNDevicePropertiesSize(const WNNDeviceProperties* deviceProperties) {
+            return sizeof(WNNDeviceProperties) +
+                   WNNDevicePropertiesGetExtraRequiredSize(*deviceProperties);
         }
 
-        void SerializeWGPUDeviceProperties(const WGPUDeviceProperties* deviceProperties,
+        void SerializeWNNDeviceProperties(const WNNDeviceProperties* deviceProperties,
                                            char* serializeBuffer) {
-            size_t devicePropertiesSize = SerializedWGPUDevicePropertiesSize(deviceProperties);
-            WGPUDevicePropertiesTransfer* transfer =
-                reinterpret_cast<WGPUDevicePropertiesTransfer*>(serializeBuffer);
+            size_t devicePropertiesSize = SerializedWNNDevicePropertiesSize(deviceProperties);
+            WNNDevicePropertiesTransfer* transfer =
+                reinterpret_cast<WNNDevicePropertiesTransfer*>(serializeBuffer);
             serializeBuffer += devicePropertiesSize;
 
-            WGPUDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer);
+            WNNDevicePropertiesSerialize(*deviceProperties, transfer, &serializeBuffer);
         }
 
-        bool DeserializeWGPUDeviceProperties(WGPUDeviceProperties* deviceProperties,
+        bool DeserializeWNNDeviceProperties(WNNDeviceProperties* deviceProperties,
                                              const volatile char* deserializeBuffer) {
-            size_t devicePropertiesSize = SerializedWGPUDevicePropertiesSize(deviceProperties);
-            const volatile WGPUDevicePropertiesTransfer* transfer = nullptr;
+            size_t devicePropertiesSize = SerializedWNNDevicePropertiesSize(deviceProperties);
+            const volatile WNNDevicePropertiesTransfer* transfer = nullptr;
             if (GetPtrFromBuffer(&deserializeBuffer, &devicePropertiesSize, 1, &transfer) !=
                 DeserializeResult::Success) {
                 return false;
             }
 
-            return WGPUDevicePropertiesDeserialize(deviceProperties, transfer, &deserializeBuffer,
+            return WNNDevicePropertiesDeserialize(deviceProperties, transfer, &deserializeBuffer,
                                                    &devicePropertiesSize,
                                                    nullptr) == DeserializeResult::Success;
         }

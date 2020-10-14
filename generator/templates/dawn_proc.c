@@ -26,13 +26,13 @@ void dawnProcSetProcs(const DawnProcTable* procs_) {
     }
 }
 
-WGPUInstance wgpuCreateInstance(WGPUInstanceDescriptor const * descriptor) {
-    return procs.createInstance(descriptor);
-}
+// WNNInstance wgpuCreateInstance(WNNInstanceDescriptor const * descriptor) {
+//     return procs.createInstance(descriptor);
+// }
 
-WGPUProc wgpuGetProcAddress(WGPUDevice device, const char* procName) {
-    return procs.getProcAddress(device, procName);
-}
+// WNNProc wgpuGetProcAddress(WNNDevice device, const char* procName) {
+//     return procs.getProcAddress(device, procName);
+// }
 
 {% for type in by_category["object"] %}
     {% for method in c_methods(type) %}

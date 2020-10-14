@@ -19,8 +19,6 @@
 
 namespace wgpu {
 
-    static constexpr uint64_t kWholeSize = WGPU_WHOLE_SIZE;
-
     {% for type in by_category["enum"] %}
         enum class {{as_cppType(type.name)}} : uint32_t {
             {% for value in type.values %}
@@ -52,7 +50,7 @@ namespace wgpu {
 
     {% endfor %}
 
-    using Proc = WGPUProc;
+    using Proc = WNNProc;
     {% for type in by_category["callback"] %}
         using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
     {% endfor %}
@@ -70,10 +68,10 @@ namespace wgpu {
       public:
         ObjectBase() = default;
         ObjectBase(CType handle): mHandle(handle) {
-            if (mHandle) Derived::WGPUReference(mHandle);
+            if (mHandle) Derived::WNNReference(mHandle);
         }
         ~ObjectBase() {
-            if (mHandle) Derived::WGPURelease(mHandle);
+            if (mHandle) Derived::WNNRelease(mHandle);
         }
 
         ObjectBase(ObjectBase const& other)
@@ -81,9 +79,9 @@ namespace wgpu {
         }
         Derived& operator=(ObjectBase const& other) {
             if (&other != this) {
-                if (mHandle) Derived::WGPURelease(mHandle);
+                if (mHandle) Derived::WNNRelease(mHandle);
                 mHandle = other.mHandle;
-                if (mHandle) Derived::WGPUReference(mHandle);
+                if (mHandle) Derived::WNNReference(mHandle);
             }
 
             return static_cast<Derived&>(*this);
@@ -95,7 +93,7 @@ namespace wgpu {
         }
         Derived& operator=(ObjectBase&& other) {
             if (&other != this) {
-                if (mHandle) Derived::WGPURelease(mHandle);
+                if (mHandle) Derived::WNNRelease(mHandle);
                 mHandle = other.mHandle;
                 other.mHandle = 0;
             }
@@ -106,7 +104,7 @@ namespace wgpu {
         ObjectBase(std::nullptr_t) {}
         Derived& operator=(std::nullptr_t) {
             if (mHandle != nullptr) {
-                Derived::WGPURelease(mHandle);
+                Derived::WNNRelease(mHandle);
                 mHandle = nullptr;
             }
             return static_cast<Derived&>(*this);
@@ -181,8 +179,8 @@ namespace wgpu {
 
           private:
             friend ObjectBase<{{CppType}}, {{CType}}>;
-            static void WGPUReference({{CType}} handle);
-            static void WGPURelease({{CType}} handle);
+            static void WNNReference({{CType}} handle);
+            static void WNNRelease({{CType}} handle);
         };
 
     {% endfor %}

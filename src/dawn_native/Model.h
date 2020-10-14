@@ -14,8 +14,8 @@ namespace dawn_native {
     ModelBase() = default;
     virtual ~ModelBase() = default;
 
-    void Compile(WGPUCompileCallback callback, CompilationOptions const * options) {
-      callback(reinterpret_cast<WGPUCompilation>(new CompilationBase()));
+    void Compile(WNNCompileCallback callback, CompilationOptions const * options) {
+      callback(reinterpret_cast<WNNCompilation>(new CompilationBase()));
     }
   };
 }

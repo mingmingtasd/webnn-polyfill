@@ -28,7 +28,7 @@ namespace dawn_native {
       Adapter();
       ~Adapter();
 
-      WGPUNeuralNetworkContext CreateNeuralNetworkContext();
+      WNNNeuralNetworkContext CreateNeuralNetworkContext();
   };
 
   // Backend-agnostic API for dawn_native

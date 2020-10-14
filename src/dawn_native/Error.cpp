@@ -30,7 +30,7 @@ namespace dawn_native {
         }
     }
 
-    wgpu::ErrorType ToWGPUErrorType(InternalErrorType type) {
+    wgpu::ErrorType ToWNNErrorType(InternalErrorType type) {
         switch (type) {
             case InternalErrorType::Validation:
                 return wgpu::ErrorType::Validation;
@@ -48,7 +48,7 @@ namespace dawn_native {
         }
     }
 
-    InternalErrorType FromWGPUErrorType(wgpu::ErrorType type) {
+    InternalErrorType FromWNNErrorType(wgpu::ErrorType type) {
         switch (type) {
             case wgpu::ErrorType::Validation:
                 return InternalErrorType::Validation;
