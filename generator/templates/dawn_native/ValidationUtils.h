@@ -15,7 +15,7 @@
 #ifndef BACKEND_VALIDATIONUTILS_H_
 #define BACKEND_VALIDATIONUTILS_H_
 
-#include "dawn/webgpu_cpp.h"
+#include "dawn/webnn_cpp.h"
 
 #include "dawn_native/Error.h"
 

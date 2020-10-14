@@ -15,7 +15,7 @@
 #ifndef DAWNNATIVE_WNN_STRUCTS_H_
 #define DAWNNATIVE_WNN_STRUCTS_H_
 
-#include "dawn/webgpu_cpp.h"
+#include "dawn/webnn_cpp.h"
 #include "dawn_native/Forward.h"
 
 namespace dawn_native {

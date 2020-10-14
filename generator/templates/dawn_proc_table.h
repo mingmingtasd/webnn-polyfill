@@ -15,7 +15,7 @@
 #ifndef DAWN_DAWN_PROC_TABLE_H_
 #define DAWN_DAWN_PROC_TABLE_H_
 
-#include "dawn/webgpu.h"
+#include "dawn/webnn.h"
 
 typedef struct DawnProcTable {
     WNNProcGetProcAddress getProcAddress;

@@ -14,7 +14,7 @@
 #ifndef WEBGPU_CPP_H_
 #define WEBGPU_CPP_H_
 
-#include "dawn/webgpu.h"
+#include "dawn/webnn.h"
 #include "dawn/EnumClassBitmasks.h"
 
 namespace wnn {

@@ -15,7 +15,7 @@
 #ifndef DAWN_DAWN_WSI_H_
 #define DAWN_DAWN_WSI_H_
 
-#include <dawn/webgpu.h>
+#include <dawn/webnn.h>
 
 // Error message (or nullptr if there was no error)
 typedef const char* DawnSwapChainError;

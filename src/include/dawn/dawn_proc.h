@@ -16,7 +16,7 @@
 #define DAWN_DAWN_PROC_H_
 
 #include "dawn/dawn_proc_table.h"
-#include "dawn/webgpu.h"
+#include "dawn/webnn.h"
 
 #ifdef __cplusplus
 extern "C" {

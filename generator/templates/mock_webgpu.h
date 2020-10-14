@@ -16,7 +16,7 @@
 #define MOCK_WEBGPU_H
 
 #include <dawn/dawn_proc_table.h>
-#include <dawn/webgpu.h>
+#include <dawn/webnn.h>
 #include <gmock/gmock.h>
 
 #include <memory>

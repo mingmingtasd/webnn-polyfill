@@ -610,7 +610,7 @@ class MultiGeneratorFromDawnJSON(Generator):
     def add_commandline_arguments(self, parser):
         allowed_targets = [
             'dawn_headers', 'dawncpp_headers', 'dawncpp', 'dawn_proc',
-            'mock_webgpu', 'dawn_wire', "dawn_native_utils"
+            'mock_webnn', 'dawn_wire', "dawn_native_utils"
         ]
 
         parser.add_argument('--dawn-json',
@@ -671,7 +671,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawn_headers' in targets:
             renders.append(
-                FileRender('webgpu.h', 'src/include/dawn/webgpu.h',
+                FileRender('webnn.h', 'src/include/dawn/webnn.h',
                            [base_params, api_params]))
             renders.append(
                 FileRender('dawn_proc_table.h',
@@ -680,7 +680,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawncpp_headers' in targets:
             renders.append(
-                FileRender('webgpu_cpp.h', 'src/include/dawn/webgpu_cpp.h',
+                FileRender('webnn_cpp.h', 'src/include/dawn/webnn_cpp.h',
                            [base_params, api_params]))
 
         if 'dawn_proc' in targets:
@@ -690,30 +690,30 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawncpp' in targets:
             renders.append(
-                FileRender('webgpu_cpp.cpp', 'src/dawn/webgpu_cpp.cpp',
+                FileRender('webnn_cpp.cpp', 'src/dawn/webnn_cpp.cpp',
                            [base_params, api_params]))
 
         if 'emscripten_bits' in targets:
             renders.append(
-                FileRender('webgpu_struct_info.json',
-                           'src/dawn/webgpu_struct_info.json',
+                FileRender('webnn_struct_info.json',
+                           'src/dawn/webnn_struct_info.json',
                            [base_params, api_params]))
             renders.append(
-                FileRender('library_webgpu_enum_tables.js',
-                           'src/dawn/library_webgpu_enum_tables.js',
+                FileRender('library_webnn_enum_tables.js',
+                           'src/dawn/library_webnn_enum_tables.js',
                            [base_params, api_params]))
 
-        if 'mock_webgpu' in targets:
+        if 'mock_webnn' in targets:
             mock_params = [
                 base_params, api_params, {
                     'has_callback_arguments': has_callback_arguments
                 }
             ]
             renders.append(
-                FileRender('mock_webgpu.h', 'src/dawn/mock_webgpu.h',
+                FileRender('mock_webnn.h', 'src/dawn/mock_webnn.h',
                            mock_params))
             renders.append(
-                FileRender('mock_webgpu.cpp', 'src/dawn/mock_webgpu.cpp',
+                FileRender('mock_webnn.cpp', 'src/dawn/mock_webnn.cpp',
                            mock_params))
 
         if 'dawn_native_utils' in targets:

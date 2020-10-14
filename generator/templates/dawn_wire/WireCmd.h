@@ -15,7 +15,7 @@
 #ifndef DAWNWIRE_WIRECMD_AUTOGEN_H_
 #define DAWNWIRE_WIRECMD_AUTOGEN_H_
 
-#include <dawn/webgpu.h>
+#include <dawn/webnn.h>
 
 namespace dawn_wire {
 
