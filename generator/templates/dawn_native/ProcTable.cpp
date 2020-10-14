@@ -84,30 +84,6 @@ namespace dawn_native {
         static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
     }
 
-    WNNInstance NativeCreateInstance(WNNInstanceDescriptor const* cDescriptor) {
-        const dawn_native::InstanceDescriptor* descriptor =
-            reinterpret_cast<const dawn_native::InstanceDescriptor*>(cDescriptor);
-        return reinterpret_cast<WNNInstance>(InstanceBase::Create(descriptor));
-    }
-
-    WNNProc NativeGetProcAddress(WNNDevice, const char* procName) {
-        if (procName == nullptr) {
-            return nullptr;
-        }
-
-        const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
-            [](const ProcEntry &a, const char *b) -> bool {
-                return strcmp(a.name, b) < 0;
-            }
-        );
-
-        if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
-            return entry->proc;
-        }
-
-        return nullptr;
-    }
-
     std::vector<const char*> GetProcMapNamesForTestingInternal() {
         std::vector<const char*> result;
         result.reserve(sProcMapSize);
@@ -119,8 +95,6 @@ namespace dawn_native {
 
     DawnProcTable GetProcsAutogen() {
         DawnProcTable table;
-        table.getProcAddress = NativeGetProcAddress;
-        table.createInstance = NativeCreateInstance;
         {% for type in by_category["object"] %}
             {% for method in c_methods(type) %}
                 table.{{as_varName(type.name, method.name)}} = Native{{as_MethodSuffix(type.name, method.name)}};
