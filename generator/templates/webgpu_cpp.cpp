@@ -13,7 +13,7 @@
 //* limitations under the License.
 #include "dawn/webgpu_cpp.h"
 
-namespace wgpu {
+namespace wnn {
     {% for type in by_category["enum"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}

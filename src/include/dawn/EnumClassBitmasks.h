@@ -17,7 +17,7 @@
 
 #include <type_traits>
 
-namespace wgpu {
+namespace wnn {
 
     template <typename T>
     struct IsDawnBitmask {
@@ -139,6 +139,6 @@ namespace wgpu {
         return (static_cast<Integral>(value) & (static_cast<Integral>(value) - 1)) == 0;
     }
 
-}  // namespace wgpu
+}  // namespace wnn
 
 #endif  // DAWN_ENUM_CLASS_BITMASKS_H_

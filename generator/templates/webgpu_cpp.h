@@ -17,7 +17,7 @@
 #include "dawn/webgpu.h"
 #include "dawn/EnumClassBitmasks.h"
 
-namespace wgpu {
+namespace wnn {
 
     {% for type in by_category["enum"] %}
         enum class {{as_cppType(type.name)}} : uint32_t {
@@ -218,6 +218,6 @@ namespace wgpu {
 
     {% endfor %}
 
-}  // namespace wgpu
+}  // namespace wnn
 
 #endif // WEBGPU_CPP_H_

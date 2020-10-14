@@ -19,9 +19,9 @@
 #include <dawn/dawn_proc.h>
 #include <dawn_native/DawnNative.h>
 
-wgpu::NeuralNetworkContext CreateCppNeuralNetworkContext() {
+wnn::NeuralNetworkContext CreateCppNeuralNetworkContext() {
   DawnProcTable backendProcs = dawn_native::GetProcs();
   dawnProcSetProcs(&backendProcs);
   dawn_native::Adapter ml;
-  return wgpu::NeuralNetworkContext::Acquire(ml.CreateNeuralNetworkContext());
+  return wnn::NeuralNetworkContext::Acquire(ml.CreateNeuralNetworkContext());
 }

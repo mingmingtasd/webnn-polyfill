@@ -22,12 +22,12 @@
 #include <string>
 #include <vector>
 
-namespace wgpu {
+namespace wnn {
     enum class ErrorType : uint32_t;
 }
 
 namespace dawn {
-    using ErrorType = wgpu::ErrorType;
+    using ErrorType = wnn::ErrorType;
 }
 
 namespace dawn_native {

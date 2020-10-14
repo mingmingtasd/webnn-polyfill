@@ -15,4 +15,4 @@
 #include <dawn/webgpu.h>
 #include <dawn/webgpu_cpp.h>
 
-wgpu::NeuralNetworkContext CreateCppNeuralNetworkContext();
+wnn::NeuralNetworkContext CreateCppNeuralNetworkContext();

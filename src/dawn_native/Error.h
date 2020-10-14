@@ -116,8 +116,8 @@ namespace dawn_native {
     // Assert that errors are device loss so that we can continue with destruction
     void IgnoreErrors(MaybeError maybeError);
 
-    wgpu::ErrorType ToWNNErrorType(InternalErrorType type);
-    InternalErrorType FromWNNErrorType(wgpu::ErrorType type);
+    wnn::ErrorType ToWNNErrorType(InternalErrorType type);
+    InternalErrorType FromWNNErrorType(wnn::ErrorType type);
 
 }  // namespace dawn_native
 

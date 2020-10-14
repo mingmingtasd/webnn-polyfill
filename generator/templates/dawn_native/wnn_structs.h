@@ -24,7 +24,7 @@ namespace dawn_native {
     {%- if member.annotation in ["*", "const*", "const*const*"] and member.optional -%}
         {{" "}}= nullptr
     {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
-        {{" "}}= wgpu::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+        {{" "}}= wnn::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
     {%- elif member.type.category == "native" and member.default_value != None -%}
         {{" "}}= {{member.default_value}}
     {%- else -%}
@@ -34,14 +34,14 @@ namespace dawn_native {
 
     struct ChainedStruct {
         ChainedStruct const * nextInChain = nullptr;
-        wgpu::SType sType = wgpu::SType::Invalid;
+        wnn::SType sType = wnn::SType::Invalid;
     };
 
     {% for type in by_category["structure"] %}
         {% if type.chained %}
             struct {{as_cppType(type.name)}} : ChainedStruct {
                 {{as_cppType(type.name)}}() {
-                    sType = wgpu::SType::{{type.name.CamelCase()}};
+                    sType = wnn::SType::{{type.name.CamelCase()}};
                 }
         {% else %}
             struct {{as_cppType(type.name)}} {

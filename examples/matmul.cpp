@@ -22,28 +22,28 @@ void compute_callback(WNNOutputs impl) {
 }
 
 void compilation_callback(WNNCompilation impl) {
-  wgpu::Compilation exe;
+  wnn::Compilation exe;
   exe.Acquire(impl);
   std::vector<float> bufferA(2*3);
-  wgpu::Input a;
+  wnn::Input a;
   a.buffer = bufferA.data();
   a.size = bufferA.size();
-  wgpu::Inputs inputs;
+  wnn::Inputs inputs;
   inputs.SetInput("a", &a);
-  wgpu::Outputs outputs;
+  wnn::Outputs outputs;
   exe.Compute(inputs, compute_callback, outputs);
 }
 
 int main(int argc, const char* argv[]) {
-  wgpu::NeuralNetworkContext nn = CreateCppNeuralNetworkContext();
+  wnn::NeuralNetworkContext nn = CreateCppNeuralNetworkContext();
   std::vector<int32_t> shapeA = {2, 3};
-  wgpu::OperandDescriptor descA = {wgpu::OperandType::Float32, shapeA.data(), (uint32_t)shapeA.size()};
-  wgpu::Operand a = nn.Input("a", &descA);
+  wnn::OperandDescriptor descA = {wnn::OperandType::Float32, shapeA.data(), (uint32_t)shapeA.size()};
+  wnn::Operand a = nn.Input("a", &descA);
   std::vector<int32_t> shapeB = {3, 2};
-  wgpu::OperandDescriptor descB = {wgpu::OperandType::Float32, shapeB.data(), (uint32_t)shapeB.size()};
+  wnn::OperandDescriptor descB = {wnn::OperandType::Float32, shapeB.data(), (uint32_t)shapeB.size()};
   std::vector<float> bufferB(3*2);
-  wgpu::Operand b = nn.Constant(&descB, bufferB.data(), bufferB.size(), 0);
-  wgpu::Operand c = nn.Matmul(a, b);
-  wgpu::Model model = nn.CreateModel();
+  wnn::Operand b = nn.Constant(&descB, bufferB.data(), bufferB.size(), 0);
+  wnn::Operand c = nn.Matmul(a, b);
+  wnn::Model model = nn.CreateModel();
   model.Compile(compilation_callback);
 }
