@@ -95,19 +95,8 @@ typedef uint32_t WNNFlags;
 #define WNNTextureFormat_RG11B10Float WNNTextureFormat_RG11B10Ufloat
 #define WNNTextureFormat_BC6HRGBSfloat WNNTextureFormat_BC6HRGBFloat
 
-typedef struct WNNChainedStruct {
-    struct WNNChainedStruct const * next;
-    WNNSType sType;
-} WNNChainedStruct;
-
 {% for type in by_category["structure"] %}
     typedef struct {{as_cType(type.name)}} {
-        {% if type.extensible %}
-            WNNChainedStruct const * nextInChain;
-        {% endif %}
-        {% if type.chained %}
-            WNNChainedStruct chain;
-        {% endif %}
         {% for member in type.members %}
             {{as_annotated_cType(member)}};
         {% endfor %}
@@ -131,8 +120,6 @@ typedef void (*WNNProc)(void);
 
 #if !defined(WNN_SKIP_PROCS)
 
-typedef WNNInstance (*WNNProcCreateInstance)(WNNInstanceDescriptor const * descriptor);
-typedef WNNProc (*WNNProcGetProcAddress)(WNNDevice device, char const * procName);
 
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Procs of {{type.name.CamelCase()}}

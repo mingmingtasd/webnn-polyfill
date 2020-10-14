@@ -49,8 +49,6 @@ namespace dawn_wire { namespace client {
             }
         {% endfor %}
 
-        bool DeviceMatches(const Device* device, WNNChainedStruct const* chainedStruct);
-
         {% for type in by_category["structure"] if type.may_have_dawn_object %}
             DAWN_DECLARE_UNUSED bool DeviceMatches(const Device* device, const {{as_cType(type.name)}}& obj) {
                 {% if type.extensible %}
@@ -83,34 +81,6 @@ namespace dawn_wire { namespace client {
                 return true;
             }
         {% endfor %}
-
-        bool DeviceMatches(const Device* device, WNNChainedStruct const* chainedStruct) {
-            while (chainedStruct != nullptr) {
-                switch (chainedStruct->sType) {
-                    {% for sType in types["s type"].values if sType.valid %}
-                        {% set CType = as_cType(sType.name) %}
-                        case {{as_cEnum(types["s type"].name, sType.name)}}: {
-                            {% if types[sType.name.get()].may_have_dawn_object %}
-                                if (!DeviceMatches(device, reinterpret_cast<const {{CType}}*>(chainedStruct))) {
-                                    return false;
-                                }
-                            {% endif %}
-                            break;
-                        }
-                    {% endfor %}
-                    case WNNSType_Invalid:
-                        break;
-                    default:
-                        UNREACHABLE();
-                        dawn::WarningLog()
-                            << "All objects may not be from the same device. "
-                            << "Unknown sType " << chainedStruct->sType << " discarded.";
-                        return false;
-                }
-                chainedStruct = chainedStruct->next;
-            }
-            return true;
-        }
 
     }  // anonymous namespace
 
@@ -234,46 +204,6 @@ namespace dawn_wire { namespace client {
     {% endfor %}
 
     namespace {
-    //     WNNInstance ClientCreateInstance(WNNInstanceDescriptor const* descriptor) {
-    //         UNREACHABLE();
-    //         return nullptr;
-    //     }
-
-    //     void ClientDeviceReference(WNNDevice) {
-    //     }
-
-    //     void ClientDeviceRelease(WNNDevice) {
-    //     }
-
-    //     struct ProcEntry {
-    //         WNNProc proc;
-    //         const char* name;
-    //     };
-    //     static const ProcEntry sProcMap[] = {
-    //         {% for (type, method) in c_methods_sorted_by_name %}
-    //             { reinterpret_cast<WNNProc>(Client{{as_MethodSuffix(type.name, method.name)}}), "{{as_cMethod(type.name, method.name)}}" },
-    //         {% endfor %}
-    //     };
-    //     static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
-    // }  // anonymous namespace
-
-    // WNNProc ClientGetProcAddress(WNNDevice, const char* procName) {
-    //     if (procName == nullptr) {
-    //         return nullptr;
-    //     }
-
-    //     const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
-    //         [](const ProcEntry &a, const char *b) -> bool {
-    //             return strcmp(a.name, b) < 0;
-    //         }
-    //     );
-
-    //     if (entry != &sProcMap[sProcMapSize] && strcmp(entry->name, procName) == 0) {
-    //         return entry->proc;
-    //     }
-
-    //     return nullptr;
-    // }
 
     std::vector<const char*> GetProcMapNamesForTesting() {
         std::vector<const char*> result;

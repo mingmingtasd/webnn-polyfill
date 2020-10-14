@@ -185,12 +185,9 @@ namespace wnn {
 
     {% endfor %}
 
-    Instance CreateInstance(InstanceDescriptor const * descriptor = nullptr);
-    Proc GetProcAddress(Device const& device, const char* procName);
-
     struct ChainedStruct {
         ChainedStruct const * nextInChain = nullptr;
-        SType sType = SType::Invalid;
+        // SType sType = SType::Invalid;
     };
 
     {% for type in by_category["structure"] %}
