@@ -18,9 +18,6 @@
 #include "dawn/webnn.h"
 
 typedef struct DawnProcTable {
-    // WNNProcGetProcAddress getProcAddress;
-    // WNNProcCreateInstance createInstance;
-
     {% for type in by_category["object"] %}
         {% for method in c_methods(type) %}
             {{as_cProc(type.name, method.name)}} {{as_varName(type.name, method.name)}};
