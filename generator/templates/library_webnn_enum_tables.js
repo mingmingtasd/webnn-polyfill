@@ -14,8 +14,8 @@
 //*
 //*
 //* This generator is used to produce the number-to-string mappings for
-//* Emscripten's library_webgpu.js.
-//* https://github.com/emscripten-core/emscripten/blob/master/src/library_webgpu.js
+//* Emscripten's library_webnn.js.
+//* https://github.com/emscripten-core/emscripten/blob/master/src/library_webnn.js
 //*
     {% for type in by_category["enum"] if type.javascript %}
         {{type.name.CamelCase()}}: {% if type.contiguousFromZero -%}

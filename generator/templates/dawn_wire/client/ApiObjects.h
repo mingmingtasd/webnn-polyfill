@@ -27,11 +27,11 @@ namespace dawn_wire { namespace client {
             };
         {% endif %}
 
-        inline {{Type}}* FromAPI(WGPU{{Type}} obj) {
+        inline {{Type}}* FromAPI(WNN{{Type}} obj) {
             return reinterpret_cast<{{Type}}*>(obj);
         }
-        inline WGPU{{Type}} ToAPI({{Type}}* obj) {
-            return reinterpret_cast<WGPU{{Type}}>(obj);
+        inline WNN{{Type}} ToAPI({{Type}}* obj) {
+            return reinterpret_cast<WNN{{Type}}>(obj);
         }
 
     {% endfor %}

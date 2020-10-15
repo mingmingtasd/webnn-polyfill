@@ -24,8 +24,8 @@ namespace dawn_native {
 
     Adapter::~Adapter() = default;
 
-    WGPUNeuralNetworkContext Adapter::CreateNeuralNetworkContext() {
-        return reinterpret_cast<WGPUNeuralNetworkContext>(new NeuralNetworkContextBase());
+    WNNNeuralNetworkContext Adapter::CreateNeuralNetworkContext() {
+        return reinterpret_cast<WNNNeuralNetworkContext>(new NeuralNetworkContextBase());
     }
 
     DawnProcTable GetProcsAutogen();

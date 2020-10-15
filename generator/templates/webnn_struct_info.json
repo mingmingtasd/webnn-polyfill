@@ -19,10 +19,10 @@
 //* https://github.com/emscripten-core/emscripten/blob/master/src/struct_info.json
 //*
     {
-        "file": "webgpu/webgpu.h",
+        "file": "webnn/webnn.h",
         "defines": [],
         "structs": {
-            "WGPUChainedStruct": [
+            "WNNChainedStruct": [
                 "next",
                 "sType"
             ],

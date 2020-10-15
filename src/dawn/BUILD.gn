@@ -25,15 +25,15 @@ dawn_json_generator("dawn_headers_gen") {
   target = "dawn_headers"
   outputs = [
     "src/include/dawn/dawn_proc_table.h",
-    "src/include/dawn/webgpu.h",
+    "src/include/dawn/webnn.h",
   ]
 }
 
 dawn_json_generator("emscripten_bits_gen") {
   target = "emscripten_bits"
   outputs = [
-    "src/dawn/webgpu_struct_info.json",
-    "src/dawn/library_webgpu_enum_tables.js",
+    "src/dawn/webnn_struct_info.json",
+    "src/dawn/library_webnn_enum_tables.js",
   ]
 }
 
@@ -51,7 +51,7 @@ source_set("dawn_headers") {
 
 dawn_json_generator("dawncpp_headers_gen") {
   target = "dawncpp_headers"
-  outputs = [ "src/include/dawn/webgpu_cpp.h" ]
+  outputs = [ "src/include/dawn/webnn_cpp.h" ]
 }
 
 source_set("dawncpp_headers") {
@@ -70,7 +70,7 @@ source_set("dawncpp_headers") {
 
 dawn_json_generator("dawncpp_gen") {
   target = "dawncpp"
-  outputs = [ "src/dawn/webgpu_cpp.cpp" ]
+  outputs = [ "src/dawn/webnn_cpp.cpp" ]
 }
 
 source_set("dawncpp") {
@@ -91,7 +91,7 @@ dawn_json_generator("dawn_proc_gen") {
 }
 
 dawn_component("dawn_proc") {
-  DEFINE_PREFIX = "WGPU"
+  DEFINE_PREFIX = "WNN"
 
   public_deps = [ ":dawn_headers" ]
   deps = [ ":dawn_proc_gen" ]

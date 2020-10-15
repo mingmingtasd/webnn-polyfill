@@ -16,7 +16,7 @@
 #define DAWN_DAWN_PROC_H_
 
 #include "dawn/dawn_proc_table.h"
-#include "dawn/webgpu.h"
+#include "dawn/webnn.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +27,7 @@ extern "C" {
 // default value of the proctable. Setting the proctable back to null is good practice when you
 // are done using libdawn_proc since further usage will cause a segfault instead of calling an
 // unexpected function.
-WGPU_EXPORT void dawnProcSetProcs(const DawnProcTable* procs);
+WNN_EXPORT void dawnProcSetProcs(const DawnProcTable* procs);
 
 #ifdef __cplusplus
 }  // extern "C"

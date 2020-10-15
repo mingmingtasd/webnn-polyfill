@@ -15,12 +15,9 @@
 #ifndef DAWN_DAWN_PROC_TABLE_H_
 #define DAWN_DAWN_PROC_TABLE_H_
 
-#include "dawn/webgpu.h"
+#include "dawn/webnn.h"
 
 typedef struct DawnProcTable {
-    WGPUProcGetProcAddress getProcAddress;
-    WGPUProcCreateInstance createInstance;
-
     {% for type in by_category["object"] %}
         {% for method in c_methods(type) %}
             {{as_cProc(type.name, method.name)}} {{as_varName(type.name, method.name)}};

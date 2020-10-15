@@ -16,7 +16,7 @@
 #define DAWNNATIVE_DAWNNATIVE_H_
 
 #include <dawn/dawn_proc_table.h>
-#include <dawn/webgpu.h>
+#include <dawn/webnn.h>
 #include <dawn_native/dawn_native_export.h>
 
 #include <string>
@@ -28,7 +28,7 @@ namespace dawn_native {
       Adapter();
       ~Adapter();
 
-      WGPUNeuralNetworkContext CreateNeuralNetworkContext();
+      WNNNeuralNetworkContext CreateNeuralNetworkContext();
   };
 
   // Backend-agnostic API for dawn_native

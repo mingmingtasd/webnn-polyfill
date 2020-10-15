@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <dawn/webgpu.h>
-#include <dawn/webgpu_cpp.h>
+#include <dawn/webnn.h>
+#include <dawn/webnn_cpp.h>
 
-wgpu::NeuralNetworkContext CreateCppNeuralNetworkContext();
+wnn::NeuralNetworkContext CreateCppNeuralNetworkContext();

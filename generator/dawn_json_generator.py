@@ -200,7 +200,7 @@ class StructureType(Record, Type):
         Type.__init__(self, name, json_data)
         self.chained = json_data.get("chained", False)
         self.extensible = json_data.get("extensible", False)
-        # Chained structs inherit from wgpu::ChainedStruct, which has
+        # Chained structs inherit from wnn::ChainedStruct, which has
         # nextInChain, so setting both extensible and chained would result in
         # two nextInChain members.
         assert not (self.extensible and self.chained)
@@ -451,7 +451,7 @@ def as_cType(name):
     if name.native:
         return name.concatcase()
     else:
-        return 'WGPU' + name.CamelCase()
+        return 'WNN' + name.CamelCase()
 
 
 def as_cTypeDawn(name):
@@ -524,7 +524,7 @@ def annotated(typ, arg):
 
 def as_cEnum(type_name, value_name):
     assert not type_name.native and not value_name.native
-    return 'WGPU' + type_name.CamelCase() + '_' + value_name.CamelCase()
+    return 'WNN' + type_name.CamelCase() + '_' + value_name.CamelCase()
 
 
 def as_cEnumDawn(type_name, value_name):
@@ -542,7 +542,7 @@ def as_cppEnum(value_name):
 
 def as_cMethod(type_name, method_name):
     assert not type_name.native and not method_name.native
-    return 'wgpu' + type_name.CamelCase() + method_name.CamelCase()
+    return 'wnn' + type_name.CamelCase() + method_name.CamelCase()
 
 
 def as_cMethodDawn(type_name, method_name):
@@ -557,7 +557,7 @@ def as_MethodSuffix(type_name, method_name):
 
 def as_cProc(type_name, method_name):
     assert not type_name.native and not method_name.native
-    return 'WGPU' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
+    return 'WNN' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
 
 
 def as_cProcDawn(type_name, method_name):
@@ -569,7 +569,7 @@ def as_frontendType(typ):
     if typ.category == 'object':
         return typ.name.CamelCase() + 'Base*'
     elif typ.category in ['bitmask', 'enum']:
-        return 'wgpu::' + typ.name.CamelCase()
+        return 'wnn::' + typ.name.CamelCase()
     elif typ.category == 'structure':
         return as_cppType(typ.name)
     else:
@@ -580,7 +580,7 @@ def as_wireType(typ):
     if typ.category == 'object':
         return typ.name.CamelCase() + '*'
     elif typ.category in ['bitmask', 'enum']:
-        return 'WGPU' + typ.name.CamelCase()
+        return 'WNN' + typ.name.CamelCase()
     else:
         return as_cppType(typ.name)
 
@@ -610,7 +610,7 @@ class MultiGeneratorFromDawnJSON(Generator):
     def add_commandline_arguments(self, parser):
         allowed_targets = [
             'dawn_headers', 'dawncpp_headers', 'dawncpp', 'dawn_proc',
-            'mock_webgpu', 'dawn_wire', "dawn_native_utils"
+            'mock_webnn', 'dawn_wire', "dawn_native_utils"
         ]
 
         parser.add_argument('--dawn-json',
@@ -671,7 +671,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawn_headers' in targets:
             renders.append(
-                FileRender('webgpu.h', 'src/include/dawn/webgpu.h',
+                FileRender('webnn.h', 'src/include/dawn/webnn.h',
                            [base_params, api_params]))
             renders.append(
                 FileRender('dawn_proc_table.h',
@@ -680,7 +680,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawncpp_headers' in targets:
             renders.append(
-                FileRender('webgpu_cpp.h', 'src/include/dawn/webgpu_cpp.h',
+                FileRender('webnn_cpp.h', 'src/include/dawn/webnn_cpp.h',
                            [base_params, api_params]))
 
         if 'dawn_proc' in targets:
@@ -690,30 +690,30 @@ class MultiGeneratorFromDawnJSON(Generator):
 
         if 'dawncpp' in targets:
             renders.append(
-                FileRender('webgpu_cpp.cpp', 'src/dawn/webgpu_cpp.cpp',
+                FileRender('webnn_cpp.cpp', 'src/dawn/webnn_cpp.cpp',
                            [base_params, api_params]))
 
         if 'emscripten_bits' in targets:
             renders.append(
-                FileRender('webgpu_struct_info.json',
-                           'src/dawn/webgpu_struct_info.json',
+                FileRender('webnn_struct_info.json',
+                           'src/dawn/webnn_struct_info.json',
                            [base_params, api_params]))
             renders.append(
-                FileRender('library_webgpu_enum_tables.js',
-                           'src/dawn/library_webgpu_enum_tables.js',
+                FileRender('library_webnn_enum_tables.js',
+                           'src/dawn/library_webnn_enum_tables.js',
                            [base_params, api_params]))
 
-        if 'mock_webgpu' in targets:
+        if 'mock_webnn' in targets:
             mock_params = [
                 base_params, api_params, {
                     'has_callback_arguments': has_callback_arguments
                 }
             ]
             renders.append(
-                FileRender('mock_webgpu.h', 'src/dawn/mock_webgpu.h',
+                FileRender('mock_webnn.h', 'src/dawn/mock_webnn.h',
                            mock_params))
             renders.append(
-                FileRender('mock_webgpu.cpp', 'src/dawn/mock_webgpu.cpp',
+                FileRender('mock_webnn.cpp', 'src/dawn/mock_webnn.cpp',
                            mock_params))
 
         if 'dawn_native_utils' in targets:
@@ -737,12 +737,12 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/dawn_native/ValidationUtils_autogen.cpp',
                            frontend_params))
             renders.append(
-                FileRender('dawn_native/wgpu_structs.h',
-                           'src/dawn_native/wgpu_structs_autogen.h',
+                FileRender('dawn_native/wnn_structs.h',
+                           'src/dawn_native/wnn_structs_autogen.h',
                            frontend_params))
             renders.append(
-                FileRender('dawn_native/wgpu_structs.cpp',
-                           'src/dawn_native/wgpu_structs_autogen.cpp',
+                FileRender('dawn_native/wnn_structs.cpp',
+                           'src/dawn_native/wnn_structs_autogen.cpp',
                            frontend_params))
             renders.append(
                 FileRender('dawn_native/ProcTable.cpp',

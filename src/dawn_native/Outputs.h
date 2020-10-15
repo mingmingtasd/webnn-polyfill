@@ -13,7 +13,7 @@ namespace dawn_native {
     virtual ~OutputsBase() = default;
 
     void SetOutput(char const * name, Output const * output) {}
-    WGPUOutput GetOutput(char const * name) {return {};}
+    WNNOutput GetOutput(char const * name) {return {};}
   };
 }
 

@@ -11,9 +11,9 @@
 //* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
-#include "dawn/webgpu_cpp.h"
+#include "dawn/webnn_cpp.h"
 
-namespace wgpu {
+namespace wnn {
     {% for type in by_category["enum"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
@@ -44,14 +44,6 @@ namespace wgpu {
 
     // ChainedStruct
 
-    static_assert(sizeof(ChainedStruct) == sizeof(WGPUChainedStruct),
-            "sizeof mismatch for ChainedStruct");
-    static_assert(alignof(ChainedStruct) == alignof(WGPUChainedStruct),
-            "alignof mismatch for ChainedStruct");
-    static_assert(offsetof(ChainedStruct, nextInChain) == offsetof(WGPUChainedStruct, next),
-            "offsetof mismatch for ChainedStruct::nextInChain");
-    static_assert(offsetof(ChainedStruct, sType) == offsetof(WGPUChainedStruct, sType),
-            "offsetof mismatch for ChainedStruct::sType");
     {% for type in by_category["structure"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
@@ -125,28 +117,16 @@ namespace wgpu {
                 {% endif %}
             }
         {% endfor %}
-        void {{CppType}}::WGPUReference({{CType}} handle) {
+        void {{CppType}}::WNNReference({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("reference"))}}(handle);
             }
         }
-        void {{CppType}}::WGPURelease({{CType}} handle) {
+        void {{CppType}}::WNNRelease({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("release"))}}(handle);
             }
         }
     {% endfor %}
-
-    // Instance
-
-    Instance CreateInstance(const InstanceDescriptor* descriptor) {
-        const WGPUInstanceDescriptor* cDescriptor =
-            reinterpret_cast<const WGPUInstanceDescriptor*>(descriptor);
-        return Instance::Acquire(wgpuCreateInstance(cDescriptor));
-    }
-
-    Proc GetProcAddress(Device const& device, const char* procName) {
-        return reinterpret_cast<Proc>(wgpuGetProcAddress(device.Get(), procName));
-    }
 
 }
