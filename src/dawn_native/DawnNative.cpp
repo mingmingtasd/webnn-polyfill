@@ -13,25 +13,37 @@
 // limitations under the License.
 
 #include "dawn_native/DawnNative.h"
-#include "dawn_native/NeuralNetworkContext.h"
+
+#include <memory>
+
+#include "common/Assert.h"
+#include "dawn_native/Inputs.h"
+#include "dawn_native/Outputs.h"
 
 // Contains the entry-points into dawn_native
-
 namespace dawn_native {
-    // Adapter
+namespace ie {
+ModelBuilderBase *Create();
+}
+// Context
+NeuralNetworkContext::NeuralNetworkContext() = default;
 
-    Adapter::Adapter() = default;
+NeuralNetworkContext::~NeuralNetworkContext() = default;
 
-    Adapter::~Adapter() = default;
+WNNModelBuilder NeuralNetworkContext::CreateModelBuilder() {
+  return reinterpret_cast<WNNModelBuilder>(ie::Create());
+}
 
-    WNNNeuralNetworkContext Adapter::CreateNeuralNetworkContext() {
-        return reinterpret_cast<WNNNeuralNetworkContext>(new NeuralNetworkContextBase());
-    }
+DawnProcTable GetProcsAutogen();
 
-    DawnProcTable GetProcsAutogen();
+DawnProcTable GetProcs() { return GetProcsAutogen(); }
 
-    DawnProcTable GetProcs() {
-        return GetProcsAutogen();
-    }
+WNNInputs CreateInputs() {
+  return reinterpret_cast<WNNInputs>(new InputsBase());
+}
 
-}  // namespace dawn_native
+WNNOutputs CreateOutputs() {
+  return reinterpret_cast<WNNOutputs>(new OutputsBase());
+}
+
+} // namespace dawn_native

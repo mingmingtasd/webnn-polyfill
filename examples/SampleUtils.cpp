@@ -14,14 +14,22 @@
 
 #include "SampleUtils.h"
 
+#include <dawn/dawn_proc.h>
 #include <dawn/webnn.h>
 #include <dawn/webnn_cpp.h>
-#include <dawn/dawn_proc.h>
 #include <dawn_native/DawnNative.h>
 
-wnn::NeuralNetworkContext CreateCppNeuralNetworkContext() {
+wnn::ModelBuilder CreateCppModelBuilder() {
   DawnProcTable backendProcs = dawn_native::GetProcs();
   dawnProcSetProcs(&backendProcs);
-  dawn_native::Adapter ml;
-  return wnn::NeuralNetworkContext::Acquire(ml.CreateNeuralNetworkContext());
+  dawn_native::NeuralNetworkContext context;
+  return wnn::ModelBuilder::Acquire(context.CreateModelBuilder());
+}
+
+wnn::Inputs CreateCppInputs() {
+  return wnn::Inputs::Acquire(dawn_native::CreateInputs());
+}
+
+wnn::Outputs CreateCppOutputs() {
+  return wnn::Outputs::Acquire(dawn_native::CreateOutputs());
 }

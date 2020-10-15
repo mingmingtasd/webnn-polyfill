@@ -27,7 +27,7 @@ namespace dawn_native {
     class OutputsBase;
     class ModelBase;
     class OperandBase;
-    class NeuralNetworkContextBase;
+    class ModelBuilderBase;
 
 }  // namespace dawn_native
 

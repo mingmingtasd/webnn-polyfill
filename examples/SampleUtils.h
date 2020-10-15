@@ -15,4 +15,7 @@
 #include <dawn/webnn.h>
 #include <dawn/webnn_cpp.h>
 
-wnn::NeuralNetworkContext CreateCppNeuralNetworkContext();
+wnn::ModelBuilder CreateCppModelBuilder();
+
+wnn::Inputs CreateCppInputs();
+wnn::Outputs CreateCppOutputs();

@@ -1,0 +1,119 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "ie_model.h"
+
+#include <gna/gna_config.hpp>
+#include <string>
+#include <utility>
+
+#include "ngraph/ngraph.hpp"
+#include "ngraph/node.hpp"
+#include "utils.h"
+
+namespace InferenceEngine {
+
+using namespace ngraph;
+
+namespace {
+SizeVector GetDimensions(ie_operand_descriptor_t const *desc) {
+  SizeVector dimensions;
+  dimensions.reserve(desc->dimensionsCount);
+  for (int i = 0; i < desc->dimensionsCount; ++i) {
+    dimensions.push_back(desc->dimensions[i]);
+  }
+  return dimensions;
+}
+
+ie_operand_t *CreateOperand(std::string &name) {
+  ie_operand_t *operand = new ie_operand_t();
+  std::unique_ptr<char[]> node_name(new char[name.length() + 1]);
+  operand->name = node_name.release();
+  memcpy(operand->name, name.c_str(), name.length() + 1);
+  return operand;
+}
+} // namespace
+
+ie_operand_t *Model::Constant(ie_operand_descriptor_t const *desc,
+                              void const *value, size_t size) {
+  SizeVector dims = GetDimensions(desc);
+  // Generally, FP16 is preferable as it is most ubiquitous and performant
+  // documented in
+  // https://docs.openvinotoolkit.org/2021.1/openvino_docs_IE_DG_supported_plugins_Supported_Devices.html.
+  bool fp32_precision = true;
+  Blob::Ptr blob;
+  if (fp32_precision) {
+    // GNA only accepts FP32 precision, cpu/gpu use FP32 currently.
+    blob = make_shared_blob<float>({Precision::FP32, dims, Layout::ANY});
+  } else {
+    // MYRIAD only accepts FP16 precision.
+    blob = make_shared_blob<int16_t>({Precision::FP16, dims, Layout::ANY});
+  }
+  blob->allocate();
+  const float *src = reinterpret_cast<const float *>(value);
+  std::shared_ptr<op::Constant> node;
+  uint32_t result;
+  if (fp32_precision) {
+    float *dst = blob->buffer().as<float *>();
+    CopyDataToBuffer<float>(dst, src, size);
+    node = std::make_shared<op::Constant>(element::f32, Shape(dims), dst);
+  } else {
+    int16_t *dst = blob->buffer().as<int16_t *>();
+    CopyDataToBuffer<int16_t>(dst, src, size);
+    node = std::make_shared<op::Constant>(element::f16, Shape(dims), dst);
+  }
+
+  std::string node_name = node->get_name();
+  name_node_map_[node_name] = node->output(0);
+
+  return CreateOperand(node_name);
+}
+
+ie_operand_t *Model::Input(ie_operand_descriptor_t const *desc) {
+  SizeVector dims = GetDimensions(desc);
+  auto input_node =
+      std::make_shared<op::v0::Parameter>(element::f32, Shape(dims));
+  ngraph_inputs_.push_back(input_node);
+
+  std::string node_name = input_node->get_name();
+  name_node_map_[node_name] = input_node->output(0);
+
+  return CreateOperand(node_name);
+}
+
+void Model::Output(ie_operand_t *operand) {
+  auto node_name = std::string(operand->name);
+  auto output_node = std::make_shared<op::Result>(name_node_map_[node_name]);
+  ngraph_outputs_.push_back(output_node);
+
+  return;
+}
+
+ie_operand_t *Model::MatMul(ie_operand_t *a, ie_operand_t *b) {
+  auto primary_node = name_node_map_[a->name];
+  auto secondary_node = name_node_map_[b->name];
+  auto matmul_node = std::make_shared<op::v0::MatMul>(
+      primary_node, secondary_node, false, false);
+
+  std::string node_name = matmul_node->get_name();
+  name_node_map_[node_name] = matmul_node->output(0);
+
+  return CreateOperand(node_name);
+}
+
+void Model::Finish() {
+  auto ngraph_function =
+      std::make_shared<Function>(ngraph_outputs_, ngraph_inputs_);
+  network_ = std::make_unique<CNNNetwork>(ngraph_function);
+  InputsDataMap input_info(network_->getInputsInfo());
+  for (auto itr : input_info) {
+    itr.second->setPrecision(Precision::FP32);
+  }
+  OutputsDataMap output_info(network_->getOutputsInfo());
+  for (auto itr : output_info) {
+    itr.second->setPrecision(Precision::FP32);
+  }
+}
+
+} // namespace InferenceEngine

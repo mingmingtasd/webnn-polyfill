@@ -27,7 +27,7 @@ extern "C" {
 // default value of the proctable. Setting the proctable back to null is good practice when you
 // are done using libdawn_proc since further usage will cause a segfault instead of calling an
 // unexpected function.
-WNN_EXPORT void dawnProcSetProcs(const DawnProcTable* procs);
+WNN_EXPORT void dawnProcSetProcs(const DawnProcTable *procs);
 
 #ifdef __cplusplus
 }  // extern "C"
