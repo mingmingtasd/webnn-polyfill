@@ -10,11 +10,17 @@ namespace op {
 
 Constant::Constant(const OperandDescriptor *descriptor, void const *value,
                    size_t size)
-    : OperandBase(), descriptor_(descriptor), value_(value), size_(size) {}
+    : OperandBase({}), descriptor_(descriptor), value_(value), size_(size) {}
 
-void Constant::AddOperand(ModelBase *model) {
-  model->AddConstant(this, descriptor_, value_, size_);
+void Constant::AddToModel(ModelBase *model) { model->AddConstant(this); }
+
+const OperandDescriptor *Constant::GetOperandDescriptor() {
+  return descriptor_;
 }
+
+void const *Constant::GetValue() { return value_; }
+
+size_t Constant::GetSize() { return size_; }
 
 } // namespace op
 

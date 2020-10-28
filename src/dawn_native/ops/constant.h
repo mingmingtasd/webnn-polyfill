@@ -17,7 +17,11 @@ public:
   Constant(const OperandDescriptor *, void const *value, size_t size);
   ~Constant() override = default;
 
-  void AddOperand(ModelBase *model) override;
+  void AddToModel(ModelBase *model) override;
+
+  const OperandDescriptor *GetOperandDescriptor();
+  void const *GetValue();
+  size_t GetSize();
 
 private:
   const OperandDescriptor *descriptor_;

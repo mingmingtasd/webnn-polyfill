@@ -6,15 +6,12 @@
 
 namespace dawn_native {
 
-Ref<OperandBase> OperandBase::FirstInput() const { return nullptr; }
+OperandBase::OperandBase(std::vector<Ref<OperandBase>> inputs)
+    : inputs_(std::move(inputs)) {}
 
-Ref<OperandBase> OperandBase::NextInput() { return nullptr; }
+void OperandBase::AddToModel(ModelBase *model) { UNREACHABLE(); }
 
-void OperandBase::AddOperand(ModelBase *model) { UNREACHABLE(); }
-
-void OperandBase::SetTraversal(bool traversal) { traversalled_ = traversal; }
-
-bool OperandBase::Traversal() { return traversalled_; }
+std::vector<Ref<OperandBase>> &OperandBase::Inputs() { return inputs_; }
 
 void OperandBase::SetName(std::string name) { name_ = name; }
 

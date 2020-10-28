@@ -20,7 +20,10 @@ public:
   Input(const std::string &, const OperandDescriptor *);
   ~Input() override = default;
 
-  void AddOperand(ModelBase *model) override;
+  void AddToModel(ModelBase *model) override;
+
+  const OperandDescriptor *GetOperandDescriptor();
+  std::string GetName();
 
 private:
   std::string name_;

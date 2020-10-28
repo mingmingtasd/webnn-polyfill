@@ -3,7 +3,6 @@
 
 #include "common/RefCounted.h"
 #include "dawn_native/Forward.h"
-
 #include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
@@ -18,7 +17,6 @@ public:
                         size_t size);
   OperandBase *Input(char const *name, OperandDescriptor const *desc);
   OperandBase *Matmul(OperandBase *a, OperandBase *b);
-
   ModelBase *CreateModel(NamedOperand const *named_operand, size_t size);
 
 private:

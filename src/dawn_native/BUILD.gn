@@ -117,8 +117,6 @@ source_set("dawn_native_sources") {
     "ops/input.h",
     "ops/matmul.cc",
     "ops/matmul.h",
-    "ops/output.cc",
-    "ops/output.h",
   ]
 
   sources += [

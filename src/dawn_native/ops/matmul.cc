@@ -10,12 +10,9 @@ namespace dawn_native {
 
 namespace op {
 
-MatMul::MatMul(OperandBase *a, OperandBase *b) : op::Output({a, b}) {}
+MatMul::MatMul(OperandBase *a, OperandBase *b) : OperandBase({a, b}) {}
 
-void MatMul::AddOperand(ModelBase *model) {
-  auto &inputs = Output::Inputs();
-  model->AddMatMul(this, inputs[0].Get(), inputs[1].Get());
-}
+void MatMul::AddToModel(ModelBase *model) { model->AddMatMul(this); }
 
 } // namespace op
 

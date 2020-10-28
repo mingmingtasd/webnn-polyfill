@@ -37,7 +37,7 @@ void Compilation::ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
     IEStatusCode code = IE(ie_compilation_set_input)(
         ie_compilation_, &ie_operand, input.second->buffer, input.second->size);
     if (code != IEStatusCode::OK) {
-      dawn::ErrorLog() << "Failing to create compilation for IE.";
+      dawn::ErrorLog() << "Failing to set input for IE.";
       return;
     }
   }
@@ -45,7 +45,7 @@ void Compilation::ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
   // Compute the compiled model.
   IEStatusCode code = IE(ie_compilation_compute)(ie_compilation_);
   if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to create compilation for IE.";
+    dawn::ErrorLog() << "Failing to compute for IE.";
     return;
   }
 
@@ -62,7 +62,7 @@ void Compilation::ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
         ie_compilation_, &ie_operand, output.second->buffer,
         output.second->size);
     if (code != IEStatusCode::OK) {
-      dawn::ErrorLog() << "Failing to create compilation for IE.";
+      dawn::ErrorLog() << "Failing to get output for IE.";
       return;
     }
   }

@@ -9,18 +9,25 @@
 
 namespace dawn_native {
 
+namespace op {
+class Constant;
+class Input;
+class MatMul;
+} // namespace op
+
 class ModelBase : public RefCounted {
 public:
   ModelBase() = default;
   virtual ~ModelBase() = default;
 
+  // Dawn API
   void Compile(WNNCompileCallback callback, CompilationOptions const *options);
 
-  virtual void AddConstant(OperandBase *, OperandDescriptor const *desc,
-                           void const *value, size_t size) = 0;
-  virtual void AddInput(OperandBase *, const std::string name,
-                        OperandDescriptor const *desc) = 0;
-  virtual void AddMatMul(OperandBase *, OperandBase *, OperandBase *) = 0;
+  virtual void AddConstant(op::Constant *constant) = 0;
+  virtual void AddInput(op::Input *input) = 0;
+  virtual void AddMatMul(op::MatMul *mat_mul) = 0;
+
+private:
   virtual void CompileImpl(WNNCompileCallback callback,
                            CompilationOptions const *options) = 0;
 };

@@ -58,43 +58,53 @@ Model::Model(struct NamedOperand const *named_operands, size_t size) {
 
 // Traversal graph inorder to create model.
 void Model::BuildNeuralNetworkModel(OperandBase *root) {
+  if (!root)
+    return;
   // the stack is used for traversaling model tree.
   std::vector<Ref<OperandBase>> stack;
+  // Push back the root node so that only child node need to be add to stack in
+  // secondary while loop.
+  stack.push_back(root);
+  traversalled_.insert(root);
   OperandBase *operand = root;
-  while (operand || !stack.empty()) {
+  while (!stack.empty()) {
     while (operand) {
-      stack.push_back(operand);
-      operand = operand->FirstInput().Get();
-    }
-    // It will be input/constant if there is no FirstInput operand.
-    if (!stack.empty()) {
-      // The index_ in Operand will be add when calling NextInput, so keep
-      // the line.
-      OperandBase *next_input = stack.back()->NextInput().Get();
-      if (next_input && !next_input->Traversal()) {
-        operand = next_input;
-      } else {
-        // Call the AddLayer virtual function to Add the operand with Android NN
-        // API.
-        stack.back()->AddOperand(this);
-        // Set the operand as traversalled so that it doesn't push again.
-        stack.back()->SetTraversal(true);
-        // Pop the node.
-        stack.pop_back();
-        // Don't use the code [operand = stack.back()] so that Origin branch
-        // [while (operand)] will be not traversalled again.
-        // operand = stack.back();
+      bool sub_graph = false;
+      for (auto &input : operand->Inputs()) {
+        // Push back the operand if it's not traversalled.
+        if (traversalled_.find(input.Get()) == traversalled_.end()) {
+          stack.push_back(input);
+          traversalled_.insert(input.Get());
+          // traversal next sub graph with the operand that isn't nullptr;
+          if (!sub_graph) {
+            operand = input.Get();
+            sub_graph = true;
+          }
+        }
+      }
+      // the sub graph of the operand has been add to model or input/constant.
+      if (!sub_graph) {
+        operand = nullptr;
       }
     }
+    // The sub graph of the operand has been add to model by native api or the
+    // the operand is input/constant, then add current operand with AddOperand
+    // virtual function.
+    stack.back()->AddToModel(this);
+    // Pop the node.
+    stack.pop_back();
+
+    // Continue to traversal unused operand.
+    operand = stack.back().Get();
   }
 }
 
-void Model::AddConstant(OperandBase *constant, OperandDescriptor const *desc,
-                        void const *value, size_t size) {
-  ie_operand_descriptor ie_desc = ConvertTo(desc);
+void Model::AddConstant(op::Constant *constant) {
+  ie_operand_descriptor ie_desc = ConvertTo(constant->GetOperandDescriptor());
   ie_operand_t *ie_operand;
   IEStatusCode code =
-      IE(ie_model_add_constant)(ie_model_, &ie_desc, value, size, &ie_operand);
+      IE(ie_model_add_constant)(ie_model_, &ie_desc, constant->GetValue(),
+                                constant->GetSize(), &ie_operand);
   if (code != IEStatusCode::OK) {
     dawn::ErrorLog() << "Failing to add constant, the code is " << code << ".";
     return;
@@ -102,9 +112,8 @@ void Model::AddConstant(OperandBase *constant, OperandDescriptor const *desc,
   constant->SetName(std::string(ie_operand->name));
 }
 
-void Model::AddInput(OperandBase *input, const std::string name,
-                     OperandDescriptor const *desc) {
-  ie_operand_descriptor ie_desc = ConvertTo(desc);
+void Model::AddInput(op::Input *input) {
+  ie_operand_descriptor ie_desc = ConvertTo(input->GetOperandDescriptor());
   ie_operand_t *ie_operand;
   IEStatusCode code = IE(ie_model_add_input)(ie_model_, &ie_desc, &ie_operand);
   if (code != IEStatusCode::OK) {
@@ -112,7 +121,7 @@ void Model::AddInput(OperandBase *input, const std::string name,
     return;
   }
   input->SetName(std::string(ie_operand->name));
-  named_operands_[name] = input;
+  named_operands_[input->GetName()] = input;
 }
 
 void Model::AddOutput(OperandBase *ouput) {
@@ -133,11 +142,12 @@ void Model::Finish() {
   }
 }
 
-void Model::AddMatMul(OperandBase *mutmul, OperandBase *a, OperandBase *b) {
+void Model::AddMatMul(op::MatMul *mutmul) {
+  auto inputs = mutmul->Inputs();
   ie_operand_t primary;
-  primary.name = const_cast<char *>(a->GetName().c_str());
+  primary.name = const_cast<char *>(inputs[0]->GetName().c_str());
   ie_operand_t secondary;
-  secondary.name = const_cast<char *>(b->GetName().c_str());
+  secondary.name = const_cast<char *>(inputs[1]->GetName().c_str());
   ie_operand_t *ie_operand;
   IEStatusCode code =
       IE(ie_model_add_mat_mul)(ie_model_, &primary, &secondary, &ie_operand);

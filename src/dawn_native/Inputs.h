@@ -18,7 +18,6 @@ public:
 
 private:
   std::map<std::string, Input const *> inputs_;
-  std::map<int, float> float_inputs_;
 };
 }
 

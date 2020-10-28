@@ -15,6 +15,7 @@ public:
   CompilationBase() = default;
   virtual ~CompilationBase() = default;
 
+  // Dawn API
   void Compute(InputsBase *inputs, WNNComputeCallback callback,
                OutputsBase *outputs = nullptr);
 

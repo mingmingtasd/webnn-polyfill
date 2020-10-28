@@ -7,18 +7,17 @@
 
 #include "dawn_native/Model.h"
 #include "dawn_native/Operand.h"
-#include "dawn_native/ops/output.h"
 
 namespace dawn_native {
 
 namespace op {
 
-class MatMul final : public Output {
+class MatMul final : public OperandBase {
 public:
   MatMul(OperandBase *, OperandBase *);
   ~MatMul() override = default;
 
-  void AddOperand(ModelBase *model) override;
+  void AddToModel(ModelBase *model) override;
 };
 
 } // namespace op
