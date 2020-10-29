@@ -1,0 +1,208 @@
+// Copyright 2020 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "ie_nn_c_api.h"
+
+#include <map>
+#include <memory>
+#include <vector>
+
+#include "ie_compilation.h"
+#include "ie_model.h"
+#include "utils.h"
+#include <inference_engine.hpp>
+
+namespace IE = InferenceEngine;
+
+std::map<IE::StatusCode, IEStatusCode> status_map = {
+    {IE::StatusCode::GENERAL_ERROR, IEStatusCode::GENERAL_ERROR},
+    {IE::StatusCode::INFER_NOT_STARTED, IEStatusCode::INFER_NOT_STARTED},
+    {IE::StatusCode::NETWORK_NOT_LOADED, IEStatusCode::NETWORK_NOT_LOADED},
+    {IE::StatusCode::NETWORK_NOT_READ, IEStatusCode::NETWORK_NOT_READ},
+    {IE::StatusCode::NOT_ALLOCATED, IEStatusCode::NOT_ALLOCATED},
+    {IE::StatusCode::NOT_FOUND, IEStatusCode::NOT_FOUND},
+    {IE::StatusCode::NOT_IMPLEMENTED, IEStatusCode::NOT_IMPLEMENTED},
+    {IE::StatusCode::OK, IEStatusCode::OK},
+    {IE::StatusCode::OUT_OF_BOUNDS, IEStatusCode::OUT_OF_BOUNDS},
+    {IE::StatusCode::PARAMETER_MISMATCH, IEStatusCode::PARAMETER_MISMATCH},
+    {IE::StatusCode::REQUEST_BUSY, IEStatusCode::REQUEST_BUSY},
+    {IE::StatusCode::RESULT_NOT_READY, IEStatusCode::RESULT_NOT_READY},
+    {IE::StatusCode::UNEXPECTED, IEStatusCode::UNEXPECTED}};
+#define BEGINE_TRY try {
+#define END_CATCH                                                              \
+  }                                                                            \
+  catch (const IE::details::InferenceEngineException &e) {                     \
+    return e.hasStatus() ? status_map[e.getStatus()]                           \
+                         : IEStatusCode::UNEXPECTED;                           \
+  }                                                                            \
+  catch (...) {                                                                \
+    return IEStatusCode::UNEXPECTED;                                           \
+  }
+
+/**
+ * @struct ie_Compilation
+ * @brief Create model from output operand and compile it for hardwave
+ * accelerate including cpu/gpu/gna/vpu.
+ */
+struct ie_model {
+  std::shared_ptr<IE::Model> object;
+};
+
+struct ie_compilation {
+  std::unique_ptr<IE::Compilation> object;
+};
+
+IEStatusCode ie_create_model(ie_model **model) {
+  if (model == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *model = new ie_model_t;
+  (*model)->object.reset(new IE::Model());
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+void ie_model_free(ie_model *model) {
+  if (model) {
+    delete model;
+    model = NULL;
+  }
+}
+
+IEStatusCode ie_model_add_constant(ie_model_t *model,
+                                   ie_operand_descriptor_t const *desc,
+                                   void const *value, size_t size,
+                                   ie_operand_t **operand) {
+  if (model == nullptr || operand == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->Constant(desc, value, size);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_add_input(ie_model_t *model,
+                                ie_operand_descriptor_t const *desc,
+                                ie_operand_t **operand) {
+  if (model == nullptr || desc == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->Input(desc);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_add_output(ie_model_t *model, ie_operand_t *operand) {
+  if (model == nullptr || operand == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  model->object->Output(operand);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_add_mat_mul(ie_model_t *model, ie_operand_t *a,
+                                  ie_operand_t *b, ie_operand_t **operand) {
+  if (model == nullptr || a == nullptr || b == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->MatMul(a, b);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+void ie_operand_free(ie_operand_t *operand) {
+  if (operand) {
+    delete operand;
+    operand = NULL;
+  }
+}
+
+IEStatusCode ie_model_finish(ie_model_t *model) {
+  if (model == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  model->object->Finish();
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_create_compilation(ie_model *model,
+                                   ie_compilation_t **compilation) {
+  if (model == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *compilation = new ie_compilation_t;
+  (*compilation)->object.reset(new IE::Compilation(model->object));
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+void ie_compilation_free(ie_compilation_t *compilation) {
+  if (compilation) {
+    delete compilation;
+    compilation = NULL;
+  }
+}
+
+IEStatusCode ie_compilation_set_input(ie_compilation_t *compilation,
+                                      ie_operand_t *operand, const void *buffer,
+                                      uint32_t length) {
+  if (compilation == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  compilation->object->SetInput(operand, buffer, length);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_compilation_compute(ie_compilation_t *compilation) {
+  if (compilation == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  compilation->object->Compute();
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_compilation_get_output(ie_compilation_t *compilation,
+                                       ie_operand_t *operand, void *buffer,
+                                       uint32_t length) {
+  if (compilation == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  compilation->object->GetOutput(operand, buffer, length);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}

@@ -39,11 +39,9 @@ typedef struct {
     void (*Destroy)(void* userData);
 
     /// Configure/reconfigure the swap chain.
-    DawnSwapChainError (*Configure)(void* userData,
-                                    WNNTextureFormat format,
+    DawnSwapChainError (*Configure)(void *userData, WNNTextureFormat format,
                                     WNNTextureUsage allowedUsage,
-                                    uint32_t width,
-                                    uint32_t height);
+                                    uint32_t width, uint32_t height);
 
     /// Acquire the next texture from the swap chain.
     DawnSwapChainError (*GetNextTexture)(void* userData, DawnSwapChainNextTexture* nextTexture);
@@ -60,7 +58,7 @@ typedef struct {
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12) && defined(__cplusplus)
 struct DawnWSIContextD3D12 {
-    WNNDevice device = nullptr;
+  WNNDevice device = nullptr;
 };
 #endif
 

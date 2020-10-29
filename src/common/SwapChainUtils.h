@@ -26,9 +26,11 @@ DawnSwapChainImplementation CreateSwapChainImplementation(T* swapChain) {
         reinterpret_cast<T*>(userData)->Init(ctx);
     };
     impl.Destroy = [](void* userData) { delete reinterpret_cast<T*>(userData); };
-    impl.Configure = [](void* userData, WNNTextureFormat format, WNNTextureUsage allowedUsage,
-                        uint32_t width, uint32_t height) {
-        return static_cast<T*>(userData)->Configure(format, allowedUsage, width, height);
+    impl.Configure = [](void *userData, WNNTextureFormat format,
+                        WNNTextureUsage allowedUsage, uint32_t width,
+                        uint32_t height) {
+      return static_cast<T *>(userData)->Configure(format, allowedUsage, width,
+                                                   height);
     };
     impl.GetNextTexture = [](void* userData, DawnSwapChainNextTexture* nextTexture) {
         return static_cast<T*>(userData)->GetNextTexture(nextTexture);

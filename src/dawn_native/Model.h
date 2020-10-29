@@ -1,23 +1,36 @@
 #ifndef WEBNN_NATIVE_MODEL_H_
 #define WEBNN_NATIVE_MODEL_H_
 
-#include "dawn_native/Forward.h"
 #include "common/RefCounted.h"
-
+#include "dawn_native/Compilation.h"
+#include "dawn_native/Forward.h"
+#include "dawn_native/Operand.h"
 #include "dawn_native/dawn_platform.h"
 
-#include "dawn_native/Compilation.h"
-
 namespace dawn_native {
-  class ModelBase : public RefCounted {
-   public:
-    ModelBase() = default;
-    virtual ~ModelBase() = default;
 
-    void Compile(WNNCompileCallback callback, CompilationOptions const * options) {
-      callback(reinterpret_cast<WNNCompilation>(new CompilationBase()));
-    }
-  };
-}
+namespace op {
+class Constant;
+class Input;
+class MatMul;
+} // namespace op
+
+class ModelBase : public RefCounted {
+public:
+  ModelBase() = default;
+  virtual ~ModelBase() = default;
+
+  // Dawn API
+  void Compile(WNNCompileCallback callback, CompilationOptions const *options);
+
+  virtual void AddConstant(op::Constant *constant) = 0;
+  virtual void AddInput(op::Input *input) = 0;
+  virtual void AddMatMul(op::MatMul *mat_mul) = 0;
+
+private:
+  virtual void CompileImpl(WNNCompileCallback callback,
+                           CompilationOptions const *options) = 0;
+};
+} // namespace dawn_native
 
 #endif  // WEBNN_NATIVE_MODEL_H_

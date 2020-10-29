@@ -9,15 +9,20 @@
 #include "dawn_native/Outputs.h"
 
 namespace dawn_native {
-  class CompilationBase : public RefCounted {
-   public:
-    CompilationBase() = default;
-    virtual ~CompilationBase() = default;
 
-    void Compute(InputsBase* inputs, WNNComputeCallback callback, OutputsBase* outputs = nullptr) {
-      callback(reinterpret_cast<WNNOutputs>(new OutputsBase()));
-    }
-  };
+class CompilationBase : public RefCounted {
+public:
+  CompilationBase() = default;
+  virtual ~CompilationBase() = default;
+
+  // Dawn API
+  void Compute(InputsBase *inputs, WNNComputeCallback callback,
+               OutputsBase *outputs = nullptr);
+
+private:
+  virtual void ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
+                           OutputsBase *outputs = nullptr) = 0;
+};
 }
 
 #endif  // WEBNN_NATIVE_COMPILATION_H_

@@ -92,16 +92,44 @@ source_set("dawn_native_sources") {
   sources = get_target_outputs(":dawn_native_utils_gen")
 
   sources += [
+    "Compilation.cpp",
+    "Compilation.h",
     "Error.cpp",
     "Error.h",
     "ErrorData.cpp",
     "ErrorData.h",
-    "Compilation.h",
+    "Inputs.cpp",
     "Inputs.h",
+    "Model.cpp",
     "Model.h",
-    "NeuralNetworkContext.h",
+    "ModelBuilder.cpp",
+    "ModelBuilder.h",
+    "Operand.cpp",
     "Operand.h",
+    "Outputs.cpp",
     "Outputs.h",
+  ]
+
+  sources += [
+    "ops/constant.cc",
+    "ops/constant.h",
+    "ops/input.cc",
+    "ops/input.h",
+    "ops/matmul.cc",
+    "ops/matmul.h",
+  ]
+
+  sources += [
+    "ie/compilation_ie.cc",
+    "ie/compilation_ie.h",
+    "ie/ienn_symbol_table.cc",
+    "ie/ienn_symbol_table.h",
+    "ie/late_binding_symbol_table.cc",
+    "ie/late_binding_symbol_table.h",
+    "ie/model_builder_ie.cc",
+    "ie/model_builder_ie.h",
+    "ie/model_ie.cc",
+    "ie/model_ie.h",
   ]
 }
 
@@ -121,4 +149,19 @@ dawn_component("dawn_native") {
   sources = [ "DawnNative.cpp" ]
   configs = [ ":dawn_native_internal" ]
   public_configs = [ ":dawn_native_weak_framework" ]
+}
+
+if (is_win) {
+  ie_nn_dll = "ie_nn_c_api.dll"
+  os_folder = "Windows64"
+} else if (is_linux) {
+  ie_nn_dll = "libie_nn_c_api.so"
+  os_folder = "Linux64"
+}
+if (is_win || is_linux) {
+  ie_nn_dll_path = "//src/dawn_native/ie/ienn/lib/${os_folder}"
+  copy("copy_ie_nn_dll") {
+    sources = [ "${ie_nn_dll_path}/${ie_nn_dll}" ]
+    outputs = [ "$root_out_dir/{{source_file_part}}" ]
+  }
 }

@@ -18,21 +18,26 @@
 #include <dawn/dawn_proc_table.h>
 #include <dawn/webnn.h>
 #include <dawn_native/dawn_native_export.h>
-
 #include <string>
 #include <vector>
 
+#include "dawn_native/ModelBuilder.h"
+
 namespace dawn_native {
-  class DAWN_NATIVE_EXPORT Adapter {
-    public:
-      Adapter();
-      ~Adapter();
 
-      WNNNeuralNetworkContext CreateNeuralNetworkContext();
-  };
+class DAWN_NATIVE_EXPORT NeuralNetworkContext {
+public:
+  NeuralNetworkContext();
+  ~NeuralNetworkContext();
 
-  // Backend-agnostic API for dawn_native
-  DAWN_NATIVE_EXPORT DawnProcTable GetProcs();
+  WNNModelBuilder CreateModelBuilder();
+};
+
+// Backend-agnostic API for dawn_native
+DAWN_NATIVE_EXPORT DawnProcTable GetProcs();
+
+DAWN_NATIVE_EXPORT WNNInputs CreateInputs();
+DAWN_NATIVE_EXPORT WNNOutputs CreateOutputs();
 
 }  // namespace dawn_native
 
