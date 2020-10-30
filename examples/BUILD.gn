@@ -56,3 +56,7 @@ dawn_sample("matmul") {
 dawn_sample("add") {
   sources = [ "add.cpp" ]
 }
+
+dawn_sample("mul") {
+  sources = [ "mul.cpp" ]
+}

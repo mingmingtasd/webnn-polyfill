@@ -102,6 +102,14 @@
         ]
       },
       {
+        "name": "mul",
+        "returns": "operand",
+        "args": [
+          {"name": "a", "type": "operand"},
+          {"name": "b", "type": "operand"}
+        ]
+      },
+      {
         "name": "createModel",
         "returns": "model",
         "args": [
