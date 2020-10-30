@@ -6,6 +6,7 @@
 #include "common/Assert.h"
 #include "common/Log.h"
 #include "dawn_native/ie/compilation_ie.h"
+#include "dawn_native/ops/pool2d.h"
 #include "ienn_symbol_table.h"
 
 namespace dawn_native {
@@ -42,6 +43,16 @@ ie_conv2d_options Conv2dOptionsForIE(Conv2dOptions const *options) {
   ie_options.strides = options->strides;
   ie_options.dilations = options->dilations;
   ie_options.groups = options->groups;
+  ie_options.layout = static_cast<ie_operand_layout>(options->layout);
+  return ie_options;
+}
+
+ie_pool2d_options Pool2dOptionsForIE(Pool2dOptions const *options) {
+  ie_pool2d_options ie_options;
+  ie_options.windowDimensions = options->windowDimensions;
+  ie_options.padding = options->padding;
+  ie_options.strides = options->strides;
+  ie_options.dilations = options->dilations;
   ie_options.layout = static_cast<ie_operand_layout>(options->layout);
   return ie_options;
 }
@@ -193,6 +204,22 @@ void Model::AddConv2d(op::Conv2d *conv2d) {
     return;
   }
   conv2d->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddPool2d(op::Pool2d *pool2d) {
+  auto inputs = pool2d->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  ie_pool2d_options_t ie_options = Pool2dOptionsForIE(pool2d->Options());
+  IEStatusCode code = IE(ie_model_add_pool2d)(
+      ie_model_, static_cast<ie_pool_type>(pool2d->GetType()), &input,
+      &ie_options, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add matmul, the code is " << code << ".";
+    return;
+  }
+  pool2d->SetName(std::string(ie_operand->name));
 }
 
 void Model::Finish() {

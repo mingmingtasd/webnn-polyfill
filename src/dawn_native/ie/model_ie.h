@@ -27,6 +27,7 @@ public:
   virtual void AddMatMul(op::MatMul *mat_mul) override;
   virtual void AddBinary(op::Binary *binary) override;
   virtual void AddConv2d(op::Conv2d *conv2d) override;
+  virtual void AddPool2d(op::Pool2d *pool2d) override;
 
   OperandBase *GetNamedOperand(std::string name);
   ie_model_t *GetInferenceEngineModel();

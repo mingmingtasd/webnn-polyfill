@@ -85,6 +85,20 @@
       {"name": "layout", "type": "operand layout", "default": "nchw"}
     ]
   },
+  "pool2d options": {
+    "category": "structure",
+    "members": [
+      {"name": "window dimensions count", "type": "uint32_t", "default": 2},
+      {"name": "window dimensions", "type": "int32_t", "annotation": "const*", "length": "window dimensions count"},
+      {"name": "padding count", "type": "uint32_t", "default": 4},
+      {"name": "padding", "type": "int32_t", "annotation": "const*", "length": "padding count"},
+      {"name": "strides count", "type": "uint32_t", "default": 2},
+      {"name": "strides", "type": "int32_t", "annotation": "const*", "length": "strides count"},
+      {"name": "dilations count", "type": "uint32_t", "default": 2},
+      {"name": "dilations", "type": "int32_t", "annotation": "const*", "length": "dilations count"},
+      {"name": "layout", "type": "operand layout", "default": "nchw"}
+    ]
+  },
   "model builder": {
     "category": "object",
     "methods": [
@@ -136,6 +150,14 @@
           {"name": "input", "type": "operand"},
           {"name": "filter", "type": "operand"},
           {"name": "options", "type": "conv2d options", "annotation": "const*", "optional": true}
+        ]
+      },
+      {
+        "name": "average pool2d",
+        "returns": "operand",
+        "args": [
+          {"name": "input", "type": "operand"},
+          {"name": "options", "type": "pool2d options", "annotation": "const*", "optional": true}
         ]
       },
       {

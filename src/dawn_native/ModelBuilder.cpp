@@ -11,6 +11,7 @@
 #include "dawn_native/ops/conv2d.h"
 #include "dawn_native/ops/input.h"
 #include "dawn_native/ops/matmul.h"
+#include "dawn_native/ops/pool2d.h"
 
 namespace dawn_native {
 
@@ -46,6 +47,13 @@ OperandBase *ModelBuilderBase::Mul(OperandBase *a, OperandBase *b) {
 OperandBase *ModelBuilderBase::Conv2d(OperandBase *input, OperandBase *filter,
                                       Conv2dOptions const *options) {
   Ref<OperandBase> context = AcquireRef(new op::Conv2d(input, filter, options));
+  return context.Detach();
+}
+
+OperandBase *ModelBuilderBase::AveragePool2d(OperandBase *input,
+                                             Pool2dOptions const *options) {
+  Ref<OperandBase> context = AcquireRef(
+      new op::Pool2d(op::Pool2dType::kAveragePool2d, input, options));
   return context.Detach();
 }
 

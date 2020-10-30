@@ -95,6 +95,24 @@ typedef struct ie_conv2d_options {
   ie_operand_layout layout = ie_operand_layout::Nchw;
 } ie_conv2d_options_t;
 
+enum ie_pool_type {
+  AVERAGE_POOL = 0,
+  L2_POOL,
+  MAX_POOL,
+};
+
+typedef struct ie_pool2d_options {
+  uint32_t windowDimensionsCount = 2;
+  int32_t const *windowDimensions;
+  uint32_t paddingCount = 4;
+  int32_t const *padding;
+  uint32_t stridesCount = 2;
+  int32_t const *strides;
+  uint32_t dilationsCount = 2;
+  int32_t const *dilations;
+  ie_operand_layout layout = ie_operand_layout::Nchw;
+} ie_pool2d_options_t;
+
 typedef struct ie_model ie_model_t;
 typedef struct ie_compilation ie_compilation_t;
 
@@ -197,6 +215,18 @@ BUILD_NETWORK_C_WRAPPER(IEStatusCode)
 ie_model_add_conv2d(ie_model_t *model, ie_operand_t *input,
                     ie_operand_t *filter, ie_conv2d_options_t *options,
                     ie_operand_t **operand);
+
+/**
+ * @brief Add pool2d node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @param ie_operand_t The filter operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_pool2d(ie_model_t *model, ie_pool_type type, ie_operand_t *input,
+                    ie_pool2d_options_t *options, ie_operand_t **operand);
 
 /**
  * @brief Releases memory occupied by operand.

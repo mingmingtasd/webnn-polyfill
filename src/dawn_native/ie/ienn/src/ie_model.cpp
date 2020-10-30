@@ -120,6 +120,7 @@ ie_operand_t *Model::AddBinary(ie_binary_type type, ie_operand_t *a,
   name_node_map_[node_name] = binary_node->output(0);
   return CreateOperand(node_name);
 }
+
 ie_operand_t *Model::AddConv2d(ie_operand_t *input, ie_operand_t *filter,
                                ie_conv2d_options_t *options) {
   CoordinateDiff pad_begin = {options->padding[0], options->padding[2]};
@@ -136,6 +137,41 @@ ie_operand_t *Model::AddConv2d(ie_operand_t *input, ie_operand_t *filter,
 
   std::string node_name = conv2d_node->get_name();
   name_node_map_[node_name] = conv2d_node->output(0);
+  return CreateOperand(node_name);
+}
+
+ie_operand_t *Model::AddPool2d(ie_pool_type type, ie_operand_t *input,
+                               ie_pool2d_options_t *options) {
+  Shape window_dimensions = {static_cast<size_t>(options->windowDimensions[0]),
+                             static_cast<size_t>(options->windowDimensions[1])};
+  Shape pad_begin = {static_cast<size_t>(options->padding[0]),
+                     static_cast<size_t>(options->padding[2])};
+  Shape pad_end = {static_cast<size_t>(options->padding[1]),
+                   static_cast<size_t>(options->padding[3])};
+  Strides strides = {static_cast<size_t>(options->strides[0]),
+                     static_cast<size_t>(options->strides[1])};
+  Shape dilations = {static_cast<size_t>(options->dilations[0]),
+                     static_cast<size_t>(options->dilations[1])};
+
+  auto input_node = name_node_map_[input->name];
+  std::shared_ptr<ngraph::Node> pool2d_node;
+  switch (type) {
+  case ie_pool_type::AVERAGE_POOL:
+    pool2d_node = std::make_shared<op::v1::AvgPool>(
+        input_node, strides, pad_begin, pad_end, window_dimensions, true,
+        op::RoundingType::FLOOR, op::PadType::EXPLICIT);
+    break;
+  case ie_pool_type::MAX_POOL:
+    pool2d_node = std::make_shared<op::v1::MaxPool>(
+        input_node, strides, pad_begin, pad_end, window_dimensions,
+        op::RoundingType::FLOOR, op::PadType::EXPLICIT);
+    break;
+  default:
+    assert(0);
+  }
+
+  std::string node_name = pool2d_node->get_name();
+  name_node_map_[node_name] = pool2d_node->output(0);
   return CreateOperand(node_name);
 }
 

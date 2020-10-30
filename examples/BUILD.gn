@@ -64,3 +64,7 @@ dawn_sample("mul") {
 dawn_sample("conv2d") {
   sources = [ "conv2d.cpp" ]
 }
+
+dawn_sample("averagePool2d") {
+  sources = [ "average_pool2d.cpp" ]
+}
