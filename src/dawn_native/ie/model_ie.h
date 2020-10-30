@@ -7,6 +7,7 @@
 #include "dawn_native/Model.h"
 #include "dawn_native/Operand.h"
 #include "dawn_native/ie/ienn/src/ie_nn_c_api.h"
+#include "dawn_native/ops/binary.h"
 #include "dawn_native/ops/constant.h"
 #include "dawn_native/ops/input.h"
 #include "dawn_native/ops/matmul.h"
@@ -23,6 +24,7 @@ public:
   virtual void AddConstant(op::Constant *constant) override;
   virtual void AddInput(op::Input *input) override;
   virtual void AddMatMul(op::MatMul *mat_mul) override;
+  virtual void AddBinary(op::Binary *binary) override;
 
   OperandBase *GetNamedOperand(std::string name);
   ie_model_t *GetInferenceEngineModel();

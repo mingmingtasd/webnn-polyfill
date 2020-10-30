@@ -111,6 +111,8 @@ source_set("dawn_native_sources") {
   ]
 
   sources += [
+    "ops/binary.cc",
+    "ops/binary.h",
     "ops/constant.cc",
     "ops/constant.h",
     "ops/input.cc",

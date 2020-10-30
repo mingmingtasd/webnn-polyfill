@@ -82,6 +82,15 @@ typedef struct ie_operand_descriptor {
 typedef struct ie_model ie_model_t;
 typedef struct ie_compilation ie_compilation_t;
 
+enum ie_binary_type {
+  ADD = 0,
+  SUB,
+  MUL,
+  DIV,
+  MAX,
+  MIN,
+};
+
 /**
  * @brief Create model. Use the ie_model_free() method to
  *  free the model memory.
@@ -103,7 +112,7 @@ ie_model_free(ie_model_t *model);
 /**
  * @brief Add Constant node to nGraph. Use the ie_operand_free() method to
  *  free the operand memory.
- * @ingroup Compilation
+ * @ingroup model
  * @param ie_operand_descriptor_t A pointer to the Operand Descriptor.
  * @param value The value of Operand.
  * @param size The size of the value.
@@ -117,7 +126,7 @@ ie_model_add_constant(ie_model_t *Compilation,
 /**
  * @brief Add Input node to nGraph. Use the ie_operand_free() method to
  *  free the operand memory.
- * @ingroup Compilation
+ * @ingroup model
  * @param name The name of Input Operand to Set Value with JS.
  * @param ie_operand_descriptor_t A pointer to the Operand Descriptor.
  * @return Status code of the operation: OK(0) for success.
@@ -139,7 +148,7 @@ ie_model_add_output(ie_model_t *model, ie_operand_t *operand);
 /**
  * @brief Add MatMul node to nGraph. Use the ie_operand_free() method to
  *  free the operand memory.
- * @ingroup Compilation
+ * @ingroup model
  * @param ie_operand_t The prmiary operand.
  * @param ie_operand_t The secondary operand.
  * @return Status code of the operation: OK(0) for success.
@@ -147,6 +156,18 @@ ie_model_add_output(ie_model_t *model, ie_operand_t *operand);
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
 ie_model_add_mat_mul(ie_model_t *model, ie_operand_t *a, ie_operand_t *b,
                      ie_operand_t **operand);
+
+/**
+ * @brief Add binary node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The prmiary operand.
+ * @param ie_operand_t The secondary operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_binary(ie_model_t *model, ie_binary_type type, ie_operand_t *a,
+                    ie_operand_t *b, ie_operand_t **operand);
 
 /**
  * @brief Releases memory occupied by operand.

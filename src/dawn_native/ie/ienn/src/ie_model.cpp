@@ -35,8 +35,8 @@ ie_operand_t *CreateOperand(std::string &name) {
 }
 } // namespace
 
-ie_operand_t *Model::Constant(ie_operand_descriptor_t const *desc,
-                              void const *value, size_t size) {
+ie_operand_t *Model::AddConstant(ie_operand_descriptor_t const *desc,
+                                 void const *value, size_t size) {
   SizeVector dims = GetDimensions(desc);
   // Generally, FP16 is preferable as it is most ubiquitous and performant
   // documented in
@@ -66,11 +66,10 @@ ie_operand_t *Model::Constant(ie_operand_descriptor_t const *desc,
 
   std::string node_name = node->get_name();
   name_node_map_[node_name] = node->output(0);
-
   return CreateOperand(node_name);
 }
 
-ie_operand_t *Model::Input(ie_operand_descriptor_t const *desc) {
+ie_operand_t *Model::AddInput(ie_operand_descriptor_t const *desc) {
   SizeVector dims = GetDimensions(desc);
   auto input_node =
       std::make_shared<op::v0::Parameter>(element::f32, Shape(dims));
@@ -78,11 +77,10 @@ ie_operand_t *Model::Input(ie_operand_descriptor_t const *desc) {
 
   std::string node_name = input_node->get_name();
   name_node_map_[node_name] = input_node->output(0);
-
   return CreateOperand(node_name);
 }
 
-void Model::Output(ie_operand_t *operand) {
+void Model::AddOutput(ie_operand_t *operand) {
   auto node_name = std::string(operand->name);
   auto output_node = std::make_shared<op::Result>(name_node_map_[node_name]);
   ngraph_outputs_.push_back(output_node);
@@ -90,7 +88,7 @@ void Model::Output(ie_operand_t *operand) {
   return;
 }
 
-ie_operand_t *Model::MatMul(ie_operand_t *a, ie_operand_t *b) {
+ie_operand_t *Model::AddMatMul(ie_operand_t *a, ie_operand_t *b) {
   auto primary_node = name_node_map_[a->name];
   auto secondary_node = name_node_map_[b->name];
   auto matmul_node = std::make_shared<op::v0::MatMul>(
@@ -98,7 +96,28 @@ ie_operand_t *Model::MatMul(ie_operand_t *a, ie_operand_t *b) {
 
   std::string node_name = matmul_node->get_name();
   name_node_map_[node_name] = matmul_node->output(0);
+  return CreateOperand(node_name);
+}
 
+ie_operand_t *Model::AddBinary(ie_binary_type type, ie_operand_t *a,
+                               ie_operand_t *b) {
+  auto primary_node = name_node_map_[a->name];
+  auto secondary_node = name_node_map_[b->name];
+  std::shared_ptr<ngraph::Node> binary_node;
+  switch (type) {
+  case ie_binary_type::ADD:
+    binary_node = std::make_shared<op::v1::Add>(primary_node, secondary_node);
+    break;
+  case ie_binary_type::MUL:
+    binary_node =
+        std::make_shared<op::v1::Multiply>(primary_node, secondary_node);
+    break;
+  default:
+    assert(0);
+  }
+
+  std::string node_name = binary_node->get_name();
+  name_node_map_[node_name] = binary_node->output(0);
   return CreateOperand(node_name);
 }
 

@@ -17,6 +17,8 @@ public:
                         size_t size);
   OperandBase *Input(char const *name, OperandDescriptor const *desc);
   OperandBase *Matmul(OperandBase *a, OperandBase *b);
+  OperandBase *Add(OperandBase *, OperandBase *);
+  OperandBase *Mul(OperandBase *, OperandBase *);
   ModelBase *CreateModel(NamedOperand const *named_operand, size_t size);
 
 private:

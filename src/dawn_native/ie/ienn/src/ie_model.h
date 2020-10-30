@@ -23,11 +23,13 @@ public:
   Model() = default;
   ~Model() = default;
 
-  ie_operand_t *Constant(ie_operand_descriptor_t const *desc, void const *value,
-                         size_t size);
-  ie_operand_t *Input(ie_operand_descriptor_t const *desc);
-  void Output(ie_operand_t *operand);
-  ie_operand_t *MatMul(ie_operand_t *a, ie_operand_t *b);
+  ie_operand_t *AddConstant(ie_operand_descriptor_t const *desc,
+                            void const *value, size_t size);
+  ie_operand_t *AddInput(ie_operand_descriptor_t const *desc);
+  void AddOutput(ie_operand_t *operand);
+  ie_operand_t *AddMatMul(ie_operand_t *a, ie_operand_t *b);
+  ie_operand_t *AddBinary(ie_binary_type type, ie_operand_t *a,
+                          ie_operand_t *b);
   void Finish();
 
 private:

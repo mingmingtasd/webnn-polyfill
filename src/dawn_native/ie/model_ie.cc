@@ -35,6 +35,7 @@ ie_operand_descriptor ConvertTo(OperandDescriptor const *desc) {
   }
   return ie_desc;
 }
+
 } // namespace
 
 Model::Model(struct NamedOperand const *named_operands, size_t size) {
@@ -134,14 +135,6 @@ void Model::AddOutput(OperandBase *ouput) {
   }
 }
 
-void Model::Finish() {
-  IEStatusCode code = IE(ie_model_finish)(ie_model_);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to finish the model.";
-    return;
-  }
-}
-
 void Model::AddMatMul(op::MatMul *mutmul) {
   auto inputs = mutmul->Inputs();
   ie_operand_t primary;
@@ -156,6 +149,31 @@ void Model::AddMatMul(op::MatMul *mutmul) {
     return;
   }
   mutmul->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddBinary(op::Binary *binary) {
+  auto inputs = binary->Inputs();
+  ie_operand_t primary;
+  primary.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t secondary;
+  secondary.name = const_cast<char *>(inputs[1]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  IEStatusCode code = IE(ie_model_add_binary)(
+      ie_model_, static_cast<ie_binary_type>(binary->GetType()), &primary,
+      &secondary, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add binary, the code is " << code << ".";
+    return;
+  }
+  binary->SetName(std::string(ie_operand->name));
+}
+
+void Model::Finish() {
+  IEStatusCode code = IE(ie_model_finish)(ie_model_);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to finish the model.";
+    return;
+  }
 }
 
 OperandBase *Model::GetNamedOperand(std::string name) {

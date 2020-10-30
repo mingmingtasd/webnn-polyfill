@@ -6,6 +6,7 @@
 #include "common/Assert.h"
 #include "common/RefCounted.h"
 #include "dawn_native/Operand.h"
+#include "dawn_native/ops/binary.h"
 #include "dawn_native/ops/constant.h"
 #include "dawn_native/ops/input.h"
 #include "dawn_native/ops/matmul.h"
@@ -26,6 +27,18 @@ OperandBase *ModelBuilderBase::Input(char const *name,
 
 OperandBase *ModelBuilderBase::Matmul(OperandBase *a, OperandBase *b) {
   Ref<OperandBase> context = AcquireRef(new op::MatMul(a, b));
+  return context.Detach();
+}
+
+OperandBase *ModelBuilderBase::Add(OperandBase *a, OperandBase *b) {
+  Ref<OperandBase> context =
+      AcquireRef(new op::Binary(op::kBinaryTypeAdd, a, b));
+  return context.Detach();
+}
+
+OperandBase *ModelBuilderBase::Mul(OperandBase *a, OperandBase *b) {
+  Ref<OperandBase> context =
+      AcquireRef(new op::Binary(op::kBinaryTypeMul, a, b));
   return context.Detach();
 }
 
