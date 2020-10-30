@@ -115,6 +115,8 @@ source_set("dawn_native_sources") {
     "ops/binary.h",
     "ops/constant.cc",
     "ops/constant.h",
+    "ops/conv2d.cc",
+    "ops/conv2d.h",
     "ops/input.cc",
     "ops/input.h",
     "ops/matmul.cc",

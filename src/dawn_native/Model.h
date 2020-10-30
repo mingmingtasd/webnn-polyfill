@@ -14,6 +14,7 @@ class Constant;
 class Input;
 class MatMul;
 class Binary;
+class Conv2d;
 } // namespace op
 
 class ModelBase : public RefCounted {
@@ -28,6 +29,7 @@ public:
   virtual void AddInput(op::Input *input) = 0;
   virtual void AddMatMul(op::MatMul *mat_mul) = 0;
   virtual void AddBinary(op::Binary *binary) = 0;
+  virtual void AddConv2d(op::Conv2d *binary) = 0;
 
 private:
   virtual void CompileImpl(WNNCompileCallback callback,

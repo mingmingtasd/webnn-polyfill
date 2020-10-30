@@ -36,6 +36,16 @@ ie_operand_descriptor ConvertTo(OperandDescriptor const *desc) {
   return ie_desc;
 }
 
+ie_conv2d_options Conv2dOptionsForIE(Conv2dOptions const *options) {
+  ie_conv2d_options ie_options;
+  ie_options.padding = options->padding;
+  ie_options.strides = options->strides;
+  ie_options.dilations = options->dilations;
+  ie_options.groups = options->groups;
+  ie_options.layout = static_cast<ie_operand_layout>(options->layout);
+  return ie_options;
+}
+
 } // namespace
 
 Model::Model(struct NamedOperand const *named_operands, size_t size) {
@@ -166,6 +176,23 @@ void Model::AddBinary(op::Binary *binary) {
     return;
   }
   binary->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddConv2d(op::Conv2d *conv2d) {
+  auto inputs = conv2d->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t filter;
+  filter.name = const_cast<char *>(inputs[1]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  ie_conv2d_options_t ie_options = Conv2dOptionsForIE(conv2d->Options());
+  IEStatusCode code = IE(ie_model_add_conv2d)(ie_model_, &input, &filter,
+                                              &ie_options, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add matmul, the code is " << code << ".";
+    return;
+  }
+  conv2d->SetName(std::string(ie_operand->name));
 }
 
 void Model::Finish() {

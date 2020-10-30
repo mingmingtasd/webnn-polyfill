@@ -8,6 +8,7 @@
 #include "dawn_native/Operand.h"
 #include "dawn_native/ops/binary.h"
 #include "dawn_native/ops/constant.h"
+#include "dawn_native/ops/conv2d.h"
 #include "dawn_native/ops/input.h"
 #include "dawn_native/ops/matmul.h"
 
@@ -39,6 +40,12 @@ OperandBase *ModelBuilderBase::Add(OperandBase *a, OperandBase *b) {
 OperandBase *ModelBuilderBase::Mul(OperandBase *a, OperandBase *b) {
   Ref<OperandBase> context =
       AcquireRef(new op::Binary(op::kBinaryTypeMul, a, b));
+  return context.Detach();
+}
+
+OperandBase *ModelBuilderBase::Conv2d(OperandBase *input, OperandBase *filter,
+                                      Conv2dOptions const *options) {
+  Ref<OperandBase> context = AcquireRef(new op::Conv2d(input, filter, options));
   return context.Detach();
 }
 

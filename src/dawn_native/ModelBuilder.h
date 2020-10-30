@@ -19,6 +19,8 @@ public:
   OperandBase *Matmul(OperandBase *a, OperandBase *b);
   OperandBase *Add(OperandBase *, OperandBase *);
   OperandBase *Mul(OperandBase *, OperandBase *);
+  OperandBase *Conv2d(OperandBase *, OperandBase *,
+                      Conv2dOptions const *options);
   ModelBase *CreateModel(NamedOperand const *named_operand, size_t size);
 
 private:

@@ -60,3 +60,7 @@ dawn_sample("add") {
 dawn_sample("mul") {
   sources = [ "mul.cpp" ]
 }
+
+dawn_sample("conv2d") {
+  sources = [ "conv2d.cpp" ]
+}

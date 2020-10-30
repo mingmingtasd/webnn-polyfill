@@ -120,6 +120,24 @@ ie_operand_t *Model::AddBinary(ie_binary_type type, ie_operand_t *a,
   name_node_map_[node_name] = binary_node->output(0);
   return CreateOperand(node_name);
 }
+ie_operand_t *Model::AddConv2d(ie_operand_t *input, ie_operand_t *filter,
+                               ie_conv2d_options_t *options) {
+  CoordinateDiff pad_begin = {options->padding[0], options->padding[2]};
+  CoordinateDiff pad_end = {options->padding[1], options->padding[3]};
+  Strides strides = {static_cast<size_t>(options->strides[0]),
+                     static_cast<size_t>(options->strides[1])};
+  Strides dilations = {static_cast<size_t>(options->dilations[0]),
+                       static_cast<size_t>(options->dilations[1])};
+
+  auto input_node = name_node_map_[input->name];
+  auto filter_node = name_node_map_[filter->name];
+  auto conv2d_node = std::make_shared<op::v1::Convolution>(
+      input_node, filter_node, strides, pad_begin, pad_end, dilations);
+
+  std::string node_name = conv2d_node->get_name();
+  name_node_map_[node_name] = conv2d_node->output(0);
+  return CreateOperand(node_name);
+}
 
 void Model::Finish() {
   auto ngraph_function =

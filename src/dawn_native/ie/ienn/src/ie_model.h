@@ -30,6 +30,8 @@ public:
   ie_operand_t *AddMatMul(ie_operand_t *a, ie_operand_t *b);
   ie_operand_t *AddBinary(ie_binary_type type, ie_operand_t *a,
                           ie_operand_t *b);
+  ie_operand_t *AddConv2d(ie_operand_t *input, ie_operand_t *filter,
+                          ie_conv2d_options_t *options);
   void Finish();
 
 private:

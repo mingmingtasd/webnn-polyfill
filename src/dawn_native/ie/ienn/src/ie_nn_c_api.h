@@ -79,6 +79,22 @@ typedef struct ie_operand_descriptor {
   uint32_t dimensionsCount = 0;
 } ie_operand_descriptor_t;
 
+enum ie_operand_layout : uint32_t {
+  Nchw = 0x00000000,
+  Nhwc = 0x00000001,
+};
+
+typedef struct ie_conv2d_options {
+  uint32_t paddingCount = 4;
+  int32_t const *padding;
+  uint32_t stridesCount = 2;
+  int32_t const *strides;
+  uint32_t dilationsCount = 2;
+  int32_t const *dilations;
+  int32_t groups = 1;
+  ie_operand_layout layout = ie_operand_layout::Nchw;
+} ie_conv2d_options_t;
+
 typedef struct ie_model ie_model_t;
 typedef struct ie_compilation ie_compilation_t;
 
@@ -168,6 +184,19 @@ ie_model_add_mat_mul(ie_model_t *model, ie_operand_t *a, ie_operand_t *b,
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
 ie_model_add_binary(ie_model_t *model, ie_binary_type type, ie_operand_t *a,
                     ie_operand_t *b, ie_operand_t **operand);
+
+/**
+ * @brief Add conv2d node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @param ie_operand_t The filter operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_conv2d(ie_model_t *model, ie_operand_t *input,
+                    ie_operand_t *filter, ie_conv2d_options_t *options,
+                    ie_operand_t **operand);
 
 /**
  * @brief Releases memory occupied by operand.

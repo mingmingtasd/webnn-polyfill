@@ -141,6 +141,21 @@ IEStatusCode ie_model_add_binary(ie_model_t *model, ie_binary_type type,
   return IEStatusCode::OK;
 }
 
+IEStatusCode ie_model_add_conv2d(ie_model_t *model, ie_operand_t *input,
+                                 ie_operand_t *filter,
+                                 ie_conv2d_options_t *options,
+                                 ie_operand_t **operand) {
+  if (model == nullptr || input == nullptr || filter == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->AddConv2d(input, filter, options);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
 void ie_operand_free(ie_operand_t *operand) {
   if (operand) {
     delete operand;

@@ -65,6 +65,26 @@
       {"name": "operand", "type": "operand"}
     ]
   },
+  "operand layout": {
+    "category": "enum",
+    "values": [
+      {"value": 0, "name": "nchw"},
+      {"value": 1, "name": "nhwc"}
+    ]
+  },
+  "conv2d options": {
+    "category": "structure",
+    "members": [
+      {"name": "padding count", "type": "uint32_t", "default": 4},
+      {"name": "padding", "type": "int32_t", "annotation": "const*", "length": "padding count"},
+      {"name": "strides count", "type": "uint32_t", "default": 2},
+      {"name": "strides", "type": "int32_t", "annotation": "const*", "length": "strides count"},
+      {"name": "dilations count", "type": "uint32_t", "default": 2},
+      {"name": "dilations", "type": "int32_t", "annotation": "const*", "length": "dilations count"},
+      {"name": "groups", "type": "int32_t", "default": 1},
+      {"name": "layout", "type": "operand layout", "default": "nchw"}
+    ]
+  },
   "model builder": {
     "category": "object",
     "methods": [
@@ -107,6 +127,15 @@
         "args": [
           {"name": "a", "type": "operand"},
           {"name": "b", "type": "operand"}
+        ]
+      },
+      {
+        "name": "conv2d",
+        "returns": "operand",
+        "args": [
+          {"name": "input", "type": "operand"},
+          {"name": "filter", "type": "operand"},
+          {"name": "options", "type": "conv2d options", "annotation": "const*", "optional": true}
         ]
       },
       {

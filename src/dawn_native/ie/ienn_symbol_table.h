@@ -24,7 +24,8 @@ namespace dawn_native {
   X(ie_compilation_set_input)                                                  \
   X(ie_compilation_compute)                                                    \
   X(ie_compilation_get_output)                                                 \
-  X(ie_model_add_binary)
+  X(ie_model_add_binary)                                                       \
+  X(ie_model_add_conv2d)
 
 LATE_BINDING_SYMBOL_TABLE_DECLARE_BEGIN(IESymbolTable)
 #define X(sym) LATE_BINDING_SYMBOL_TABLE_DECLARE_ENTRY(IESymbolTable, sym)
