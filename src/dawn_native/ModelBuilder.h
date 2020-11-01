@@ -22,6 +22,7 @@ public:
   OperandBase *Conv2d(OperandBase *, OperandBase *,
                       Conv2dOptions const *options);
   OperandBase *AveragePool2d(OperandBase *, Pool2dOptions const *options);
+  OperandBase *MaxPool2d(OperandBase *, Pool2dOptions const *options);
   ModelBase *CreateModel(NamedOperand const *named_operand, size_t size);
 
 private:

@@ -57,6 +57,13 @@ OperandBase *ModelBuilderBase::AveragePool2d(OperandBase *input,
   return context.Detach();
 }
 
+OperandBase *ModelBuilderBase::MaxPool2d(OperandBase *input,
+                                         Pool2dOptions const *options) {
+  Ref<OperandBase> context =
+      AcquireRef(new op::Pool2d(op::Pool2dType::kMaxPool2d, input, options));
+  return context.Detach();
+}
+
 ModelBase *ModelBuilderBase::CreateModel(NamedOperand const *named_operand,
                                          size_t size) {
   return CreateModelImpl(named_operand, size);

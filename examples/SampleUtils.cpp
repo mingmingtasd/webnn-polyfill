@@ -125,7 +125,7 @@ void CompilationCallback(WNNCompilation impl) {
 
   wnn::Outputs outputs = CreateCppOutputs();
   std::vector<float> output_buffer(product(s_wrapped_model->OutputShape()),
-                                   1.0);
+                                   0.0);
   wnn::Output output;
   output.buffer = output_buffer.data();
   output.size = output_buffer.size();

@@ -13,7 +13,7 @@ namespace op {
 Pool2d::Pool2d(Pool2dType type, OperandBase *input,
                Pool2dOptions const *options)
     : OperandBase({input}), type_(type) {
-  if (options == nullptr || options->padding == nullptr) {
+  if (options == nullptr || options->windowDimensions == nullptr) {
     window_dimensions_ = std::vector<int32_t>(2, 1);
     options_.windowDimensions = window_dimensions_.data();
     options_.windowDimensionsCount = window_dimensions_.size();

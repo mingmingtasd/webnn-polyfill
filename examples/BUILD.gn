@@ -68,3 +68,7 @@ dawn_sample("conv2d") {
 dawn_sample("averagePool2d") {
   sources = [ "average_pool2d.cpp" ]
 }
+
+dawn_sample("maxPool2d") {
+  sources = [ "max_pool2d.cpp" ]
+}
