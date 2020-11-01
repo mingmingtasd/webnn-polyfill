@@ -12,6 +12,7 @@
 #include "dawn_native/ops/input.h"
 #include "dawn_native/ops/matmul.h"
 #include "dawn_native/ops/pool2d.h"
+#include "dawn_native/ops/relu.h"
 
 namespace dawn_native {
 
@@ -61,6 +62,11 @@ OperandBase *ModelBuilderBase::MaxPool2d(OperandBase *input,
                                          Pool2dOptions const *options) {
   Ref<OperandBase> context =
       AcquireRef(new op::Pool2d(op::Pool2dType::kMaxPool2d, input, options));
+  return context.Detach();
+}
+
+OperandBase *ModelBuilderBase::Relu(OperandBase *input) {
+  Ref<OperandBase> context = AcquireRef(new op::Relu(input));
   return context.Detach();
 }
 

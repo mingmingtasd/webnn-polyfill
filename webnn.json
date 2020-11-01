@@ -169,6 +169,13 @@
         ]
       },
       {
+        "name": "relu",
+        "returns": "operand",
+        "args": [
+          {"name": "input", "type": "operand"}
+        ]
+      },
+      {
         "name": "createModel",
         "returns": "model",
         "args": [

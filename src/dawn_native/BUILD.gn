@@ -123,6 +123,8 @@ source_set("dawn_native_sources") {
     "ops/matmul.h",
     "ops/pool2d.cc",
     "ops/pool2d.h",
+    "ops/relu.cc",
+    "ops/relu.h",
   ]
 
   sources += [

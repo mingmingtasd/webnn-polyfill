@@ -222,6 +222,19 @@ void Model::AddPool2d(op::Pool2d *pool2d) {
   pool2d->SetName(std::string(ie_operand->name));
 }
 
+void Model::AddRelu(op::Relu *relu) {
+  auto inputs = relu->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  IEStatusCode code = IE(ie_model_add_relu)(ie_model_, &input, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add relu, the code is " << code << ".";
+    return;
+  }
+  relu->SetName(std::string(ie_operand->name));
+}
+
 void Model::Finish() {
   IEStatusCode code = IE(ie_model_finish)(ie_model_);
   if (code != IEStatusCode::OK) {
