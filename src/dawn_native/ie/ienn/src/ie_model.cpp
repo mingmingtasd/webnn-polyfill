@@ -17,13 +17,14 @@ namespace InferenceEngine {
 using namespace ngraph;
 
 namespace {
-SizeVector GetDimensions(ie_operand_descriptor_t const *desc) {
-  SizeVector dimensions;
-  dimensions.reserve(desc->dimensionsCount);
-  for (int i = 0; i < desc->dimensionsCount; ++i) {
-    dimensions.push_back(desc->dimensions[i]);
+
+SizeVector ToVector(int32_t const *value, uint32_t count) {
+  SizeVector data;
+  data.reserve(count);
+  for (int i = 0; i < count; ++i) {
+    data.push_back(value[i]);
   }
-  return dimensions;
+  return data;
 }
 
 ie_operand_t *CreateOperand(std::string &name) {
@@ -37,7 +38,7 @@ ie_operand_t *CreateOperand(std::string &name) {
 
 ie_operand_t *Model::AddConstant(ie_operand_descriptor_t const *desc,
                                  void const *value, size_t size) {
-  SizeVector dims = GetDimensions(desc);
+  SizeVector dims = ToVector(desc->dimensions, desc->dimensionsCount);
   // Generally, FP16 is preferable as it is most ubiquitous and performant
   // documented in
   // https://docs.openvinotoolkit.org/2021.1/openvino_docs_IE_DG_supported_plugins_Supported_Devices.html.
@@ -70,7 +71,7 @@ ie_operand_t *Model::AddConstant(ie_operand_descriptor_t const *desc,
 }
 
 ie_operand_t *Model::AddInput(ie_operand_descriptor_t const *desc) {
-  SizeVector dims = GetDimensions(desc);
+  SizeVector dims = ToVector(desc->dimensions, desc->dimensionsCount);
   auto input_node =
       std::make_shared<op::v0::Parameter>(element::f32, Shape(dims));
   ngraph_inputs_.push_back(input_node);
@@ -181,6 +182,20 @@ ie_operand_t *Model::AddRelu(ie_operand_t *input) {
 
   std::string node_name = relu_node->get_name();
   name_node_map_[node_name] = relu_node->output(0);
+  return CreateOperand(node_name);
+}
+
+ie_operand_t *Model::AddReshape(ie_operand_t *input, int32_t const *new_shape,
+                                uint32_t new_shape_count) {
+  auto input_node = name_node_map_[input->name];
+  SizeVector shape = ToVector(new_shape, new_shape_count);
+  auto target_shape_node =
+      std::make_shared<op::Constant>(element::i64, Shape{shape.size()}, shape);
+  auto reshape_node = std::make_shared<op::v1::Reshape>(
+      input_node, target_shape_node->output(0), true);
+
+  std::string node_name = reshape_node->get_name();
+  name_node_map_[node_name] = reshape_node->output(0);
   return CreateOperand(node_name);
 }
 

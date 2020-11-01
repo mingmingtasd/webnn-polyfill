@@ -13,6 +13,7 @@
 #include "dawn_native/ops/input.h"
 #include "dawn_native/ops/matmul.h"
 #include "dawn_native/ops/relu.h"
+#include "dawn_native/ops/reshape.h"
 
 namespace dawn_native {
 
@@ -30,6 +31,7 @@ public:
   virtual void AddConv2d(op::Conv2d *conv2d) override;
   virtual void AddPool2d(op::Pool2d *pool2d) override;
   virtual void AddRelu(op::Relu *relu) override;
+  virtual void AddReshape(op::Reshape *relu) override;
 
   OperandBase *GetNamedOperand(std::string name);
   ie_model_t *GetInferenceEngineModel();

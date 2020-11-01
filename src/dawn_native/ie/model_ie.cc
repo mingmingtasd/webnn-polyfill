@@ -235,6 +235,21 @@ void Model::AddRelu(op::Relu *relu) {
   relu->SetName(std::string(ie_operand->name));
 }
 
+void Model::AddReshape(op::Reshape *reshape) {
+  auto inputs = reshape->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  IEStatusCode code =
+      IE(ie_model_add_reshape)(ie_model_, &input, reshape->GetNewShape(),
+                               reshape->GetNewShapeCount(), &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add relu, the code is " << code << ".";
+    return;
+  }
+  reshape->SetName(std::string(ie_operand->name));
+}
+
 void Model::Finish() {
   IEStatusCode code = IE(ie_model_finish)(ie_model_);
   if (code != IEStatusCode::OK) {

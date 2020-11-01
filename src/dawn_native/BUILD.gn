@@ -125,6 +125,8 @@ source_set("dawn_native_sources") {
     "ops/pool2d.h",
     "ops/relu.cc",
     "ops/relu.h",
+    "ops/reshape.cc",
+    "ops/reshape.h",
   ]
 
   sources += [

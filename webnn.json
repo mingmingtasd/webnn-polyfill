@@ -176,6 +176,15 @@
         ]
       },
       {
+        "name": "reshape",
+        "returns": "operand",
+        "args": [
+          {"name": "input", "type": "operand"},
+          {"name": "new shape", "type": "int32_t", "annotation": "const*"},
+          {"name": "new shape count", "type": "uint32_t", "default": 0}
+        ]
+      },
+      {
         "name": "createModel",
         "returns": "model",
         "args": [

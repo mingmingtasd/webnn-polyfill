@@ -76,3 +76,7 @@ dawn_sample("maxPool2d") {
 dawn_sample("relu") {
   sources = [ "relu.cpp" ]
 }
+
+dawn_sample("reshape") {
+  sources = [ "reshape.cpp" ]
+}

@@ -24,6 +24,7 @@ public:
   OperandBase *AveragePool2d(OperandBase *, Pool2dOptions const *options);
   OperandBase *MaxPool2d(OperandBase *, Pool2dOptions const *options);
   OperandBase *Relu(OperandBase *);
+  OperandBase *Reshape(OperandBase *, int32_t const *, size_t);
   ModelBase *CreateModel(NamedOperand const *named_operand, size_t size);
 
 private:

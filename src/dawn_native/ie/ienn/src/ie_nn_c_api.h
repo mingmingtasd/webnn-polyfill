@@ -240,6 +240,18 @@ ie_model_add_relu(ie_model_t *model, ie_operand_t *input,
                   ie_operand_t **operand);
 
 /**
+ * @brief Add Reshape node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_reshape(ie_model_t *model, ie_operand_t *input,
+                     int32_t const *new_shape, uint32_t new_shape_count,
+                     ie_operand_t **operand);
+
+/**
  * @brief Releases memory occupied by operand.
  * @ingroup Operand
  * @param operand A pointer to the operand to free memory.

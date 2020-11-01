@@ -17,6 +17,7 @@ class Binary;
 class Conv2d;
 class Pool2d;
 class Relu;
+class Reshape;
 } // namespace op
 
 class ModelBase : public RefCounted {
@@ -34,6 +35,7 @@ public:
   virtual void AddConv2d(op::Conv2d *conv2d) = 0;
   virtual void AddPool2d(op::Pool2d *pool2d) = 0;
   virtual void AddRelu(op::Relu *relu) = 0;
+  virtual void AddReshape(op::Reshape *relu) = 0;
 
 private:
   virtual void CompileImpl(WNNCompileCallback callback,
