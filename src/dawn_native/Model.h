@@ -18,6 +18,7 @@ class Conv2d;
 class Pool2d;
 class Relu;
 class Reshape;
+class Softmax;
 } // namespace op
 
 class ModelBase : public RefCounted {
@@ -36,6 +37,7 @@ public:
   virtual void AddPool2d(op::Pool2d *pool2d) = 0;
   virtual void AddRelu(op::Relu *relu) = 0;
   virtual void AddReshape(op::Reshape *relu) = 0;
+  virtual void AddSoftmax(op::Softmax *softmax) = 0;
 
 private:
   virtual void CompileImpl(WNNCompileCallback callback,

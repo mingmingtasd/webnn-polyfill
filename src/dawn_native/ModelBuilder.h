@@ -25,6 +25,7 @@ public:
   OperandBase *MaxPool2d(OperandBase *, Pool2dOptions const *options);
   OperandBase *Relu(OperandBase *);
   OperandBase *Reshape(OperandBase *, int32_t const *, size_t);
+  OperandBase *Softmax(OperandBase *);
   ModelBase *CreateModel(NamedOperand const *named_operand, size_t size);
 
 private:

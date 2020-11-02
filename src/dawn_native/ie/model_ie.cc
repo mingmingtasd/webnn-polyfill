@@ -250,6 +250,19 @@ void Model::AddReshape(op::Reshape *reshape) {
   reshape->SetName(std::string(ie_operand->name));
 }
 
+void Model::AddSoftmax(op::Softmax *softmax) {
+  auto inputs = softmax->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  IEStatusCode code = IE(ie_model_add_softmax)(ie_model_, &input, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add softmax, the code is " << code << ".";
+    return;
+  }
+  softmax->SetName(std::string(ie_operand->name));
+}
+
 void Model::Finish() {
   IEStatusCode code = IE(ie_model_finish)(ie_model_);
   if (code != IEStatusCode::OK) {

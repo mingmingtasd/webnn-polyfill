@@ -14,6 +14,7 @@
 #include "dawn_native/ops/pool2d.h"
 #include "dawn_native/ops/relu.h"
 #include "dawn_native/ops/reshape.h"
+#include "dawn_native/ops/softmax.h"
 
 namespace dawn_native {
 
@@ -76,6 +77,11 @@ OperandBase *ModelBuilderBase::Reshape(OperandBase *input,
                                        size_t new_shape_count) {
   Ref<OperandBase> context =
       AcquireRef(new op::Reshape(input, new_shape, new_shape_count));
+  return context.Detach();
+}
+
+OperandBase *ModelBuilderBase::Softmax(OperandBase *input) {
+  Ref<OperandBase> context = AcquireRef(new op::Softmax(input));
   return context.Detach();
 }
 

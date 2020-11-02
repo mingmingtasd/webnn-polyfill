@@ -199,6 +199,16 @@ ie_operand_t *Model::AddReshape(ie_operand_t *input, int32_t const *new_shape,
   return CreateOperand(node_name);
 }
 
+ie_operand_t *Model::AddSoftmax(ie_operand_t *input) {
+  auto input_node = name_node_map_[input->name];
+  // new Spec only define 2-D input tensor along axis 1.
+  auto softmax_node = std::make_shared<op::v1::Softmax>(input_node, 1);
+
+  std::string node_name = softmax_node->get_name();
+  name_node_map_[node_name] = softmax_node->output(0);
+  return CreateOperand(node_name);
+}
+
 void Model::Finish() {
   auto ngraph_function =
       std::make_shared<Function>(ngraph_outputs_, ngraph_inputs_);

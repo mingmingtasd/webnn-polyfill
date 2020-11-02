@@ -80,3 +80,7 @@ dawn_sample("relu") {
 dawn_sample("reshape") {
   sources = [ "reshape.cpp" ]
 }
+
+dawn_sample("softmax") {
+  sources = [ "softmax.cpp" ]
+}

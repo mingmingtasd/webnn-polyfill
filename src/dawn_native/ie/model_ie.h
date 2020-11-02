@@ -14,6 +14,7 @@
 #include "dawn_native/ops/matmul.h"
 #include "dawn_native/ops/relu.h"
 #include "dawn_native/ops/reshape.h"
+#include "dawn_native/ops/softmax.h"
 
 namespace dawn_native {
 
@@ -32,6 +33,7 @@ public:
   virtual void AddPool2d(op::Pool2d *pool2d) override;
   virtual void AddRelu(op::Relu *relu) override;
   virtual void AddReshape(op::Reshape *relu) override;
+  virtual void AddSoftmax(op::Softmax *softmax) override;
 
   OperandBase *GetNamedOperand(std::string name);
   ie_model_t *GetInferenceEngineModel();

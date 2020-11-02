@@ -199,6 +199,19 @@ IEStatusCode ie_model_add_reshape(ie_model_t *model, ie_operand_t *input,
   return IEStatusCode::OK;
 }
 
+IEStatusCode ie_model_add_softmax(ie_model_t *model, ie_operand_t *input,
+                                  ie_operand_t **operand) {
+  if (model == nullptr || input == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->AddSoftmax(input);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
 void ie_operand_free(ie_operand_t *operand) {
   if (operand) {
     delete operand;

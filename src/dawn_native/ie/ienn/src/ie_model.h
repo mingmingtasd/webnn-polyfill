@@ -37,6 +37,7 @@ public:
   ie_operand_t *AddRelu(ie_operand_t *input);
   ie_operand_t *AddReshape(ie_operand_t *input, int32_t const *new_shape,
                            uint32_t new_shape_count);
+  ie_operand_t *AddSoftmax(ie_operand_t *input);
   void Finish();
 
 private:

@@ -185,6 +185,13 @@
         ]
       },
       {
+        "name": "softmax",
+        "returns": "operand",
+        "args": [
+          {"name": "input", "type": "operand"}
+        ]
+      },
+      {
         "name": "createModel",
         "returns": "model",
         "args": [
