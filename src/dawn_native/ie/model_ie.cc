@@ -47,6 +47,15 @@ ie_conv2d_options Conv2dOptionsForIE(Conv2dOptions const *options) {
   return ie_options;
 }
 
+ie_transpose_options TransposeOptionsForIE(TransposeOptions const *options) {
+  if (options == nullptr)
+    return {};
+  ie_transpose_options ie_options;
+  ie_options.permutation = options->permutation;
+  ie_options.permutationCount = options->permutationCount;
+  return ie_options;
+}
+
 ie_pool2d_options Pool2dOptionsForIE(Pool2dOptions const *options) {
   ie_pool2d_options ie_options;
   ie_options.windowDimensions = options->windowDimensions;
@@ -261,6 +270,22 @@ void Model::AddSoftmax(op::Softmax *softmax) {
     return;
   }
   softmax->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddTranspose(op::Transpose *transpose) {
+  auto inputs = transpose->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  ie_transpose_options_t ie_options =
+      TransposeOptionsForIE(transpose->Options());
+  IEStatusCode code =
+      IE(ie_model_add_transpose)(ie_model_, &input, &ie_options, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add transpose, the code is " << code << ".";
+    return;
+  }
+  transpose->SetName(std::string(ie_operand->name));
 }
 
 void Model::Finish() {

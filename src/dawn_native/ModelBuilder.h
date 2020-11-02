@@ -26,6 +26,7 @@ public:
   OperandBase *Relu(OperandBase *);
   OperandBase *Reshape(OperandBase *, int32_t const *, size_t);
   OperandBase *Softmax(OperandBase *);
+  OperandBase *Transpose(OperandBase *, TransposeOptions const *options);
   ModelBase *CreateModel(NamedOperand const *named_operand, size_t size);
 
 private:

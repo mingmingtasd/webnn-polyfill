@@ -19,6 +19,7 @@ class Pool2d;
 class Relu;
 class Reshape;
 class Softmax;
+class Transpose;
 } // namespace op
 
 class ModelBase : public RefCounted {
@@ -38,6 +39,7 @@ public:
   virtual void AddRelu(op::Relu *relu) = 0;
   virtual void AddReshape(op::Reshape *relu) = 0;
   virtual void AddSoftmax(op::Softmax *softmax) = 0;
+  virtual void AddTranspose(op::Transpose *transpose) = 0;
 
 private:
   virtual void CompileImpl(WNNCompileCallback callback,

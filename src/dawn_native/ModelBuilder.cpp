@@ -15,6 +15,7 @@
 #include "dawn_native/ops/relu.h"
 #include "dawn_native/ops/reshape.h"
 #include "dawn_native/ops/softmax.h"
+#include "dawn_native/ops/transpose.h"
 
 namespace dawn_native {
 
@@ -82,6 +83,12 @@ OperandBase *ModelBuilderBase::Reshape(OperandBase *input,
 
 OperandBase *ModelBuilderBase::Softmax(OperandBase *input) {
   Ref<OperandBase> context = AcquireRef(new op::Softmax(input));
+  return context.Detach();
+}
+
+OperandBase *ModelBuilderBase::Transpose(OperandBase *input,
+                                         TransposeOptions const *options) {
+  Ref<OperandBase> context = AcquireRef(new op::Transpose(input, options));
   return context.Detach();
 }
 

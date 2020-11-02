@@ -129,6 +129,8 @@ source_set("dawn_native_sources") {
     "ops/reshape.h",
     "ops/softmax.cc",
     "ops/softmax.h",
+    "ops/transpose.cc",
+    "ops/transpose.h",
   ]
 
   sources += [

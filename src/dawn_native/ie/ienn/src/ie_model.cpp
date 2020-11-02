@@ -209,6 +209,30 @@ ie_operand_t *Model::AddSoftmax(ie_operand_t *input) {
   return CreateOperand(node_name);
 }
 
+ie_operand_t *Model::AddTranspose(ie_operand_t *input,
+                                  ie_transpose_options_t *options) {
+  auto input_node = name_node_map_[input->name];
+  auto input_shape = input_node.get_shape();
+  SizeVector permutation;
+  permutation.reserve(input_shape.size());
+  if (options->permutationCount == 0) {
+    // When it’s not specified, it’s set to [N-1...0].
+    for (int i = 0; i < input_shape.size(); ++i) {
+      permutation.insert(permutation.begin(), i);
+    }
+  } else {
+    permutation = ToVector(options->permutation, options->permutationCount);
+  }
+  const auto order_node = op::Constant::create(
+      element::i64, Shape{permutation.size()}, permutation);
+  auto transpose_node =
+      std::make_shared<op::v1::Transpose>(input_node, order_node);
+
+  std::string node_name = transpose_node->get_name();
+  name_node_map_[node_name] = transpose_node->output(0);
+  return CreateOperand(node_name);
+}
+
 void Model::Finish() {
   auto ngraph_function =
       std::make_shared<Function>(ngraph_outputs_, ngraph_inputs_);

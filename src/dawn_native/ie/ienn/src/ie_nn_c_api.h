@@ -113,6 +113,11 @@ typedef struct ie_pool2d_options {
   ie_operand_layout layout = ie_operand_layout::Nchw;
 } ie_pool2d_options_t;
 
+typedef struct ie_transpose_options {
+  uint32_t permutationCount = 0;
+  int32_t const *permutation;
+} ie_transpose_options_t;
+
 typedef struct ie_model ie_model_t;
 typedef struct ie_compilation ie_compilation_t;
 
@@ -261,6 +266,17 @@ ie_model_add_reshape(ie_model_t *model, ie_operand_t *input,
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
 ie_model_add_softmax(ie_model_t *model, ie_operand_t *input,
                      ie_operand_t **operand);
+
+/**
+ * @brief Add transpose node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_transpose(ie_model_t *model, ie_operand_t *input,
+                       ie_transpose_options *options, ie_operand_t **operand);
 
 /**
  * @brief Releases memory occupied by operand.

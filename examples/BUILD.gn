@@ -84,3 +84,7 @@ dawn_sample("reshape") {
 dawn_sample("softmax") {
   sources = [ "softmax.cpp" ]
 }
+
+dawn_sample("transpose") {
+  sources = [ "transpose.cpp" ]
+}

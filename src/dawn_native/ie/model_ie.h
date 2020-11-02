@@ -15,6 +15,7 @@
 #include "dawn_native/ops/relu.h"
 #include "dawn_native/ops/reshape.h"
 #include "dawn_native/ops/softmax.h"
+#include "dawn_native/ops/transpose.h"
 
 namespace dawn_native {
 
@@ -34,6 +35,7 @@ public:
   virtual void AddRelu(op::Relu *relu) override;
   virtual void AddReshape(op::Reshape *relu) override;
   virtual void AddSoftmax(op::Softmax *softmax) override;
+  virtual void AddTranspose(op::Transpose *transpose) override;
 
   OperandBase *GetNamedOperand(std::string name);
   ie_model_t *GetInferenceEngineModel();

@@ -29,7 +29,8 @@ namespace dawn_native {
   X(ie_model_add_pool2d)                                                       \
   X(ie_model_add_relu)                                                         \
   X(ie_model_add_reshape)                                                      \
-  X(ie_model_add_softmax)
+  X(ie_model_add_softmax)                                                      \
+  X(ie_model_add_transpose)
 
 LATE_BINDING_SYMBOL_TABLE_DECLARE_BEGIN(IESymbolTable)
 #define X(sym) LATE_BINDING_SYMBOL_TABLE_DECLARE_ENTRY(IESymbolTable, sym)
