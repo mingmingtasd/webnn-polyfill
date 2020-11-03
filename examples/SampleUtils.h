@@ -62,6 +62,6 @@ private:
   std::vector<float> expected_buffer_;
 };
 
-void Compile(WrappedModel *model);
+void Test(WrappedModel *model);
 
 } // namespace utils

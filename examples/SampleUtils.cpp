@@ -134,7 +134,7 @@ void CompilationCallback(WNNCompilation impl) {
 }
 
 // Wrapped Compilation
-void Compile(WrappedModel *wrapped_model) {
+void Test(WrappedModel *wrapped_model) {
   s_wrapped_model = wrapped_model;
   wnn::ModelBuilder nn = CreateCppModelBuilder();
   wnn::Operand output_operand = wrapped_model->GenerateOutput(nn);
