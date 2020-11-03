@@ -14,10 +14,19 @@
 
 #include "SampleUtils.h"
 
+#include "common/Assert.h"
+#include "common/Log.h"
 #include <dawn/dawn_proc.h>
 #include <dawn/webnn.h>
 #include <dawn/webnn_cpp.h>
 #include <dawn_native/DawnNative.h>
+
+uint32_t product(const std::vector<int32_t> &dims) {
+  uint32_t prod = 1;
+  for (size_t i = 0; i < dims.size(); ++i)
+    prod *= dims[i];
+  return prod;
+}
 
 wnn::ModelBuilder CreateCppModelBuilder() {
   DawnProcTable backendProcs = dawn_native::GetProcs();
@@ -33,3 +42,105 @@ wnn::Inputs CreateCppInputs() {
 wnn::Outputs CreateCppOutputs() {
   return wnn::Outputs::Acquire(dawn_native::CreateOutputs());
 }
+
+bool Expected(float output, float expected) {
+  return (fabs(output - expected) < 0.005f);
+}
+
+namespace utils {
+
+void WrappedModel::SetInput(std::vector<int32_t> shape,
+                            std::vector<float> buffer) {
+  input_shape_ = std::move(shape);
+  input_buffer_ = std::move(buffer);
+  input_desc_ = {wnn::OperandType::Float32, input_shape_.data(),
+                 (uint32_t)input_shape_.size()};
+}
+
+wnn::OperandDescriptor *WrappedModel::InputDesc() { return &input_desc_; }
+
+std::vector<float> WrappedModel::InputBuffer() { return input_buffer_; }
+
+void WrappedModel::SetConstant(std::vector<int32_t> shape,
+                               std::vector<float> buffer) {
+  constant_shape_ = std::move(shape);
+  constant_buffer_ = std::move(buffer);
+  constant_desc_ = {wnn::OperandType::Float32, constant_shape_.data(),
+                    (uint32_t)constant_shape_.size()};
+}
+
+wnn::OperandDescriptor *WrappedModel::ConstantDesc() { return &constant_desc_; }
+
+void const *WrappedModel::ConstantBuffer() { return constant_buffer_.data(); }
+
+std::vector<int32_t> WrappedModel::ConstantShape() { return constant_shape_; }
+
+void WrappedModel::SetOutputShape(std::vector<int32_t> shape) {
+  output_shape_ = std::move(shape);
+}
+
+std::vector<int32_t> WrappedModel::OutputShape() { return output_shape_; }
+
+void WrappedModel::SetExpectedBuffer(std::vector<float> buffer) {
+  expected_buffer_ = std::move(buffer);
+}
+
+std::vector<float> WrappedModel::ExpectedBuffer() { return expected_buffer_; }
+
+wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
+  UNREACHABLE();
+}
+
+WrappedModel *s_wrapped_model;
+
+void ComputeCallback(WNNOutputs impl) {
+  wnn::Outputs outputs = outputs.Acquire(impl);
+  wnn::Output output = outputs.GetOutput("output");
+  std::vector<float> expected_data = s_wrapped_model->ExpectedBuffer();
+  bool expected = true;
+  for (size_t i = 0; i < output.size; ++i) {
+    float output_data = static_cast<float *>(output.buffer)[i];
+    if (!Expected(output_data, expected_data[i])) {
+      dawn::ErrorLog() << "The output doesn't output as expected for "
+                       << output_data << " != " << expected_data[i];
+      expected = false;
+      break;
+    }
+  }
+  if (expected) {
+    dawn::InfoLog() << "The output output as expected.";
+  }
+  delete s_wrapped_model;
+}
+
+void CompilationCallback(WNNCompilation impl) {
+  wnn::Compilation exe = exe.Acquire(impl);
+
+  std::vector<float> input_buffer = s_wrapped_model->InputBuffer();
+  wnn::Input a;
+  a.buffer = input_buffer.data();
+  a.size = input_buffer.size();
+  wnn::Inputs inputs = CreateCppInputs();
+  inputs.SetInput("input", &a);
+
+  wnn::Outputs outputs = CreateCppOutputs();
+  std::vector<float> output_buffer(product(s_wrapped_model->OutputShape()),
+                                   0.0);
+  wnn::Output output;
+  output.buffer = output_buffer.data();
+  output.size = output_buffer.size();
+  outputs.SetOutput("output", &output);
+  exe.Compute(inputs, ComputeCallback, outputs);
+}
+
+// Wrapped Compilation
+void Test(WrappedModel *wrapped_model) {
+  s_wrapped_model = wrapped_model;
+  wnn::ModelBuilder nn = CreateCppModelBuilder();
+  wnn::Operand output_operand = wrapped_model->GenerateOutput(nn);
+  wnn::NamedOperand named_operand = {"output", output_operand};
+  wnn::Model model = nn.CreateModel(&named_operand, 1);
+  model.Compile(CompilationCallback);
+}
+
+} // namespace utils

@@ -6,6 +6,7 @@
 #include "common/Assert.h"
 #include "common/Log.h"
 #include "dawn_native/ie/compilation_ie.h"
+#include "dawn_native/ops/pool2d.h"
 #include "ienn_symbol_table.h"
 
 namespace dawn_native {
@@ -35,6 +36,36 @@ ie_operand_descriptor ConvertTo(OperandDescriptor const *desc) {
   }
   return ie_desc;
 }
+
+ie_conv2d_options Conv2dOptionsForIE(Conv2dOptions const *options) {
+  ie_conv2d_options ie_options;
+  ie_options.padding = options->padding;
+  ie_options.strides = options->strides;
+  ie_options.dilations = options->dilations;
+  ie_options.groups = options->groups;
+  ie_options.layout = static_cast<ie_operand_layout>(options->layout);
+  return ie_options;
+}
+
+ie_transpose_options TransposeOptionsForIE(TransposeOptions const *options) {
+  if (options == nullptr)
+    return {};
+  ie_transpose_options ie_options;
+  ie_options.permutation = options->permutation;
+  ie_options.permutationCount = options->permutationCount;
+  return ie_options;
+}
+
+ie_pool2d_options Pool2dOptionsForIE(Pool2dOptions const *options) {
+  ie_pool2d_options ie_options;
+  ie_options.windowDimensions = options->windowDimensions;
+  ie_options.padding = options->padding;
+  ie_options.strides = options->strides;
+  ie_options.dilations = options->dilations;
+  ie_options.layout = static_cast<ie_operand_layout>(options->layout);
+  return ie_options;
+}
+
 } // namespace
 
 Model::Model(struct NamedOperand const *named_operands, size_t size) {
@@ -134,14 +165,6 @@ void Model::AddOutput(OperandBase *ouput) {
   }
 }
 
-void Model::Finish() {
-  IEStatusCode code = IE(ie_model_finish)(ie_model_);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to finish the model.";
-    return;
-  }
-}
-
 void Model::AddMatMul(op::MatMul *mutmul) {
   auto inputs = mutmul->Inputs();
   ie_operand_t primary;
@@ -156,6 +179,121 @@ void Model::AddMatMul(op::MatMul *mutmul) {
     return;
   }
   mutmul->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddBinary(op::Binary *binary) {
+  auto inputs = binary->Inputs();
+  ie_operand_t primary;
+  primary.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t secondary;
+  secondary.name = const_cast<char *>(inputs[1]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  IEStatusCode code = IE(ie_model_add_binary)(
+      ie_model_, static_cast<ie_binary_type>(binary->GetType()), &primary,
+      &secondary, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add binary, the code is " << code << ".";
+    return;
+  }
+  binary->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddConv2d(op::Conv2d *conv2d) {
+  auto inputs = conv2d->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t filter;
+  filter.name = const_cast<char *>(inputs[1]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  ie_conv2d_options_t ie_options = Conv2dOptionsForIE(conv2d->Options());
+  IEStatusCode code = IE(ie_model_add_conv2d)(ie_model_, &input, &filter,
+                                              &ie_options, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add matmul, the code is " << code << ".";
+    return;
+  }
+  conv2d->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddPool2d(op::Pool2d *pool2d) {
+  auto inputs = pool2d->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  ie_pool2d_options_t ie_options = Pool2dOptionsForIE(pool2d->Options());
+  IEStatusCode code = IE(ie_model_add_pool2d)(
+      ie_model_, static_cast<ie_pool_type>(pool2d->GetType()), &input,
+      &ie_options, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add matmul, the code is " << code << ".";
+    return;
+  }
+  pool2d->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddRelu(op::Relu *relu) {
+  auto inputs = relu->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  IEStatusCode code = IE(ie_model_add_relu)(ie_model_, &input, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add relu, the code is " << code << ".";
+    return;
+  }
+  relu->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddReshape(op::Reshape *reshape) {
+  auto inputs = reshape->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  IEStatusCode code =
+      IE(ie_model_add_reshape)(ie_model_, &input, reshape->GetNewShape(),
+                               reshape->GetNewShapeCount(), &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add relu, the code is " << code << ".";
+    return;
+  }
+  reshape->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddSoftmax(op::Softmax *softmax) {
+  auto inputs = softmax->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  IEStatusCode code = IE(ie_model_add_softmax)(ie_model_, &input, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add softmax, the code is " << code << ".";
+    return;
+  }
+  softmax->SetName(std::string(ie_operand->name));
+}
+
+void Model::AddTranspose(op::Transpose *transpose) {
+  auto inputs = transpose->Inputs();
+  ie_operand_t input;
+  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  ie_operand_t *ie_operand;
+  ie_transpose_options_t ie_options =
+      TransposeOptionsForIE(transpose->Options());
+  IEStatusCode code =
+      IE(ie_model_add_transpose)(ie_model_, &input, &ie_options, &ie_operand);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to add transpose, the code is " << code << ".";
+    return;
+  }
+  transpose->SetName(std::string(ie_operand->name));
+}
+
+void Model::Finish() {
+  IEStatusCode code = IE(ie_model_finish)(ie_model_);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to finish the model.";
+    return;
+  }
 }
 
 OperandBase *Model::GetNamedOperand(std::string name) {

@@ -79,8 +79,56 @@ typedef struct ie_operand_descriptor {
   uint32_t dimensionsCount = 0;
 } ie_operand_descriptor_t;
 
+enum ie_operand_layout : uint32_t {
+  Nchw = 0x00000000,
+  Nhwc = 0x00000001,
+};
+
+typedef struct ie_conv2d_options {
+  uint32_t paddingCount = 4;
+  int32_t const *padding;
+  uint32_t stridesCount = 2;
+  int32_t const *strides;
+  uint32_t dilationsCount = 2;
+  int32_t const *dilations;
+  int32_t groups = 1;
+  ie_operand_layout layout = ie_operand_layout::Nchw;
+} ie_conv2d_options_t;
+
+enum ie_pool_type {
+  AVERAGE_POOL = 0,
+  L2_POOL,
+  MAX_POOL,
+};
+
+typedef struct ie_pool2d_options {
+  uint32_t windowDimensionsCount = 2;
+  int32_t const *windowDimensions;
+  uint32_t paddingCount = 4;
+  int32_t const *padding;
+  uint32_t stridesCount = 2;
+  int32_t const *strides;
+  uint32_t dilationsCount = 2;
+  int32_t const *dilations;
+  ie_operand_layout layout = ie_operand_layout::Nchw;
+} ie_pool2d_options_t;
+
+typedef struct ie_transpose_options {
+  uint32_t permutationCount = 0;
+  int32_t const *permutation;
+} ie_transpose_options_t;
+
 typedef struct ie_model ie_model_t;
 typedef struct ie_compilation ie_compilation_t;
+
+enum ie_binary_type {
+  ADD = 0,
+  SUB,
+  MUL,
+  DIV,
+  MAX,
+  MIN,
+};
 
 /**
  * @brief Create model. Use the ie_model_free() method to
@@ -103,7 +151,7 @@ ie_model_free(ie_model_t *model);
 /**
  * @brief Add Constant node to nGraph. Use the ie_operand_free() method to
  *  free the operand memory.
- * @ingroup Compilation
+ * @ingroup model
  * @param ie_operand_descriptor_t A pointer to the Operand Descriptor.
  * @param value The value of Operand.
  * @param size The size of the value.
@@ -117,7 +165,7 @@ ie_model_add_constant(ie_model_t *Compilation,
 /**
  * @brief Add Input node to nGraph. Use the ie_operand_free() method to
  *  free the operand memory.
- * @ingroup Compilation
+ * @ingroup model
  * @param name The name of Input Operand to Set Value with JS.
  * @param ie_operand_descriptor_t A pointer to the Operand Descriptor.
  * @return Status code of the operation: OK(0) for success.
@@ -139,7 +187,7 @@ ie_model_add_output(ie_model_t *model, ie_operand_t *operand);
 /**
  * @brief Add MatMul node to nGraph. Use the ie_operand_free() method to
  *  free the operand memory.
- * @ingroup Compilation
+ * @ingroup model
  * @param ie_operand_t The prmiary operand.
  * @param ie_operand_t The secondary operand.
  * @return Status code of the operation: OK(0) for success.
@@ -147,6 +195,88 @@ ie_model_add_output(ie_model_t *model, ie_operand_t *operand);
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
 ie_model_add_mat_mul(ie_model_t *model, ie_operand_t *a, ie_operand_t *b,
                      ie_operand_t **operand);
+
+/**
+ * @brief Add binary node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The prmiary operand.
+ * @param ie_operand_t The secondary operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_binary(ie_model_t *model, ie_binary_type type, ie_operand_t *a,
+                    ie_operand_t *b, ie_operand_t **operand);
+
+/**
+ * @brief Add conv2d node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @param ie_operand_t The filter operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_conv2d(ie_model_t *model, ie_operand_t *input,
+                    ie_operand_t *filter, ie_conv2d_options_t *options,
+                    ie_operand_t **operand);
+
+/**
+ * @brief Add pool2d node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @param ie_operand_t The filter operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_pool2d(ie_model_t *model, ie_pool_type type, ie_operand_t *input,
+                    ie_pool2d_options_t *options, ie_operand_t **operand);
+
+/**
+ * @brief Add Relu node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_relu(ie_model_t *model, ie_operand_t *input,
+                  ie_operand_t **operand);
+
+/**
+ * @brief Add Reshape node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_reshape(ie_model_t *model, ie_operand_t *input,
+                     int32_t const *new_shape, uint32_t new_shape_count,
+                     ie_operand_t **operand);
+
+/**
+ * @brief Add Softmax node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_softmax(ie_model_t *model, ie_operand_t *input,
+                     ie_operand_t **operand);
+
+/**
+ * @brief Add transpose node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_add_transpose(ie_model_t *model, ie_operand_t *input,
+                       ie_transpose_options *options, ie_operand_t **operand);
 
 /**
  * @brief Releases memory occupied by operand.

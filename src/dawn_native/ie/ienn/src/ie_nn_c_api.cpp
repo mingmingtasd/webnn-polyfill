@@ -82,7 +82,7 @@ IEStatusCode ie_model_add_constant(ie_model_t *model,
   }
 
   BEGINE_TRY
-  *operand = model->object->Constant(desc, value, size);
+  *operand = model->object->AddConstant(desc, value, size);
   END_CATCH
 
   return IEStatusCode::OK;
@@ -96,7 +96,7 @@ IEStatusCode ie_model_add_input(ie_model_t *model,
   }
 
   BEGINE_TRY
-  *operand = model->object->Input(desc);
+  *operand = model->object->AddInput(desc);
   END_CATCH
 
   return IEStatusCode::OK;
@@ -108,7 +108,7 @@ IEStatusCode ie_model_add_output(ie_model_t *model, ie_operand_t *operand) {
   }
 
   BEGINE_TRY
-  model->object->Output(operand);
+  model->object->AddOutput(operand);
   END_CATCH
 
   return IEStatusCode::OK;
@@ -121,7 +121,106 @@ IEStatusCode ie_model_add_mat_mul(ie_model_t *model, ie_operand_t *a,
   }
 
   BEGINE_TRY
-  *operand = model->object->MatMul(a, b);
+  *operand = model->object->AddMatMul(a, b);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_add_binary(ie_model_t *model, ie_binary_type type,
+                                 ie_operand_t *a, ie_operand_t *b,
+                                 ie_operand_t **operand) {
+  if (model == nullptr || a == nullptr || b == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->AddBinary(type, a, b);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_add_conv2d(ie_model_t *model, ie_operand_t *input,
+                                 ie_operand_t *filter,
+                                 ie_conv2d_options_t *options,
+                                 ie_operand_t **operand) {
+  if (model == nullptr || input == nullptr || filter == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->AddConv2d(input, filter, options);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_add_pool2d(ie_model_t *model, ie_pool_type type,
+                                 ie_operand_t *input,
+                                 ie_pool2d_options_t *options,
+                                 ie_operand_t **operand) {
+  if (model == nullptr || input == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->AddPool2d(type, input, options);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_add_relu(ie_model_t *model, ie_operand_t *input,
+                               ie_operand_t **operand) {
+  if (model == nullptr || input == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->AddRelu(input);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_add_reshape(ie_model_t *model, ie_operand_t *input,
+                                  int32_t const *new_shape,
+                                  uint32_t new_shape_count,
+                                  ie_operand_t **operand) {
+  if (model == nullptr || input == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->AddReshape(input, new_shape, new_shape_count);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_add_softmax(ie_model_t *model, ie_operand_t *input,
+                                  ie_operand_t **operand) {
+  if (model == nullptr || input == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->AddSoftmax(input);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_add_transpose(ie_model_t *model, ie_operand_t *input,
+                                    ie_transpose_options *options,
+                                    ie_operand_t **operand) {
+  if (model == nullptr || input == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *operand = model->object->AddTranspose(input, options);
   END_CATCH
 
   return IEStatusCode::OK;

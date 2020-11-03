@@ -52,3 +52,39 @@ template("dawn_sample") {
 dawn_sample("matmul") {
   sources = [ "matmul.cpp" ]
 }
+
+dawn_sample("add") {
+  sources = [ "add.cpp" ]
+}
+
+dawn_sample("mul") {
+  sources = [ "mul.cpp" ]
+}
+
+dawn_sample("conv2d") {
+  sources = [ "conv2d.cpp" ]
+}
+
+dawn_sample("averagePool2d") {
+  sources = [ "average_pool2d.cpp" ]
+}
+
+dawn_sample("maxPool2d") {
+  sources = [ "max_pool2d.cpp" ]
+}
+
+dawn_sample("relu") {
+  sources = [ "relu.cpp" ]
+}
+
+dawn_sample("reshape") {
+  sources = [ "reshape.cpp" ]
+}
+
+dawn_sample("softmax") {
+  sources = [ "softmax.cpp" ]
+}
+
+dawn_sample("transpose") {
+  sources = [ "transpose.cpp" ]
+}
