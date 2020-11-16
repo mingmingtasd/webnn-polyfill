@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "dawn_native/ops/Softmax.h"
+#include "dawn_native/ops/softmax.h"
 
 #include <memory>
 

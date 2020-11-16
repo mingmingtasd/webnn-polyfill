@@ -46,7 +46,8 @@ DllHandle InternalLoadDll(const char dll_name[]) {
   // }
 
   // base::FilePath dll_path = module_path.Append(dll_name);
-  handle = dlopen(dll_name.MaybeAsASCII().c_str(), RTLD_NOW);
+  // handle = dlopen(dll_name.MaybeAsASCII().c_str(), RTLD_NOW);
+  handle = dlopen(dll_name, RTLD_NOW);
 #elif defined(__APPLE__)
   // base::FilePath base_dir;
   // if (base::mac::AmIBundled()) {
@@ -73,7 +74,7 @@ void InternalUnloadDll(DllHandle handle) {
 #if !defined(ADDRESS_SANITIZER)
 #if defined(__linux__) || defined(__APPLE__)
   if (dlclose(handle) != 0) {
-    DLOG(ERROR) << GetDllError();
+    dawn::ErrorLog() << GetDllError();
   }
 #elif defined(_WIN32) || defined(_WIN64)
   FreeLibrary(static_cast<HMODULE>(handle));
@@ -87,10 +88,10 @@ static bool LoadSymbol(DllHandle handle, const char *symbol_name,
   *symbol = dlsym(handle, symbol_name);
   char *err = dlerror();
   if (err) {
-    DLOG(ERROR) << "Error loading symbol " << symbol_name << " : " << err;
+    dawn::ErrorLog() << "Error loading symbol " << symbol_name << " : " << err;
     return false;
   } else if (!*symbol) {
-    DLOG(ERROR) << "Symbol " << symbol_name << " is NULL";
+    dawn::ErrorLog() << "Symbol " << symbol_name << " is NULL";
     return false;
   }
 #elif defined(_WIN32) || defined(_WIN64)
