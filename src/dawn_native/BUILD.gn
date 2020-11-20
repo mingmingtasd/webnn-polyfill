@@ -163,6 +163,10 @@ dawn_component("dawn_native") {
   sources = [ "DawnNative.cpp" ]
   configs = [ ":dawn_native_internal" ]
   public_configs = [ ":dawn_native_weak_framework" ]
+  defines = [
+    "DAWN_NATIVE_SHARED_LIBRARY",
+    "DAWN_NATIVE_IMPLEMENTATION",
+  ]
 }
 
 if (is_win) {

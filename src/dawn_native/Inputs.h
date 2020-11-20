@@ -2,6 +2,7 @@
 #define WEBNN_NATIVE_INPUTS_H_
 
 #include <map>
+#include <string>
 
 #include "common/RefCounted.h"
 

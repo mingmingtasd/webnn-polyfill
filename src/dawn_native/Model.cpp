@@ -8,12 +8,12 @@
 
 namespace dawn_native {
 
-void ModelBase::Compile(WNNCompileCallback callback,
+void ModelBase::Compile(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {
-  CompileImpl(callback, options);
+  CompileImpl(callback, userdata, options);
 }
 
-void ModelBase::CompileImpl(WNNCompileCallback callback,
+void ModelBase::CompileImpl(WNNCompileCallback callback, void *userdata,
                             CompilationOptions const *options) {
   UNREACHABLE();
 }

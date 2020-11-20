@@ -37,7 +37,7 @@ ie_operand_t *CreateOperand(std::string &name) {
 } // namespace
 
 ie_operand_t *Model::AddConstant(ie_operand_descriptor_t const *desc,
-                                 void const *value, size_t size) {
+                                 void const *value, size_t length) {
   SizeVector dims = ToVector(desc->dimensions, desc->dimensionsCount);
   // Generally, FP16 is preferable as it is most ubiquitous and performant
   // documented in
@@ -57,11 +57,11 @@ ie_operand_t *Model::AddConstant(ie_operand_descriptor_t const *desc,
   uint32_t result;
   if (fp32_precision) {
     float *dst = blob->buffer().as<float *>();
-    CopyDataToBuffer<float>(dst, src, size);
+    CopyDataToBuffer<float>(dst, src, length);
     node = std::make_shared<op::Constant>(element::f32, Shape(dims), dst);
   } else {
     int16_t *dst = blob->buffer().as<int16_t *>();
-    CopyDataToBuffer<int16_t>(dst, src, size);
+    CopyDataToBuffer<int16_t>(dst, src, length);
     node = std::make_shared<op::Constant>(element::f16, Shape(dims), dst);
   }
 

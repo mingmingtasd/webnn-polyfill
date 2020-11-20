@@ -16,12 +16,12 @@ public:
   virtual ~CompilationBase() = default;
 
   // Dawn API
-  void Compute(InputsBase *inputs, WNNComputeCallback callback,
+  void Compute(InputsBase *inputs, WNNComputeCallback callback, void *userdata,
                OutputsBase *outputs = nullptr);
 
 private:
   virtual void ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
-                           OutputsBase *outputs = nullptr) = 0;
+                           void *userdata, OutputsBase *outputs = nullptr) = 0;
 };
 }
 

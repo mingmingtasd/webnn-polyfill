@@ -15,7 +15,7 @@ public:
   ~Compilation() override;
 
   void ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
-                   OutputsBase *outputs = nullptr) override;
+                   void *userdata, OutputsBase *outputs = nullptr) override;
 
 private:
   Ref<Model> model_;

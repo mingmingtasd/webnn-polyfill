@@ -80,9 +80,7 @@ StatusCode Compilation::SetInput(ie_operand_t *operand, const void *buffer,
   }
 
   Blob::Ptr input_blob = infer_request->GetBlob(operand->name);
-  float *dst =
-      input_blob->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-  memcpy(static_cast<void *>(dst), buffer, length * sizeof(float));
+  memcpy(input_blob->buffer(), buffer, length);
 
   return StatusCode::OK;
 }
@@ -95,7 +93,7 @@ StatusCode Compilation::GetOutput(ie_operand_t *operand, void *buffer,
   }
 
   Blob::Ptr output_blob = infer_request->GetBlob(operand->name);
-  memcpy(buffer, output_blob->buffer(), length * sizeof(float));
+  memcpy(buffer, output_blob->buffer(), length);
 
   return StatusCode::OK;
 }

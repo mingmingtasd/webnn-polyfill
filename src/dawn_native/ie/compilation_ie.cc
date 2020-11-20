@@ -28,7 +28,7 @@ Compilation::~Compilation() {
 }
 
 void Compilation::ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
-                              OutputsBase *outputs) {
+                              void *userdata, OutputsBase *outputs) {
   // Set input data to nGraph.
   for (auto &input : inputs->GetInputs()) {
     OperandBase *operand = model_->GetNamedOperand(input.first);
@@ -66,7 +66,7 @@ void Compilation::ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
       return;
     }
   }
-  callback(reinterpret_cast<WNNOutputs>(outputs));
+  callback(reinterpret_cast<WNNOutputs>(outputs), userdata);
 }
 
 } // namespace ie

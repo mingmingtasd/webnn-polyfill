@@ -23,7 +23,7 @@ public:
   wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
     wnn::Operand input = nn.Input("input", InputDesc());
     wnn::Operand constant =
-        nn.Constant(ConstantDesc(), ConstantBuffer(), product(ConstantShape()));
+        nn.Constant(ConstantDesc(), ConstantBuffer(), ConstantLength());
     return nn.Mul(input, constant);
   }
 };

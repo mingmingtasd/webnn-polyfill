@@ -75,14 +75,14 @@ void ie_model_free(ie_model *model) {
 
 IEStatusCode ie_model_add_constant(ie_model_t *model,
                                    ie_operand_descriptor_t const *desc,
-                                   void const *value, size_t size,
+                                   void const *value, size_t length,
                                    ie_operand_t **operand) {
   if (model == nullptr || operand == nullptr) {
     return IEStatusCode::GENERAL_ERROR;
   }
 
   BEGINE_TRY
-  *operand = model->object->AddConstant(desc, value, size);
+  *operand = model->object->AddConstant(desc, value, length);
   END_CATCH
 
   return IEStatusCode::OK;

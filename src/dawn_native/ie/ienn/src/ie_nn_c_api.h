@@ -160,7 +160,7 @@ ie_model_free(ie_model_t *model);
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
 ie_model_add_constant(ie_model_t *Compilation,
                       ie_operand_descriptor_t const *desc, void const *value,
-                      size_t size, ie_operand_t **);
+                      size_t length, ie_operand_t **);
 
 /**
  * @brief Add Input node to nGraph. Use the ie_operand_free() method to

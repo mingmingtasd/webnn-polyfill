@@ -2,6 +2,7 @@
 #define WEBNN_NATIVE_OUTPUTS_H_
 
 #include <map>
+#include <string>
 
 #include "common/RefCounted.h"
 #include "dawn_native/Forward.h"

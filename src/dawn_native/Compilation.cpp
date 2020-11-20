@@ -7,8 +7,8 @@
 namespace dawn_native {
 
 void CompilationBase::Compute(InputsBase *inputs, WNNComputeCallback callback,
-                              OutputsBase *outputs) {
-  ComputeImpl(inputs, callback, outputs);
+                              void *userdata, OutputsBase *outputs) {
+  ComputeImpl(inputs, callback, userdata, outputs);
 }
 
 } // namespace dawn_native
