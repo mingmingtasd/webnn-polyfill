@@ -92,10 +92,20 @@ wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
 }
 
 WrappedModel *s_wrapped_model;
+void ComputeCallback(WNNOutputs impl, void* userData) {}
 
-void ComputeCallback(WNNOutputs impl, void* userData) {
-  wnn::Outputs outputs = outputs.Acquire(impl);
-  wnn::Output output = outputs.GetOutput("output");
+void CompilationCallback(WNNCompilation impl, void* userData) {
+  wnn::Compilation exe = exe.Acquire(impl);
+
+  std::vector<float> input_buffer = s_wrapped_model->InputBuffer();
+  wnn::Input a;
+  a.buffer = input_buffer.data();
+  a.size = input_buffer.size() * sizeof(float);
+  wnn::Inputs inputs = CreateCppInputs();
+  inputs.SetInput("input", &a);
+
+  wnn::Outputs outputs = exe.Compute(inputs, ComputeCallback, nullptr, nullptr);
+  wnn::Output output = outputs.GetOutputWithIndex(0);
   std::vector<float> expected_data = s_wrapped_model->ExpectedBuffer();
   bool expected = true;
   for (size_t i = 0; i < output.size / sizeof(float); ++i) {
@@ -112,26 +122,6 @@ void ComputeCallback(WNNOutputs impl, void* userData) {
     dawn::InfoLog() << "The output output as expected.";
   }
   delete s_wrapped_model;
-}
-
-void CompilationCallback(WNNCompilation impl, void* userData) {
-  wnn::Compilation exe = exe.Acquire(impl);
-
-  std::vector<float> input_buffer = s_wrapped_model->InputBuffer();
-  wnn::Input a;
-  a.buffer = input_buffer.data();
-  a.size = input_buffer.size() * sizeof(float);
-  wnn::Inputs inputs = CreateCppInputs();
-  inputs.SetInput("input", &a);
-
-  wnn::Outputs outputs = CreateCppOutputs();
-  std::vector<float> output_buffer(product(s_wrapped_model->OutputShape()),
-                                   0.0);
-  wnn::Output output;
-  output.buffer = output_buffer.data();
-  output.size = output_buffer.size() * sizeof(float);
-  outputs.SetOutput("output", &output);
-  exe.Compute(inputs, ComputeCallback, nullptr, outputs);
 }
 
 // Wrapped Compilation

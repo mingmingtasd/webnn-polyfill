@@ -295,6 +295,34 @@ BUILD_NETWORK_C_WRAPPER(IEStatusCode)
 ie_model_finish(ie_model_t *compliation);
 
 /**
+ * @brief Get outputs number.
+ * @ingroup model
+ * @param compliation A pointer to the specified ie_model_t.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_get_outputs_number(const ie_model_t *model, size_t *size_result);
+
+/**
+ * @brief Get output name with index.
+ * @ingroup model
+ * @param compliation A pointer to the specified ie_model_t.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_get_output_name(const ie_model_t *model, const size_t number,
+                         char **name);
+
+/**
+ * @brief Get output name with index.
+ * @ingroup model
+ * @param compliation A pointer to the specified ie_model_t.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_model_free_name(const ie_model_t *model, char **name);
+
+/**
  * @brief Create compilation. Use the ie_compilation_free() method to
  *  free the compilation memory.
  * @ingroup compilation
@@ -340,5 +368,24 @@ ie_compilation_get_output(ie_compilation_t *compilation, ie_operand_t *operand,
  */
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
 ie_compilation_compute(ie_compilation_t *compilation);
+
+/**
+ * @brief Get buffer with name.
+ * @ingroup compilation
+ * @param compliation A pointer to the specified ie_model_t.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_compilation_get_buffer(const ie_compilation_t *compilation, const char *name,
+                          void **buffer, size_t *byte_length);
+
+/**
+ * @brief free the buffer.
+ * @ingroup compilation
+ * @param compliation A pointer to the specified ie_compilation_t.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_compilation_free_buffer(const ie_compilation_t *compilation, void **buffer);
 
 #endif // IE_NN_C_API_H

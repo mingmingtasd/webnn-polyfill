@@ -247,4 +247,25 @@ void Model::Finish() {
   }
 }
 
+size_t Model::GetOutputsNumber() {
+  OutputsDataMap outputs = network_->getOutputsInfo();
+  return outputs.size();
+}
+
+IEStatusCode Model::GetOutputName(const size_t number, char **name) {
+  OutputsDataMap outputs = network_->getOutputsInfo();
+  // check if the number is out of bounds.
+  if (number < 0 || number >= outputs.size()) {
+    return IEStatusCode::OUT_OF_BOUNDS;
+  }
+  OutputsDataMap::iterator iter = outputs.begin();
+  for (size_t i = 0; i < number; ++i) {
+    ++iter;
+  }
+  std::unique_ptr<char[]> outputName(new char[iter->first.length() + 1]);
+  *name = outputName.release();
+  memcpy(*name, iter->first.c_str(), iter->first.length() + 1);
+  return IEStatusCode::OK;
+}
+
 } // namespace InferenceEngine

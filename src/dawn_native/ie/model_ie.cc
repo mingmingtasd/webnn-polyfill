@@ -312,6 +312,31 @@ void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
 
 ie_model_t *Model::GetInferenceEngineModel() { return ie_model_; }
 
+size_t Model::GetOutputsNumber() {
+  size_t output_number = 0;
+  IEStatusCode code =
+      IE(ie_model_get_outputs_number)(ie_model_, &output_number);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to get output number for IE.";
+  }
+  return output_number;
+}
+
+std::string Model::GetOutputName(size_t index) {
+  char *output_name;
+  IEStatusCode code =
+      IE(ie_model_get_output_name)(ie_model_, index, &output_name);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to get output name for IE.";
+    return std::string();
+  }
+  std::string name(output_name);
+  // The name has been kept in outputs object, so it can be free.
+  // IE(ie_model_free_name)(ie_model_, &output_name);
+
+  return name;
+}
+
 } // namespace ie
 
 } // namespace dawn_native

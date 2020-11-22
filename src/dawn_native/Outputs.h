@@ -18,6 +18,8 @@ public:
   // DAWN API
   void SetOutput(char const *name, struct Output const *output);
   WNNOutput GetOutput(char const *name);
+  size_t GetOutputsNumber();
+  WNNOutput GetOutputWithIndex(size_t index);
 
   std::map<std::string, Output const *> &GetOutputs();
 

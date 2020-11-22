@@ -98,6 +98,20 @@ StatusCode Compilation::GetOutput(ie_operand_t *operand, void *buffer,
   return StatusCode::OK;
 }
 
+IEStatusCode Compilation::GetBuffer(const char *name, void **buffer,
+                                    size_t *byte_length) {
+  InferRequest *infer_request = GetInferenceRequest();
+  if (!infer_request) {
+    return IEStatusCode::NETWORK_NOT_LOADED;
+  }
+  Blob::Ptr output_blob = infer_request->GetBlob(name);
+  *byte_length = output_blob->byteSize();
+  *buffer = malloc(*byte_length);
+  memcpy(*buffer, output_blob->buffer(), *byte_length);
+
+  return IEStatusCode::OK;
+}
+
 StatusCode Compilation::Compute() {
   InferRequest *infer_request = GetInferenceRequest();
   if (!infer_request) {

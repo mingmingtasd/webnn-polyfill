@@ -28,6 +28,7 @@ public:
                       uint32_t length);
   StatusCode GetOutput(ie_operand_t *operand, void *buffer, uint32_t length);
   StatusCode Compute();
+  IEStatusCode GetBuffer(const char *name, void **buffer, size_t *byte_length);
 
 private:
   InferRequest *GetInferenceRequest();
