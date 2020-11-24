@@ -1,0 +1,88 @@
+{
+  "variables": {
+    "root": "../../..",
+    "platform": "<(OS)",
+    "build": "<@(module_root_dir)/build",
+    "release": "<(build)/Release",
+    "dawn": "{{ DAWN_PATH | safe }}",
+  },
+  "conditions": [
+    [ "platform == 'win'",   { "variables": { "platform": "win" } } ],
+    [ "platform == 'linux'", { "variables": {
+      "platform": "linux",
+      "rel_release": "<!(echo <(release) | sed 's/.*generated/generated/')",
+      } } ],
+    [ "platform == 'mac'",   { "variables": { "platform": "darwin" } } ]
+  ],
+  "make_global_settings": [
+    ['CXX','/usr/bin/clang++'],
+    ['LINK','/usr/bin/clang++'],
+  ],
+  "targets": [
+    {
+      "target_name": "action_after_build",
+      "type": "none",
+      "conditions": []
+    },
+    {
+      "conditions": [
+        [
+          "OS=='win'",
+          {
+            "sources": [
+              {{ SOURCE_INCLUDES | safe }}
+            ],
+            "target_name": "addon-win32",
+            "cflags!": [
+              "-fno-exceptions"
+            ],
+            "cflags_cc!": [
+              "-fno-exceptions"
+            ],
+            "include_dirs": [
+              "<!@(node -p \"require('node-addon-api').include\")",
+              #"<(root)/lib/include",
+              "<(dawn)/src/include",
+              "<(dawn)/out/Shared/gen/src/include",
+            ],
+            "library_dirs": [
+              "<(build)/"
+            ],
+            "link_settings": {
+              "libraries": [
+                "-ldawn_native.dll.lib",
+                "-ldawn_proc.dll.lib",
+                #"-ldawn_wire.dll.lib",
+              ]
+            },
+            "defines": [
+              "WIN32_LEAN_AND_MEAN",
+              "NOMINMAX",
+              "_UNICODE",
+              "UNICODE",
+              #"DAWN_ENABLE_BACKEND_D3D12",
+              "DAWN_NATIVE_SHARED_LIBRARY",
+              "DAWN_NATIVE_IMPLEMENTATION",
+              "NAPI_CPP_EXCEPTIONS"
+            ],
+            "msvs_settings": {
+              "VCCLCompilerTool": {
+                "AdditionalOptions": ["/MP /EHsc"],
+                "ExceptionHandling": 1
+              },
+              "VCLibrarianTool": {
+                "AdditionalOptions" : []
+              },
+              "VCLinkerTool": {
+                "AdditionalLibraryDirectories": [
+                  "../@PROJECT_SOURCE_DIR@/lib/<(platform)/<(target_arch)",
+                  "<(build)/"
+                ]
+              }
+            }
+          }
+        ]
+      ]
+    }
+  ]
+}
