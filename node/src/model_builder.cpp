@@ -10,6 +10,7 @@
 #include "ops/conv2d.h"
 #include "ops/input.h"
 #include "ops/pool2d.h"
+#include "ops/reshape.h"
 
 Napi::FunctionReference ModelBuilder::constructor;
 
@@ -137,6 +138,17 @@ Napi::Value ModelBuilder::Relu(const Napi::CallbackInfo &info) {
   return object;
 }
 
+Napi::Value ModelBuilder::Reshape(const Napi::CallbackInfo &info) {
+  Napi::Object object = Operand::constructor.New({});
+  Operand *unwrapped = Napi::ObjectWrap<Operand>::Unwrap(object);
+  auto node = std::make_shared<op::Reshape>(info);
+  node->SetOutput(wnnModelBuilderReshape(model_builder_, node->GetInputs()[0],
+                                         node->GetNewShape().data(),
+                                         node->GetNewShape().size()));
+  unwrapped->SetNode(node);
+  return object;
+}
+
 Napi::Value ModelBuilder::CreateModel(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Object model = Model::constructor.New({});
@@ -182,6 +194,7 @@ Napi::Object ModelBuilder::Initialize(Napi::Env env, Napi::Object exports) {
        InstanceMethod("averagePool2d", &ModelBuilder::AveragePool2d,
                       napi_enumerable),
        InstanceMethod("relu", &ModelBuilder::Relu, napi_enumerable),
+       InstanceMethod("reshape", &ModelBuilder::Reshape, napi_enumerable),
        InstanceMethod("createModel", &ModelBuilder::CreateModel,
                       napi_enumerable)});
   constructor = Napi::Persistent(func);

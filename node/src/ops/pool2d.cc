@@ -8,25 +8,6 @@
 
 namespace op {
 
-// std::vector<int32_t> GetTypedArray(Napi::Object& obj, std::string name) {
-//   Napi::Array array = obj.Get(name).As<Napi::Array>();
-//   uint32_t len = array.Length();
-//   std::vector<int32_t> typed_array;
-//   for(uint32_t i = 0; i < len; i++) {
-//     typed_array.push_back(static_cast<Napi::Value>(array[i]).As<Napi::Number>().Int32Value());
-//   }
-//   return typed_array;
-// }
-
-// static std::unordered_map<std::string, uint32_t> OperandLayoutMap = {
-//   { "nchw", 0 },
-//   { "nhwc", 1 },
-// };
-
-// uint32_t OperandLayout(std::string name) {
-//   return OperandLayoutMap[name];
-// };
-
 Pool2d::Pool2d(const Napi::CallbackInfo &info) : Node(info) {
   options_ = {};
   if (info.Length() == 1)
