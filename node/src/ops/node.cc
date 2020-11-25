@@ -9,27 +9,19 @@ Node::Node(const Napi::CallbackInfo &info) {
     if (info[i].IsObject()) {
       Napi::Object object = info[i].As<Napi::Object>();
       if (object.InstanceOf(Operand::constructor.Value())) {
-        Operand* operand = Napi::ObjectWrap<Operand>::Unwrap(object);
+        Operand *operand = Napi::ObjectWrap<Operand>::Unwrap(object);
         inputs_.push_back(operand->GetOperand());
       }
     }
   }
 }
 
-std::vector<WNNOperand>& Node::GetInputs() {
-  return inputs_;
-}
+std::vector<WNNOperand> &Node::GetInputs() { return inputs_; }
 
-void Node::SetOutput(WNNOperand operand) {
-  output_ = operand;
-}
+void Node::SetOutput(WNNOperand operand) { output_ = operand; }
 
-WNNOperand Node::GetOutput() {
-  return output_;
-}
+WNNOperand Node::GetOutput() { return output_; }
 
-Node::~Node() {
-  wnnOperandRelease(output_);
-}
+Node::~Node() { wnnOperandRelease(output_); }
 
 } // namespace op

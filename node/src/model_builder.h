@@ -20,6 +20,7 @@ public:
   Napi::Value Conv2d(const Napi::CallbackInfo &info);
   Napi::Value MaxPool2d(const Napi::CallbackInfo &info);
   Napi::Value AveragePool2d(const Napi::CallbackInfo &info);
+  Napi::Value Relu(const Napi::CallbackInfo &info);
   Napi::Value CreateModel(const Napi::CallbackInfo &info);
 
 private:

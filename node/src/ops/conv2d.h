@@ -7,7 +7,7 @@
 
 namespace op {
 
-std::vector<int32_t> GetTypedArray(Napi::Object& obj, std::string name);
+std::vector<int32_t> GetTypedArray(Napi::Object &obj, std::string name);
 uint32_t OperandLayout(std::string name);
 
 class Conv2d final : public Node {
@@ -15,7 +15,7 @@ public:
   Conv2d(const Napi::CallbackInfo &info);
   ~Conv2d() = default;
 
-  WNNConv2dOptions* GetOptions();
+  WNNConv2dOptions *GetOptions();
 
 private:
   WNNConv2dOptions options_;

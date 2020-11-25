@@ -10,7 +10,7 @@ public:
   Pool2d(const Napi::CallbackInfo &info);
   ~Pool2d() = default;
 
-  WNNPool2dOptions* GetOptions();
+  WNNPool2dOptions *GetOptions();
 
 private:
   WNNPool2dOptions options_;

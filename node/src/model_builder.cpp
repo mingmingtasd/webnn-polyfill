@@ -113,7 +113,7 @@ Napi::Value ModelBuilder::MaxPool2d(const Napi::CallbackInfo &info) {
   Operand *unwrapped = Napi::ObjectWrap<Operand>::Unwrap(object);
   auto node = std::make_shared<op::Pool2d>(info);
   node->SetOutput(wnnModelBuilderMaxPool2d(model_builder_, node->GetInputs()[0],
-                                        node->GetOptions()));
+                                           node->GetOptions()));
   unwrapped->SetNode(node);
   return object;
 }
@@ -122,8 +122,17 @@ Napi::Value ModelBuilder::AveragePool2d(const Napi::CallbackInfo &info) {
   Napi::Object object = Operand::constructor.New({});
   Operand *unwrapped = Napi::ObjectWrap<Operand>::Unwrap(object);
   auto node = std::make_shared<op::Pool2d>(info);
-  node->SetOutput(wnnModelBuilderAveragePool2d(model_builder_, node->GetInputs()[0],
-                                        node->GetOptions()));
+  node->SetOutput(wnnModelBuilderAveragePool2d(
+      model_builder_, node->GetInputs()[0], node->GetOptions()));
+  unwrapped->SetNode(node);
+  return object;
+}
+
+Napi::Value ModelBuilder::Relu(const Napi::CallbackInfo &info) {
+  Napi::Object object = Operand::constructor.New({});
+  Operand *unwrapped = Napi::ObjectWrap<Operand>::Unwrap(object);
+  auto node = std::make_shared<op::Node>(info);
+  node->SetOutput(wnnModelBuilderRelu(model_builder_, node->GetInputs()[0]));
   unwrapped->SetNode(node);
   return object;
 }
@@ -170,7 +179,9 @@ Napi::Object ModelBuilder::Initialize(Napi::Env env, Napi::Object exports) {
        InstanceMethod("matmul", &ModelBuilder::MatMul, napi_enumerable),
        InstanceMethod("conv2d", &ModelBuilder::Conv2d, napi_enumerable),
        InstanceMethod("maxPool2d", &ModelBuilder::MaxPool2d, napi_enumerable),
-       InstanceMethod("averagePool2d", &ModelBuilder::AveragePool2d, napi_enumerable),
+       InstanceMethod("averagePool2d", &ModelBuilder::AveragePool2d,
+                      napi_enumerable),
+       InstanceMethod("relu", &ModelBuilder::Relu, napi_enumerable),
        InstanceMethod("createModel", &ModelBuilder::CreateModel,
                       napi_enumerable)});
   constructor = Napi::Persistent(func);

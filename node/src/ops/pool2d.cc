@@ -1,7 +1,7 @@
 #include "pool2d.h"
 
-#include <unordered_map>
 #include <iostream>
+#include <unordered_map>
 
 #include "../operand.h"
 #include "conv2d.h"
@@ -29,7 +29,8 @@ namespace op {
 
 Pool2d::Pool2d(const Napi::CallbackInfo &info) : Node(info) {
   options_ = {};
-  if (info.Length() == 1) return;
+  if (info.Length() == 1)
+    return;
 
   Napi::Object obj = info[1].As<Napi::Object>();
   Napi::Array property_names = obj.GetPropertyNames();
@@ -52,13 +53,12 @@ Pool2d::Pool2d(const Napi::CallbackInfo &info) : Node(info) {
       options_.dilations = dilations_.data();
       options_.dilationsCount = dilations_.size();
     } else if (name == "layout") {
-      options_.layout = static_cast<WNNOperandLayout>(OperandLayout(obj.Get(name).As<Napi::String>().Utf8Value()));
+      options_.layout = static_cast<WNNOperandLayout>(
+          OperandLayout(obj.Get(name).As<Napi::String>().Utf8Value()));
     }
   }
 }
 
-WNNPool2dOptions* Pool2d::GetOptions() {
-  return &options_;
-}
+WNNPool2dOptions *Pool2d::GetOptions() { return &options_; }
 
 } // namespace op

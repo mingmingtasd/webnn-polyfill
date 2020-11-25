@@ -13,7 +13,7 @@ public:
   Node(const Napi::CallbackInfo &info);
   ~Node();
 
-  std::vector<WNNOperand>& GetInputs();
+  std::vector<WNNOperand> &GetInputs();
   void SetOutput(WNNOperand);
   WNNOperand GetOutput();
 
@@ -21,6 +21,6 @@ private:
   std::vector<WNNOperand> inputs_;
   WNNOperand output_;
 };
-} // op
+} // namespace op
 
-#endif  // __OPS_NODE_H_
+#endif // __OPS_NODE_H_
