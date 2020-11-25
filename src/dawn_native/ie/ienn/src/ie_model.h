@@ -41,6 +41,8 @@ public:
   ie_operand_t *AddTranspose(ie_operand_t *input,
                              ie_transpose_options_t *options);
   void Finish();
+  size_t GetOutputsNumber();
+  IEStatusCode GetOutputName(const size_t number, char **name);
 
 private:
   friend class Compilation;

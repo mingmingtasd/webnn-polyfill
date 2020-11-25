@@ -19,6 +19,22 @@ WNNOutput OutputsBase::GetOutput(char const *name) {
   return wnn_output;
 }
 
+size_t OutputsBase::GetOutputsNumber() { return outputs_.size(); }
+
+WNNOutput OutputsBase::GetOutputWithIndex(size_t index) {
+  size_t i = 0;
+  for (auto &output : outputs_) {
+    if (i == index) {
+      WNNOutput wnn_output;
+      wnn_output.buffer = output.second->buffer;
+      wnn_output.size = output.second->size;
+      wnn_output.dimensions = output.second->dimensions;
+      wnn_output.dimensionsCount = output.second->dimensionsCount;
+      return wnn_output;
+    }
+  }
+}
+
 std::map<std::string, Output const *> &OutputsBase::GetOutputs() {
   return outputs_;
 }

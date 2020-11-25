@@ -2,6 +2,7 @@
 #define WEBNN_NATIVE_OUTPUTS_H_
 
 #include <map>
+#include <string>
 
 #include "common/RefCounted.h"
 #include "dawn_native/Forward.h"
@@ -17,6 +18,8 @@ public:
   // DAWN API
   void SetOutput(char const *name, struct Output const *output);
   WNNOutput GetOutput(char const *name);
+  size_t GetOutputsNumber();
+  WNNOutput GetOutputWithIndex(size_t index);
 
   std::map<std::string, Output const *> &GetOutputs();
 

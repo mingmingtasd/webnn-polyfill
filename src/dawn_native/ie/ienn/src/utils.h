@@ -28,12 +28,11 @@ namespace InferenceEngine {
 short f32tof16(float x);
 
 template <typename T>
-void CopyDataToBuffer(T *dst, const float *src, size_t size) {
+void CopyDataToBuffer(T *dst, const float *src, size_t length) {
   if (std::is_same<T, float>::value || std::is_same<T, int32_t>::value) {
-    const size_t buffer_length = size * sizeof(T);
-    memcpy(static_cast<void *>(dst), static_cast<const void *>(src),
-           buffer_length);
+    memcpy(static_cast<void *>(dst), static_cast<const void *>(src), length);
   } else if (std::is_same<T, int16_t>::value) {
+    size_t size = length / sizeof(float);
     for (size_t i = 0; i < size; ++i) {
       dst[i] = f32tof16(src[i]);
     }

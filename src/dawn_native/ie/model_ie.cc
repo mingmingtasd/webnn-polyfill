@@ -75,13 +75,16 @@ Model::Model(struct NamedOperand const *named_operands, size_t size) {
     dawn::ErrorLog() << "Failing to load ienn_c_api.dll.";
     return;
   }
+
   for (uint32_t i = 0; i < size; ++i) {
     struct NamedOperand output = named_operands[i];
     BuildNeuralNetworkModel(output.operand);
     // Add output node to ngraph.
     AddOutput(output.operand);
     // Insert the named operand to map.
-    named_operands_[std::string(output.name)] = output.operand;
+    if (output.name) {
+      named_operands_[std::string(output.name)] = output.operand;
+    }
   }
   // Finish to create the model that is CNNNetwork.
   Finish();
@@ -168,9 +171,11 @@ void Model::AddOutput(OperandBase *ouput) {
 void Model::AddMatMul(op::MatMul *mutmul) {
   auto inputs = mutmul->Inputs();
   ie_operand_t primary;
-  primary.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  std::string primary_name = inputs[0]->GetName();
+  primary.name = const_cast<char *>(primary_name.c_str());
   ie_operand_t secondary;
-  secondary.name = const_cast<char *>(inputs[1]->GetName().c_str());
+  std::string secondary_name = inputs[1]->GetName();
+  secondary.name = const_cast<char *>(secondary_name.c_str());
   ie_operand_t *ie_operand;
   IEStatusCode code =
       IE(ie_model_add_mat_mul)(ie_model_, &primary, &secondary, &ie_operand);
@@ -300,12 +305,37 @@ OperandBase *Model::GetNamedOperand(std::string name) {
   return named_operands_[name];
 }
 
-void Model::CompileImpl(WNNCompileCallback callback,
+void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {
-  callback(reinterpret_cast<WNNCompilation>(new Compilation(this)));
+  callback(reinterpret_cast<WNNCompilation>(new Compilation(this)), userdata);
 }
 
 ie_model_t *Model::GetInferenceEngineModel() { return ie_model_; }
+
+size_t Model::GetOutputsNumber() {
+  size_t output_number = 0;
+  IEStatusCode code =
+      IE(ie_model_get_outputs_number)(ie_model_, &output_number);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to get output number for IE.";
+  }
+  return output_number;
+}
+
+std::string Model::GetOutputName(size_t index) {
+  char *output_name;
+  IEStatusCode code =
+      IE(ie_model_get_output_name)(ie_model_, index, &output_name);
+  if (code != IEStatusCode::OK) {
+    dawn::ErrorLog() << "Failing to get output name for IE.";
+    return std::string();
+  }
+  std::string name(output_name);
+  // The name has been kept in outputs object, so it can be free.
+  // IE(ie_model_free_name)(ie_model_, &output_name);
+
+  return name;
+}
 
 } // namespace ie
 

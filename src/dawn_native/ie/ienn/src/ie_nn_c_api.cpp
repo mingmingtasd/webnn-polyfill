@@ -75,14 +75,14 @@ void ie_model_free(ie_model *model) {
 
 IEStatusCode ie_model_add_constant(ie_model_t *model,
                                    ie_operand_descriptor_t const *desc,
-                                   void const *value, size_t size,
+                                   void const *value, size_t length,
                                    ie_operand_t **operand) {
   if (model == nullptr || operand == nullptr) {
     return IEStatusCode::GENERAL_ERROR;
   }
 
   BEGINE_TRY
-  *operand = model->object->AddConstant(desc, value, size);
+  *operand = model->object->AddConstant(desc, value, length);
   END_CATCH
 
   return IEStatusCode::OK;
@@ -245,6 +245,43 @@ IEStatusCode ie_model_finish(ie_model_t *model) {
   return IEStatusCode::OK;
 }
 
+IEStatusCode ie_model_get_outputs_number(const ie_model_t *model,
+                                         size_t *size_result) {
+  if (model == nullptr || size_result == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  *size_result = model->object->GetOutputsNumber();
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_get_output_name(const ie_model_t *model,
+                                      const size_t number, char **name) {
+  if (model == nullptr || name == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  IEStatusCode status;
+  status = model->object->GetOutputName(number, name);
+  if (status != IEStatusCode::OK)
+    return status;
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_model_free_name(char **name) {
+  if (*name) {
+    delete[] * name;
+    *name = NULL;
+  }
+  return IEStatusCode::OK;
+}
+
 IEStatusCode ie_create_compilation(ie_model *model,
                                    ie_compilation_t **compilation) {
   if (model == nullptr) {
@@ -303,5 +340,29 @@ IEStatusCode ie_compilation_get_output(ie_compilation_t *compilation,
   compilation->object->GetOutput(operand, buffer, length);
   END_CATCH
 
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_compilation_get_buffer(const ie_compilation_t *compilation,
+                                       const char *name, void **buffer,
+                                       size_t *byte_length) {
+  if (compilation == nullptr || name == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  IEStatusCode status;
+  status = compilation->object->GetBuffer(name, buffer, byte_length);
+  if (status != IEStatusCode::OK)
+    return status;
+  END_CATCH
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_compilation_free_buffer(void **buffer) {
+  if (*buffer) {
+    delete[] * buffer;
+    *buffer = NULL;
+  }
   return IEStatusCode::OK;
 }

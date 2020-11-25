@@ -73,7 +73,7 @@ wnn::OperandDescriptor *WrappedModel::ConstantDesc() { return &constant_desc_; }
 
 void const *WrappedModel::ConstantBuffer() { return constant_buffer_.data(); }
 
-std::vector<int32_t> WrappedModel::ConstantShape() { return constant_shape_; }
+size_t WrappedModel::ConstantLength() { return constant_buffer_.size() * sizeof(float); }
 
 void WrappedModel::SetOutputShape(std::vector<int32_t> shape) {
   output_shape_ = std::move(shape);
@@ -92,17 +92,28 @@ wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
 }
 
 WrappedModel *s_wrapped_model;
+void ComputeCallback(WNNOutputs impl, void* userData) {}
 
-void ComputeCallback(WNNOutputs impl) {
-  wnn::Outputs outputs = outputs.Acquire(impl);
-  wnn::Output output = outputs.GetOutput("output");
+void CompilationCallback(WNNCompilation impl, void* userData) {
+  wnn::Compilation exe = exe.Acquire(impl);
+
+  std::vector<float> input_buffer = s_wrapped_model->InputBuffer();
+  wnn::Input a;
+  a.buffer = input_buffer.data();
+  a.size = input_buffer.size() * sizeof(float);
+  wnn::Inputs inputs = CreateCppInputs();
+  inputs.SetInput("input", &a);
+
+  wnn::Outputs outputs = exe.Compute(inputs, ComputeCallback, nullptr, nullptr);
+  wnn::Output output = outputs.GetOutputWithIndex(0);
   std::vector<float> expected_data = s_wrapped_model->ExpectedBuffer();
   bool expected = true;
-  for (size_t i = 0; i < output.size; ++i) {
+  for (size_t i = 0; i < output.size / sizeof(float); ++i) {
     float output_data = static_cast<float *>(output.buffer)[i];
     if (!Expected(output_data, expected_data[i])) {
       dawn::ErrorLog() << "The output doesn't output as expected for "
-                       << output_data << " != " << expected_data[i];
+                       << output_data << " != " << expected_data[i]
+                       << " index = " << i;
       expected = false;
       break;
     }
@@ -113,26 +124,6 @@ void ComputeCallback(WNNOutputs impl) {
   delete s_wrapped_model;
 }
 
-void CompilationCallback(WNNCompilation impl) {
-  wnn::Compilation exe = exe.Acquire(impl);
-
-  std::vector<float> input_buffer = s_wrapped_model->InputBuffer();
-  wnn::Input a;
-  a.buffer = input_buffer.data();
-  a.size = input_buffer.size();
-  wnn::Inputs inputs = CreateCppInputs();
-  inputs.SetInput("input", &a);
-
-  wnn::Outputs outputs = CreateCppOutputs();
-  std::vector<float> output_buffer(product(s_wrapped_model->OutputShape()),
-                                   0.0);
-  wnn::Output output;
-  output.buffer = output_buffer.data();
-  output.size = output_buffer.size();
-  outputs.SetOutput("output", &output);
-  exe.Compute(inputs, ComputeCallback, outputs);
-}
-
 // Wrapped Compilation
 void Test(WrappedModel *wrapped_model) {
   s_wrapped_model = wrapped_model;
@@ -140,7 +131,7 @@ void Test(WrappedModel *wrapped_model) {
   wnn::Operand output_operand = wrapped_model->GenerateOutput(nn);
   wnn::NamedOperand named_operand = {"output", output_operand};
   wnn::Model model = nn.CreateModel(&named_operand, 1);
-  model.Compile(CompilationCallback);
+  model.Compile(CompilationCallback, nullptr);
 }
 
 } // namespace utils

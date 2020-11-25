@@ -1,0 +1,35 @@
+#ifndef __DESCRIPTOR_DECODER_H__
+#define __DESCRIPTOR_DECODER_H__
+
+#include <unordered_map>
+
+#include "operand.h"
+#include "Base.h"
+
+namespace DescriptorDecoder {
+  {% for enum in enums %}
+  uint32_t {{ enum.externalName }}(std::string name);
+  std::string {{ enum.externalName }}(uint32_t value);
+  {% endfor %}
+
+  {% for struct in structures %}
+  {{ struct.name }} Decode{{ struct.externalName }}({{ getDecodeStructureParameters(struct, true) | safe }});
+  {% endfor %}
+
+  {% for struct in structures %}
+  class {{ struct.externalName }} {
+    public:
+      {{ struct.externalName }}({{ getDecodeStructureParameters(struct, true) | safe }});
+      ~{{ struct.externalName }}();
+      {{ struct.name }}* operator &() { return &descriptor; };
+    private:
+      {{ struct.name }} descriptor;
+  };
+  {% endfor %}
+
+  {% for struct in structures %}
+  void Destroy{{ struct.externalName }}({{ struct.name }} descriptor);
+  {% endfor %}
+}
+
+#endif

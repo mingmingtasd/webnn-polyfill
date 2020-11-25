@@ -21,8 +21,6 @@
 #include <string>
 #include <vector>
 
-#include "dawn_native/ModelBuilder.h"
-
 namespace dawn_native {
 
 class DAWN_NATIVE_EXPORT NeuralNetworkContext {

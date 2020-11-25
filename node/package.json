@@ -1,0 +1,49 @@
+{
+  "name": "webnn-napi",
+  "main": "index.js",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">= 13.0.0"
+  },
+  "config": {
+    "DAWN_PATH": "PATH_TO_DAWN",
+    "GEN_OUT_DIR": "./generated",
+    "SPEC_DIR": "./generator/specifications",
+    "TEMPLATE_DIR": "./generator/templates"
+  },
+  "scripts": {
+    "build": "node ./build.js",
+    "generate": "node --experimental-modules --experimental-json-modules ./generator/index.mjs",
+    "all": "npm run generate && npm run build",
+    "tests": "node --experimental-modules tests/index.mjs"
+  },
+  "devDependencies": {
+    "gl-matrix": "^3.3.0",
+    "ncp": "^2.0.0",
+    "node-addon-api": "^3.0.2",
+    "nunjucks": "^3.2.2"
+  },
+  "dependencies": {
+    "bindings": "^1.5.0"
+  },
+  "description": "WebNN-NAPI",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kings-Distributed-Systems/webnn-napi"
+  },
+  "keywords": [
+    "webnn",
+    "dawn"
+  ],
+  "author": "Dominic Cerisano",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Kings-Distributed-Systems/webnn-napi/issues"
+  },
+  "homepage": "https://github.com/Kings-Distributed-Systems/webnn-napi#readme",
+  "directories": {
+    "example": "examples",
+    "lib": "lib",
+    "test": "tests"
+  }
+}

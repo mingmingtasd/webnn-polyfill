@@ -39,9 +39,11 @@ public:
 
   OperandBase *GetNamedOperand(std::string name);
   ie_model_t *GetInferenceEngineModel();
+  size_t GetOutputsNumber();
+  std::string GetOutputName(size_t index);
 
 private:
-  void CompileImpl(WNNCompileCallback callback,
+  void CompileImpl(WNNCompileCallback callback, void *userdata,
                    CompilationOptions const *options) override;
   void BuildNeuralNetworkModel(OperandBase *root);
   void AddOutput(OperandBase *ouput);

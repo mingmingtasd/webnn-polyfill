@@ -41,7 +41,7 @@ public:
   void SetConstant(std::vector<int32_t> shape, std::vector<float> buffer);
   wnn::OperandDescriptor *ConstantDesc();
   void const *ConstantBuffer();
-  std::vector<int32_t> ConstantShape();
+  size_t ConstantLength();
 
   virtual wnn::Operand GenerateOutput(wnn::ModelBuilder nn);
   void SetOutputShape(std::vector<int32_t> shape);

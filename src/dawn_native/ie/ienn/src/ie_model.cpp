@@ -37,7 +37,7 @@ ie_operand_t *CreateOperand(std::string &name) {
 } // namespace
 
 ie_operand_t *Model::AddConstant(ie_operand_descriptor_t const *desc,
-                                 void const *value, size_t size) {
+                                 void const *value, size_t length) {
   SizeVector dims = ToVector(desc->dimensions, desc->dimensionsCount);
   // Generally, FP16 is preferable as it is most ubiquitous and performant
   // documented in
@@ -57,11 +57,11 @@ ie_operand_t *Model::AddConstant(ie_operand_descriptor_t const *desc,
   uint32_t result;
   if (fp32_precision) {
     float *dst = blob->buffer().as<float *>();
-    CopyDataToBuffer<float>(dst, src, size);
+    CopyDataToBuffer<float>(dst, src, length);
     node = std::make_shared<op::Constant>(element::f32, Shape(dims), dst);
   } else {
     int16_t *dst = blob->buffer().as<int16_t *>();
-    CopyDataToBuffer<int16_t>(dst, src, size);
+    CopyDataToBuffer<int16_t>(dst, src, length);
     node = std::make_shared<op::Constant>(element::f16, Shape(dims), dst);
   }
 
@@ -245,6 +245,27 @@ void Model::Finish() {
   for (auto itr : output_info) {
     itr.second->setPrecision(Precision::FP32);
   }
+}
+
+size_t Model::GetOutputsNumber() {
+  OutputsDataMap outputs = network_->getOutputsInfo();
+  return outputs.size();
+}
+
+IEStatusCode Model::GetOutputName(const size_t number, char **name) {
+  OutputsDataMap outputs = network_->getOutputsInfo();
+  // check if the number is out of bounds.
+  if (number < 0 || number >= outputs.size()) {
+    return IEStatusCode::OUT_OF_BOUNDS;
+  }
+  OutputsDataMap::iterator iter = outputs.begin();
+  for (size_t i = 0; i < number; ++i) {
+    ++iter;
+  }
+  std::unique_ptr<char[]> outputName(new char[iter->first.length() + 1]);
+  *name = outputName.release();
+  memcpy(*name, iter->first.c_str(), iter->first.length() + 1);
+  return IEStatusCode::OK;
 }
 
 } // namespace InferenceEngine

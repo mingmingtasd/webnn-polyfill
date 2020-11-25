@@ -14,12 +14,16 @@ public:
   explicit Compilation(Ref<Model> model);
   ~Compilation() override;
 
-  void ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
-                   OutputsBase *outputs = nullptr) override;
+  OutputsBase *ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
+                           void *userdata,
+                           OutputsBase *outputs = nullptr) override;
+  void FreeUnusedData();
 
 private:
   Ref<Model> model_;
   ie_compilation_t *ie_compilation_;
+  // The outputs is used to hold buffer from Inference Engine.
+  std::vector<Output *> outputs_;
 };
 
 } // namespace ie

@@ -28,7 +28,8 @@ public:
   virtual ~ModelBase() = default;
 
   // Dawn API
-  void Compile(WNNCompileCallback callback, CompilationOptions const *options);
+  void Compile(WNNCompileCallback callback, void *userdata,
+               CompilationOptions const *options);
 
   virtual void AddConstant(op::Constant *constant) = 0;
   virtual void AddInput(op::Input *input) = 0;
@@ -42,7 +43,7 @@ public:
   virtual void AddTranspose(op::Transpose *transpose) = 0;
 
 private:
-  virtual void CompileImpl(WNNCompileCallback callback,
+  virtual void CompileImpl(WNNCompileCallback callback, void *userdata,
                            CompilationOptions const *options) = 0;
 };
 } // namespace dawn_native
