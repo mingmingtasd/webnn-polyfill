@@ -8,7 +8,7 @@
 
 namespace op {
 
-Input::Input(const Napi::CallbackInfo &info) {
+Input::Input(const Napi::CallbackInfo &info) : Node(info) {
   // name
   name_ = info[0].As<Napi::String>().Utf8Value();
   
@@ -27,13 +27,8 @@ Input::Input(const Napi::CallbackInfo &info) {
   descriptor_.dimensionsCount = dimensions_.size();
 }
 
-void Input::AddToModel(WNNModelBuilder builder) {
-  OperandWrap::SetOperand(wnnModelBuilderInput(builder,
-                                              name_.c_str(),
-                                              &descriptor_));
-}
 const WNNOperandDescriptor *Input::GetOperandDescriptor() { return &descriptor_; }
 
-std::string Input::GetName() { return name_; }
+std::string &Input::GetName() { return name_; }
 
 } // namespace op

@@ -45,7 +45,7 @@ export function getDecodeStructureMember(structure, member, opts = DEFAULT_OPTS_
     out += `\n${padding}{`;
     padding = opts.padding += `  `;
   }
-  console.log("====================" + type.isArray + " " + jsType.isArrayBuffer);
+  // console.log("====================" + type.isArray + " " + jsType.isArrayBuffer);
   // validate array
   if (
     type.isArray &&
@@ -310,7 +310,7 @@ ${padding}Napi::TypedArray array = ${input.name}.Get("${member.name}").As<Napi::
 ${padding}Napi::ArrayBuffer buffer = array.ArrayBuffer();
 ${padding}${output.name}.${member.name} = reinterpret_cast<${rawType}>(buffer.Data());
 ${padding}${output.name}.${type.length} = buffer.ByteLength();`;
-console.log("----------11111 " + output.name + " " + member.name);
+// console.log("----------11111 " + output.name + " " + member.name);
   } else {
     warn(`Unexpected member type '${rawType}' in '${structure.externalName}'.'${member.name}'`);
   }

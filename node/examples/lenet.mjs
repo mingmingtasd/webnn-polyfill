@@ -9,19 +9,21 @@ Object.assign(global, WebNN);
   const context = ML.getNeuralNetworkContext();
 
   const builder = context.createModelBuilder();
-  const a = builder.input('a', {type: 'float32', dimensions: [3, 4]});
-  const b = builder.constant(
-      {type: 'float32', dimensions: [4, 3]}, new Float32Array([0.17467105, -1.2045133, -0.02621938, 0.6096196, 1.4499376, 1.3465316, 0.03289436, 1.0754977, -0.61485314, 0.94857556, -0.36462623, 1.402278]));
-  const c = builder.add(a, b);
-  const model = builder.createModel({c});
+  const input = builder.input('a', {type: 'float32', dimensions: [1, 1, 5, 5]});
+  const filter = builder.constant(
+      {type: 'float32', dimensions: [1, 1, 3, 3]}, new Float32Array(9).fill(1));
+  const output = builder.conv2d(input, filter, {padding});
+  const model = builder.createModel({output});
   const compiledModel = await model.compile();
   const inputs = {
-    'a': {
-      buffer: new Float32Array([0.9602246, 0.97682184, -0.33201018, 0.8248904, 0.40872088, 0.18995902, 0.69355214, -0.37210146, 0.18104352, 3.270753, -0.803097, -0.7268995]),
+    'input': {
+      buffer: new Float32Array([0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+        13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,]),
     },
   };
   const outputs = await compiledModel.compute(inputs);
-  const expected = [1.5347629, -0.3981255, 2.6510081, -0.14295794, 0.6647107, -0.70315295, 1.3096018, 3.9256358, 3.873897];
+  const expected = [ 12.,  21., 27., 33.,  24.,  33.,  54.,  63., 72.,  51.,  63.,  99., 108.,
+    117., 81., 93., 144., 153., 162., 111., 72., 111., 117., 123., 84.,];
   utils.checkValue(outputs.buffer, expected);
   console.log("sucess for outputs buffer " + outputs.buffer);
 })();

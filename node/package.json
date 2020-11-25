@@ -15,13 +15,18 @@
     "build": "node ./build.js",
     "generate": "node --experimental-modules --experimental-json-modules ./generator/index.mjs",
     "all": "npm run generate && npm run build",
-    "tests": "node --experimental-modules tests/index.mjs"
+    "tests": "node --experimental-modules tests/index.mjs",
+    "start": "http-server",
+    "test": "mocha ./test/ops"
   },
   "devDependencies": {
     "gl-matrix": "^3.3.0",
     "ncp": "^2.0.0",
     "node-addon-api": "^3.0.2",
-    "nunjucks": "^3.2.2"
+    "nunjucks": "^3.2.2",
+    "chai": "^4.2.0",
+    "http-server": "^0.12.3",
+    "mocha": "^8.1.3"
   },
   "dependencies": {
     "bindings": "^1.5.0"

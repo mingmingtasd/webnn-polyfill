@@ -1,7 +1,7 @@
 #ifndef __OPERAND_H__
 #define __OPERAND_H__
 
-#include "ops/operand_wrap.h"
+#include "ops/node.h"
 
 class Operand : public Napi::ObjectWrap<Operand> {
 public:
@@ -11,11 +11,11 @@ public:
   explicit Operand(const Napi::CallbackInfo &info);
   ~Operand() = default;
 
-  void SetOperand(std::shared_ptr<op::OperandWrap>);
+  void SetNode(std::shared_ptr<op::Node>);
   WNNOperand GetOperand();
 
 private:
-  std::shared_ptr<op::OperandWrap> operand_wrap_;
+  std::shared_ptr<op::Node> node_;
 };
 
 #endif // __OPERAND_H__

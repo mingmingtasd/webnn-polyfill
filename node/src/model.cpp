@@ -1,5 +1,7 @@
 #include "model.h"
 
+#include <iostream>
+
 #include "DescriptorDecoder.h"
 #include "compilation.h"
 
@@ -29,7 +31,6 @@ Napi::Value Model::Compile(const Napi::CallbackInfo &info) {
           Model* self = reinterpret_cast<Model*>(userData);
           self->SetWNNCompilation(compilation);
         }, reinterpret_cast<void*>(this), nullptr);
-
   Napi::Object compilation = Compilation::constructor.New({});
   Compilation* unwrapped = Napi::ObjectWrap<Compilation>::Unwrap(compilation);
   unwrapped->SetCompilation(compilation_);

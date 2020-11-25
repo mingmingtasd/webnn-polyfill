@@ -8,7 +8,7 @@
 
 namespace op {
 
-Constant::Constant(const Napi::CallbackInfo &info) {
+Constant::Constant(const Napi::CallbackInfo &info) : Node(info) {
   Napi::Object obj = info[0].As<Napi::Object>();
   // type
   descriptor_.type = static_cast<WNNOperandType>(
@@ -25,13 +25,6 @@ Constant::Constant(const Napi::CallbackInfo &info) {
 
   // constant value
   value_ = getTypedArrayData(info[1].As<Napi::Value>(), &size_);
-}
-
-void Constant::AddToModel(WNNModelBuilder builder) {
-  OperandWrap::SetOperand(wnnModelBuilderConstant(builder,
-                                              &descriptor_,
-                                              value_,
-                                              size_));
 }
 
 const WNNOperandDescriptor *Constant::GetOperandDescriptor() {
