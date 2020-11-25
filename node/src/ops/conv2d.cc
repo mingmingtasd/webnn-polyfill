@@ -8,6 +8,8 @@
 namespace op {
 
 std::vector<int32_t> GetTypedArray(Napi::Object &obj, std::string name) {
+  if (!(obj.Get(name).IsArray()))
+    return {};
   Napi::Array array = obj.Get(name).As<Napi::Array>();
   uint32_t len = array.Length();
   std::vector<int32_t> typed_array;

@@ -11,6 +11,7 @@
 #include "ops/input.h"
 #include "ops/pool2d.h"
 #include "ops/reshape.h"
+#include "ops/transpose.h"
 
 Napi::FunctionReference ModelBuilder::constructor;
 
@@ -149,6 +150,25 @@ Napi::Value ModelBuilder::Reshape(const Napi::CallbackInfo &info) {
   return object;
 }
 
+Napi::Value ModelBuilder::Softmax(const Napi::CallbackInfo &info) {
+  Napi::Object object = Operand::constructor.New({});
+  Operand *unwrapped = Napi::ObjectWrap<Operand>::Unwrap(object);
+  auto node = std::make_shared<op::Node>(info);
+  node->SetOutput(wnnModelBuilderSoftmax(model_builder_, node->GetInputs()[0]));
+  unwrapped->SetNode(node);
+  return object;
+}
+
+Napi::Value ModelBuilder::Transpose(const Napi::CallbackInfo &info) {
+  Napi::Object object = Operand::constructor.New({});
+  Operand *unwrapped = Napi::ObjectWrap<Operand>::Unwrap(object);
+  auto node = std::make_shared<op::Transpose>(info);
+  node->SetOutput(wnnModelBuilderTranspose(model_builder_, node->GetInputs()[0],
+                                           node->GetOptions()));
+  unwrapped->SetNode(node);
+  return object;
+}
+
 Napi::Value ModelBuilder::CreateModel(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
   Napi::Object model = Model::constructor.New({});
@@ -195,6 +215,8 @@ Napi::Object ModelBuilder::Initialize(Napi::Env env, Napi::Object exports) {
                       napi_enumerable),
        InstanceMethod("relu", &ModelBuilder::Relu, napi_enumerable),
        InstanceMethod("reshape", &ModelBuilder::Reshape, napi_enumerable),
+       InstanceMethod("softmax", &ModelBuilder::Softmax, napi_enumerable),
+       InstanceMethod("transpose", &ModelBuilder::Transpose, napi_enumerable),
        InstanceMethod("createModel", &ModelBuilder::CreateModel,
                       napi_enumerable)});
   constructor = Napi::Persistent(func);

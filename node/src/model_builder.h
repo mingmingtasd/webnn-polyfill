@@ -22,6 +22,8 @@ public:
   Napi::Value AveragePool2d(const Napi::CallbackInfo &info);
   Napi::Value Relu(const Napi::CallbackInfo &info);
   Napi::Value Reshape(const Napi::CallbackInfo &info);
+  Napi::Value Softmax(const Napi::CallbackInfo &info);
+  Napi::Value Transpose(const Napi::CallbackInfo &info);
   Napi::Value CreateModel(const Napi::CallbackInfo &info);
 
 private:
