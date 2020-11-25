@@ -15,8 +15,11 @@ public:
   Napi::Value Constant(const Napi::CallbackInfo &info);
   Napi::Value Input(const Napi::CallbackInfo &info);
   Napi::Value Add(const Napi::CallbackInfo &info);
+  Napi::Value Mul(const Napi::CallbackInfo &info);
   Napi::Value MatMul(const Napi::CallbackInfo &info);
   Napi::Value Conv2d(const Napi::CallbackInfo &info);
+  Napi::Value MaxPool2d(const Napi::CallbackInfo &info);
+  Napi::Value AveragePool2d(const Napi::CallbackInfo &info);
   Napi::Value CreateModel(const Napi::CallbackInfo &info);
 
 private:

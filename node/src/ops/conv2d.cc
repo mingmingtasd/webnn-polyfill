@@ -34,21 +34,21 @@ Conv2d::Conv2d(const Napi::CallbackInfo &info) : Node(info) {
   Napi::Array property_names = obj.GetPropertyNames();
   for (size_t j = 0; j < property_names.Length(); ++j) {
     std::string name = property_names.Get(j).As<Napi::String>().Utf8Value();
-    if (name == "0" || name == "padding") {
+    if (name == "padding") {
       padding_ = GetTypedArray(obj, name);
       options_.padding = padding_.data();
       options_.paddingCount = padding_.size();
-    } else if (name == "1" || name == "strides") {
+    } else if (name == "strides") {
       stride_ = GetTypedArray(obj, name);
       options_.strides = stride_.data();
       options_.stridesCount = stride_.size();
-    } else if (name == "2" || name == "dilations") {
+    } else if (name == "dilations") {
       dilations_ = GetTypedArray(obj, name);
       options_.dilations = dilations_.data();
       options_.dilationsCount = dilations_.size();
-    } else if (name == "3" || name == "groups") {
+    } else if (name == "groups") {
       options_.groups = static_cast<Napi::Value>(obj.Get(name)).As<Napi::Number>().Int32Value();
-    } else if (name == "4" || name == "layout") {
+    } else if (name == "layout") {
       options_.layout = static_cast<WNNOperandLayout>(OperandLayout(obj.Get(name).As<Napi::String>().Utf8Value()));
     }
   }
