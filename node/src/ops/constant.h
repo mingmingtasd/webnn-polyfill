@@ -7,16 +7,15 @@
 
 #include <napi.h>
 
-#include "operand_wrap.h"
+#include "node.h"
 
 namespace op {
 
-class Constant final : public OperandWrap {
+class Constant final : public Node {
 public:
   Constant(const Napi::CallbackInfo &info);
   ~Constant() = default;
 
-  void AddToModel(WNNModelBuilder builder);
   const WNNOperandDescriptor *GetOperandDescriptor();
   void const *GetValue();
   size_t GetSize();

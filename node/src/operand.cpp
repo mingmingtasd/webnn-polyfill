@@ -5,13 +5,9 @@ Napi::FunctionReference Operand::constructor;
 Operand::Operand(const Napi::CallbackInfo& info) : 
     Napi::ObjectWrap<Operand>(info) {
 }
-void Operand::SetOperand(std::shared_ptr<op::OperandWrap> operand) {
-  operand_wrap_ = operand;
-}
+void Operand::SetNode(std::shared_ptr<op::Node> node) { node_ = node; }
 
-WNNOperand Operand::GetOperand() {
-  return operand_wrap_->GetOperand();
-}
+WNNOperand Operand::GetOperand() { return node_->GetOutput(); }
 
 Napi::Object Operand::Initialize(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);

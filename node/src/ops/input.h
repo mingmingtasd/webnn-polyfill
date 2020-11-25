@@ -8,18 +8,17 @@
 #include <memory>
 #include <string>
 
-#include "operand_wrap.h"
+#include "node.h"
 
 namespace op {
 
-class Input final : public OperandWrap {
+class Input final : public Node {
 public:
   Input(const Napi::CallbackInfo &info);
   ~Input() = default;
 
-  void AddToModel(WNNModelBuilder builder);
   const WNNOperandDescriptor *GetOperandDescriptor();
-  std::string GetName();
+  std::string &GetName();
 
 private:
   std::string name_;

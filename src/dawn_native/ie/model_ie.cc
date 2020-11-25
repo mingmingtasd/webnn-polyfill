@@ -171,11 +171,9 @@ void Model::AddOutput(OperandBase *ouput) {
 void Model::AddMatMul(op::MatMul *mutmul) {
   auto inputs = mutmul->Inputs();
   ie_operand_t primary;
-  std::string primary_name = inputs[0]->GetName();
-  primary.name = const_cast<char *>(primary_name.c_str());
+  primary.name = const_cast<char *>(inputs[0]->GetName().c_str());
   ie_operand_t secondary;
-  std::string secondary_name = inputs[1]->GetName();
-  secondary.name = const_cast<char *>(secondary_name.c_str());
+  secondary.name = const_cast<char *>(inputs[1]->GetName().c_str());
   ie_operand_t *ie_operand;
   IEStatusCode code =
       IE(ie_model_add_mat_mul)(ie_model_, &primary, &secondary, &ie_operand);

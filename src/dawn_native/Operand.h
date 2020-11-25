@@ -22,7 +22,7 @@ public:
   virtual void AddToModel(ModelBase *model);
   // The name is uniquely identifies getting from native api.
   void SetName(std::string name);
-  std::string GetName();
+  std::string& GetName();
 
 private:
   // the inputs of operand.
