@@ -15,7 +15,7 @@ import generateGyp from "./generators/gyp.mjs";
 import generateIndex from "./generators/index.mjs";
 import generateDescriptorDecoder from "./generators/descriptorDecoder.mjs";
 
-const DAWN_PATH = normalizeDawnPath(fs.readFileSync(pkg.config.DAWN_PATH, "utf-8"));
+const DAWN_PATH = normalizeDawnPath(fs.readFileSync(pkg.config.DAWN_PATH, "utf-8")).trim();
 
 const GEN_FILE_NOTICE = `/*
  * MACHINE GENERATED, DO NOT EDIT

@@ -4,3 +4,15 @@
   <br/>
 </p>
 
+## Build
+
+Windows
+```sh
+> .\build.bat
+```
+
+## Test
+
+```sh
+> mocha test\ops
+```

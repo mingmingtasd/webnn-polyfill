@@ -11,7 +11,7 @@ let ast = null;
 
 const GYP_TEMPLATE = fs.readFileSync(`${pkg.config.TEMPLATE_DIR}/binding-gyp.njk`, "utf-8");
 
-const DAWN_PATH = fs.readFileSync(pkg.config.DAWN_PATH, "utf-8");
+const DAWN_PATH = fs.readFileSync(pkg.config.DAWN_PATH, "utf-8").trim();
 
 nunjucks.configure({ autoescape: true });
 
