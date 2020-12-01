@@ -24,7 +24,7 @@ Constant::Constant(const Napi::CallbackInfo &info) : Node(info) {
   descriptor_.dimensionsCount = dimensions_.size();
 
   // constant value
-  value_ = getTypedArrayData(info[1].As<Napi::Value>(), &size_);
+  value_ = getTypedArrayData<float>(info[1].As<Napi::Value>(), &size_);
 }
 
 const WNNOperandDescriptor *Constant::GetOperandDescriptor() {
