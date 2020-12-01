@@ -18,17 +18,19 @@ inline void nextJSProcessTick(Napi::Env& env) {
   nextTick.Call(env.Global(), {});
 };
 
-inline void* getTypedArrayData(const Napi::Value& value, size_t* len = nullptr) {
+template<typename T> inline T* getTypedArrayData(const Napi::Value& value, size_t* len = nullptr) {
+  T* data = nullptr;
   if (len) *len = 0;
   if (!value.IsTypedArray()) {
     Napi::Env env = value.Env();
     Napi::Error::New(env, "Argument must be a 'ArrayBufferView'").ThrowAsJavaScriptException();
-    return nullptr;
+    return data;
   }
   Napi::TypedArray arr = value.As<Napi::TypedArray>();
   Napi::ArrayBuffer buffer = arr.ArrayBuffer();
   if (len) *len = arr.ByteLength();
-  return buffer.Data();
+  data = reinterpret_cast<T*>(reinterpret_cast<uint64_t>(buffer.Data()) + arr.ByteOffset());
+  return data;
 };
 
 #endif // __UTILS_H__
