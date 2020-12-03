@@ -72,4 +72,10 @@ cd "$build_dir"
 cmake -DCMAKE_BUILD_TYPE=Release "$CURRENT_PATH"
 make $NUM_THREADS
 
+# copy the libie_nn_c_api.so to ienn\lib\Linux64
+if [ -e "$CURRENT_PATH/lib/Linux64/libie_nn_c_api.so" ]; then
+    rm -rf "$CURRENT_PATH/lib/Linux64/libie_nn_c_api.so"
+fi
+cp "$build_dir/$OS_PATH/Release/lib/libie_nn_c_api.so" "$CURRENT_PATH/lib/Linux64"
+
 printf "\nBuild completed, you can find binaries for all samples in the $build_dir/%s/Release subfolder.\n\n" "$OS_PATH"

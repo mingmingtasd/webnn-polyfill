@@ -320,7 +320,7 @@ ie_model_get_output_name(const ie_model_t *model, const size_t number,
  * @return Status code of the operation: OK(0) for success.
  */
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
-ie_model_free_name(const ie_model_t *model, char **name);
+ie_model_free_name(char **name);
 
 /**
  * @brief Create compilation. Use the ie_compilation_free() method to
@@ -386,6 +386,6 @@ ie_compilation_get_buffer(const ie_compilation_t *compilation, const char *name,
  * @return Status code of the operation: OK(0) for success.
  */
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
-ie_compilation_free_buffer(const ie_compilation_t *compilation, void **buffer);
+ie_compilation_free_buffer(void **buffer);
 
 #endif // IE_NN_C_API_H

@@ -330,7 +330,7 @@ std::string Model::GetOutputName(size_t index) {
   }
   std::string name(output_name);
   // The name has been kept in outputs object, so it can be free.
-  // IE(ie_model_free_name)(ie_model_, &output_name);
+  IE(ie_model_free_name)(&output_name);
 
   return name;
 }
