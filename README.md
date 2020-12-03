@@ -20,7 +20,8 @@ Sync the dependencies.
 
 Generate projects.
 ```sh
-> gn gen out/Release
+Use Release mode when running OpenVINO backend.
+> gn gen out/Release --args="is_debug = false"
 ```
 
 Build

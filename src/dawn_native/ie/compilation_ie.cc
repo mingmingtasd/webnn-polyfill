@@ -29,7 +29,7 @@ Compilation::~Compilation() {
 
 void Compilation::FreeUnusedData() {
   for (auto &output : outputs_) {
-    IE(ie_compilation_free_buffer)(ie_compilation_, &output->buffer);
+    IE(ie_compilation_free_buffer)(&output->buffer);
     delete output;
   }
 }

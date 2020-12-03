@@ -23,9 +23,9 @@ size_t OutputsBase::GetOutputsNumber() { return outputs_.size(); }
 
 WNNOutput OutputsBase::GetOutputWithIndex(size_t index) {
   size_t i = 0;
+  WNNOutput wnn_output;
   for (auto &output : outputs_) {
     if (i == index) {
-      WNNOutput wnn_output;
       wnn_output.buffer = output.second->buffer;
       wnn_output.size = output.second->size;
       wnn_output.dimensions = output.second->dimensions;
@@ -33,6 +33,7 @@ WNNOutput OutputsBase::GetOutputWithIndex(size_t index) {
       return wnn_output;
     }
   }
+  return wnn_output;
 }
 
 std::map<std::string, Output const *> &OutputsBase::GetOutputs() {
