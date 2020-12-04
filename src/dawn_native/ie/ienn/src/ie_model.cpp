@@ -262,8 +262,7 @@ IEStatusCode Model::GetOutputName(const size_t number, char **name) {
   for (size_t i = 0; i < number; ++i) {
     ++iter;
   }
-  std::unique_ptr<char[]> outputName(new char[iter->first.length() + 1]);
-  *name = outputName.release();
+  *name = new char[iter->first.length() + 1];
   memcpy(*name, iter->first.c_str(), iter->first.length() + 1);
   return IEStatusCode::OK;
 }

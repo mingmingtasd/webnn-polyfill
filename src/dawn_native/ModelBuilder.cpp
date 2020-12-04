@@ -92,9 +92,8 @@ OperandBase *ModelBuilderBase::Transpose(OperandBase *input,
   return context.Detach();
 }
 
-ModelBase *ModelBuilderBase::CreateModel(NamedOperand const *named_operand,
-                                         size_t size) {
-  return CreateModelImpl(named_operand, size);
+ModelBase *ModelBuilderBase::CreateModel(NamedOperandsBase const *named_operands) {
+  return CreateModelImpl(named_operands);
 }
 
 } // namespace dawn_native

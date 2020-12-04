@@ -75,7 +75,7 @@ namespace wnn {
         }
 
         ObjectBase(ObjectBase const& other)
-            : ObjectBase(other.Get()) {
+            : ObjectBase(other.GetHandle()) {
         }
         Derived& operator=(ObjectBase const& other) {
             if (&other != this) {
@@ -120,7 +120,7 @@ namespace wnn {
         explicit operator bool() const {
             return mHandle != nullptr;
         }
-        CType Get() const {
+        CType GetHandle() const {
             return mHandle;
         }
         CType Release() {

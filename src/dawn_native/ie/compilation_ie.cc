@@ -4,14 +4,22 @@
 #include <vector>
 
 #include "common/Log.h"
-#include "dawn_native/Inputs.h"
 #include "dawn_native/Operand.h"
-#include "dawn_native/Outputs.h"
+#include "dawn_native/Result.h"
+#include "dawn_native/NamedResults.h"
 #include "ienn_symbol_table.h"
 
 namespace dawn_native {
 
 namespace ie {
+
+class Result : public ResultBase {
+public:
+  using ResultBase::Reference;
+  ~Result() {
+    ie_compilation_free_buffer(&buffer_);
+  }
+};
 
 Compilation::Compilation(Ref<Model> model) : model_(model) {
   // Create compilation for IE backend.
@@ -34,19 +42,20 @@ void Compilation::FreeUnusedData() {
   }
 }
 
-OutputsBase *Compilation::ComputeImpl(InputsBase *inputs,
-                                      WNNComputeCallback callback,
-                                      void *userdata, OutputsBase *outputs) {
+void Compilation::ComputeImpl(NamedInputsBase *inputs,
+                              WNNComputeCallback callback,
+                              void *userdata, NamedOutputsBase *outputs) {
   // Set input data to nGraph.
-  for (auto &input : inputs->GetInputs()) {
-    OperandBase *operand = model_->GetNamedOperand(input.first);
+  for (auto &input : inputs->GetRecords()) {
+    OperandBase const *operand = model_->GetNamedOperand(input.first);
     ie_operand_t ie_operand;
     ie_operand.name = const_cast<char *>(operand->GetName().c_str());
     IEStatusCode code = IE(ie_compilation_set_input)(
         ie_compilation_, &ie_operand, input.second->buffer, input.second->size);
     if (code != IEStatusCode::OK) {
       dawn::ErrorLog() << "Failing to set input for IE.";
-      return nullptr;
+      callback(nullptr, userdata);
+      return;
     }
   }
 
@@ -54,14 +63,15 @@ OutputsBase *Compilation::ComputeImpl(InputsBase *inputs,
   IEStatusCode code = IE(ie_compilation_compute)(ie_compilation_);
   if (code != IEStatusCode::OK) {
     dawn::ErrorLog() << "Failing to compute for IE.";
-    return nullptr;
+    callback(nullptr, userdata);
+    return;
   }
 
   // Get Data from nGraph with output.
   // TODO(junwei). new memory for output data.
   if (outputs == nullptr) {
+    Ref<NamedResultsBase> results = AcquireRef(new NamedResultsBase());
     FreeUnusedData();
-    Ref<OutputsBase> outputs = AcquireRef(new OutputsBase());
     size_t output_number = model_->GetOutputsNumber();
     for (size_t i = 0; i < output_number; ++i) {
       std::string output_name = model_->GetOutputName(i);
@@ -71,19 +81,21 @@ OutputsBase *Compilation::ComputeImpl(InputsBase *inputs,
           ie_compilation_, output_name.data(), &output_buffer, &buffer_length);
       if (code != IEStatusCode::OK) {
         dawn::ErrorLog() << "Failing to get output name for IE.";
-        return nullptr;
+        callback(nullptr, userdata);
+        return;
       }
-      Output *output = new Output;
-      output->buffer = output_buffer;
-      output->size = buffer_length;
-      outputs_.push_back(output);
-      outputs->SetOutput(output_name.data(), output);
+      // TODO(junwei): get the output dimensions;
+      std::vector<uint32_t> dimensions;
+      Ref<ResultBase> result = AcquireRef(
+          new Result::ResultBase(output_buffer, buffer_length, dimensions));
+      results->Set(model_->GetUserName(output_name).c_str(), result.Detach());
     }
-    return outputs.Detach();
+    callback(reinterpret_cast<WNNNamedResults>(results.Detach()), userdata);
+    return;
   }
 
-  for (auto &output : outputs->GetOutputs()) {
-    OperandBase *operand = model_->GetNamedOperand(output.first);
+  for (auto &output : outputs->GetRecords()) {
+    OperandBase const *operand = model_->GetNamedOperand(output.first);
     ie_operand_t ie_operand;
     ie_operand.name = const_cast<char *>(operand->GetName().c_str());
     IEStatusCode code = IE(ie_compilation_get_output)(
@@ -91,11 +103,11 @@ OutputsBase *Compilation::ComputeImpl(InputsBase *inputs,
         output.second->size);
     if (code != IEStatusCode::OK) {
       dawn::ErrorLog() << "Failing to get output for IE.";
-      return nullptr;
+      callback(nullptr, userdata);
     }
   }
-  callback(reinterpret_cast<WNNOutputs>(outputs), userdata);
-  return outputs;
+  callback(nullptr, userdata);
+  return;
 }
 
 } // namespace ie

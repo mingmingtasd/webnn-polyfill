@@ -17,8 +17,9 @@
 #include <memory>
 
 #include "common/Assert.h"
-#include "dawn_native/Inputs.h"
-#include "dawn_native/Outputs.h"
+#include "dawn_native/Compilation.h"
+#include "dawn_native/ModelBuilder.h"
+
 
 // Contains the entry-points into dawn_native
 namespace dawn_native {
@@ -38,12 +39,16 @@ DawnProcTable GetProcsAutogen();
 
 DawnProcTable GetProcs() { return GetProcsAutogen(); }
 
-WNNInputs CreateInputs() {
-  return reinterpret_cast<WNNInputs>(new InputsBase());
+WNNNamedInputs CreateNamedInputs() {
+  return reinterpret_cast<WNNNamedInputs>(new NamedInputsBase());
 }
 
-WNNOutputs CreateOutputs() {
-  return reinterpret_cast<WNNOutputs>(new OutputsBase());
+WNNNamedOperands CreateNamedOperands() {
+  return reinterpret_cast<WNNNamedOperands>(new NamedOperandsBase());
+}
+
+WNNNamedOutputs CreateNamedOutputs() {
+  return reinterpret_cast<WNNNamedOutputs>(new NamedOutputsBase());
 }
 
 } // namespace dawn_native

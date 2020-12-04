@@ -17,12 +17,14 @@ public:
   virtual ~OperandBase() = default;
 
   // It's used for getting inputs when traversaling model tree.
-  std::vector<Ref<OperandBase>> &Inputs();
+  const std::vector<Ref<OperandBase>> &Inputs() const;
   // Add the operand to model for specific backend.
   virtual void AddToModel(ModelBase *model);
   // The name is uniquely identifies getting from native api.
   void SetName(std::string name);
-  std::string& GetName();
+  const std::string& GetName() const {
+    return name_;
+  }
 
 private:
   // the inputs of operand.

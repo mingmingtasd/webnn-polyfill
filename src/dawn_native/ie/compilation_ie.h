@@ -14,9 +14,9 @@ public:
   explicit Compilation(Ref<Model> model);
   ~Compilation() override;
 
-  OutputsBase *ComputeImpl(InputsBase *inputs, WNNComputeCallback callback,
-                           void *userdata,
-                           OutputsBase *outputs = nullptr) override;
+  void ComputeImpl(NamedInputsBase *inputs, WNNComputeCallback callback,
+                   void *userdata,
+                   NamedOutputsBase *outputs = nullptr) override;
   void FreeUnusedData();
 
 private:

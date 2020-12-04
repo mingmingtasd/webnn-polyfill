@@ -34,8 +34,9 @@ public:
 // Backend-agnostic API for dawn_native
 DAWN_NATIVE_EXPORT DawnProcTable GetProcs();
 
-DAWN_NATIVE_EXPORT WNNInputs CreateInputs();
-DAWN_NATIVE_EXPORT WNNOutputs CreateOutputs();
+DAWN_NATIVE_EXPORT WNNNamedInputs CreateNamedInputs();
+DAWN_NATIVE_EXPORT WNNNamedOperands CreateNamedOperands();
+DAWN_NATIVE_EXPORT WNNNamedOutputs CreateNamedOutputs();
 
 }  // namespace dawn_native
 
