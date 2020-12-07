@@ -6,7 +6,7 @@ Create a `.gclient` file with the following content:
 ```
 solutions = [
   { "name"        : ".",
-    "url"         : "https://github.com/huningxin/webnn-native.git",
+    "url"         : "https://github.com/otcshare/webnn-native.git",
     "deps_file"   : "DEPS",
     "managed"     : False,
   },
