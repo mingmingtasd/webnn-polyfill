@@ -4,6 +4,7 @@
 #include "common/RefCounted.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/dawn_platform.h"
+#include "dawn_native/NamedOperands.h"
 
 namespace dawn_native {
 
@@ -27,11 +28,10 @@ public:
   OperandBase *Reshape(OperandBase *, int32_t const *, size_t);
   OperandBase *Softmax(OperandBase *);
   OperandBase *Transpose(OperandBase *, TransposeOptions const *options);
-  ModelBase *CreateModel(NamedOperand const *named_operand, size_t size);
+  ModelBase *CreateModel(NamedOperandsBase const *named_operands);
 
 private:
-  virtual ModelBase *CreateModelImpl(NamedOperand const *named_operand,
-                                     size_t size) = 0;
+  virtual ModelBase *CreateModelImpl(NamedOperandsBase const *named_operand) = 0;
 };
 
 } // namespace dawn_native

@@ -23,11 +23,14 @@ class Ref;
 namespace dawn_native {
 
     class CompilationBase;
-    class InputsBase;
-    class OutputsBase;
     class ModelBase;
-    class OperandBase;
     class ModelBuilderBase;
+    class NamedInputsBase;
+    class NamedOperandsBase;
+    class NamedOutputsBase;
+    class NamedResultsBase;
+    class OperandBase;
+    class ResultBase;
 
 }  // namespace dawn_native
 

@@ -15,7 +15,13 @@
   "void": {
     "category": "native"
   },
+  "const void*": {
+    "category": "native"
+  },
   "uint32_t": {
+    "category": "native"
+  },
+  "const uint32_t*": {
     "category": "native"
   },
   "int32_t": {
@@ -58,11 +64,16 @@
       {"name": "power preference", "type": "power preference"}
     ]
   },
-  "named operand": {
-    "category": "structure",
-    "members": [
-      {"name": "name", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-      {"name": "operand", "type": "operand"}
+  "named operands": {
+    "category": "object",
+    "methods": [
+      {
+        "name": "set",
+        "args": [
+          {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"},
+          {"name": "operand", "type": "operand"}
+        ]
+      }
     ]
   },
   "operand layout": {
@@ -210,8 +221,7 @@
         "name": "createModel",
         "returns": "model",
         "args": [
-          {"name": "named operands", "type": "named operand", "annotation": "const*"},
-          {"name": "size", "type": "size_t"}
+          {"name": "named operands", "type": "named operands"}
         ]
       }
     ]
@@ -254,11 +264,11 @@
       {"name": "dimensions count", "type": "uint32_t", "default": 0}
     ]
   },
-  "inputs": {
+  "named inputs": {
     "category": "object",
     "methods": [
       {
-        "name": "set input",
+        "name": "set",
         "args": [
           {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"},
           {"name": "input", "type": "input", "annotation": "const*"}
@@ -266,33 +276,47 @@
       }
     ]
   },
-  "outputs": {
+  "named outputs": {
     "category": "object",
     "methods": [
       {
-        "name": "set output",
+        "name": "set",
         "args": [
           {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"},
-          {"name": "buffer", "type": "output", "annotation": "const*"}
+          {"name": "output", "type": "output", "annotation": "const*"}
         ]
+      }
+    ]
+  },
+  "result": {
+    "category": "object",
+    "methods": [
+      {
+        "name": "bufferSize",
+        "returns": "uint32_t"
       },
       {
-        "name": "get output",
-        "returns": "output",
+        "name": "buffer",
+        "returns": "const void*"
+      },
+      {
+        "name": "dimensionsSize",
+        "returns": "uint32_t"
+      },
+      {
+        "name": "dimensions",
+        "returns": "const uint32_t*"
+      }
+    ]
+  },
+  "named results": {
+    "category": "object",
+    "methods": [
+      {
+        "name": "get",
+        "returns": "result",
         "args": [
           {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"}
-        ]
-      },
-      {
-        "name": "get outputs number",
-        "returns": "size_t",
-        "args": []
-      },
-      {
-        "name": "get output with index",
-        "returns": "output",
-        "args": [
-          {"name": "index", "type": "size_t"}
         ]
       }
     ]
@@ -300,7 +324,7 @@
   "compute callback": {
     "category": "callback",
     "args": [
-      {"name": "outputs", "type": "outputs"},
+      {"name": "outputs", "type": "named results"},
       {"name": "userdata", "type": "void", "annotation": "*"}
     ]
   },
@@ -309,12 +333,11 @@
     "methods": [
       {
         "name": "compute",
-        "returns": "outputs",
         "args": [
-          {"name": "inputs", "type": "inputs"},
+          {"name": "inputs", "type": "named inputs"},
           {"name": "callback", "type": "compute callback"},
           {"name": "userdata", "type": "void", "annotation": "*"},
-          {"name": "outputs", "type": "outputs", "optional": true}
+          {"name": "outputs", "type": "named outputs", "optional": true}
         ]
       }
     ]

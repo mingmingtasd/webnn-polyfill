@@ -7,6 +7,7 @@
 #include "common/Log.h"
 #include "dawn_native/ie/compilation_ie.h"
 #include "dawn_native/ops/pool2d.h"
+#include "dawn_native/NamedOperands.h"
 #include "ienn_symbol_table.h"
 
 namespace dawn_native {
@@ -68,7 +69,7 @@ ie_pool2d_options Pool2dOptionsForIE(Pool2dOptions const *options) {
 
 } // namespace
 
-Model::Model(struct NamedOperand const *named_operands, size_t size) {
+Model::Model(NamedOperandsBase const *named_operands) {
   // Load ienn_c_api.dll to compile the model.
   IEStatusCode code = IE(ie_create_model)(&ie_model_);
   if (code != IEStatusCode::OK) {
@@ -76,31 +77,31 @@ Model::Model(struct NamedOperand const *named_operands, size_t size) {
     return;
   }
 
-  for (uint32_t i = 0; i < size; ++i) {
-    struct NamedOperand output = named_operands[i];
-    BuildNeuralNetworkModel(output.operand);
+  
+  for (auto &itr : named_operands->GetRecords()) {
+    named_operands_[itr.first] = itr.second;
+    BuildNeuralNetworkModel(itr.second);
     // Add output node to ngraph.
-    AddOutput(output.operand);
-    // Insert the named operand to map.
-    if (output.name) {
-      named_operands_[std::string(output.name)] = output.operand;
-    }
+    AddOutput(itr.second);
+    user_name_map_[itr.second->GetName()] = itr.first;
   }
+
+  
   // Finish to create the model that is CNNNetwork.
   Finish();
 }
 
 // Traversal graph inorder to create model.
-void Model::BuildNeuralNetworkModel(OperandBase *root) {
+void Model::BuildNeuralNetworkModel(const OperandBase *root) {
   if (!root)
     return;
   // the stack is used for traversaling model tree.
   std::vector<Ref<OperandBase>> stack;
   // Push back the root node so that only child node need to be add to stack in
   // secondary while loop.
-  stack.push_back(root);
+  stack.push_back(const_cast<OperandBase*>(root));
   traversalled_.insert(root);
-  OperandBase *operand = root;
+  const OperandBase *operand = root;
   while (!stack.empty()) {
     while (operand) {
       bool sub_graph = false;
@@ -158,7 +159,7 @@ void Model::AddInput(op::Input *input) {
   named_operands_[input->GetName()] = input;
 }
 
-void Model::AddOutput(OperandBase *ouput) {
+void Model::AddOutput(const OperandBase *ouput) {
   ie_operand_t ie_operand;
   ie_operand.name = const_cast<char *>(ouput->GetName().c_str());
   IEStatusCode code = IE(ie_model_add_output)(ie_model_, &ie_operand);
@@ -299,7 +300,7 @@ void Model::Finish() {
   }
 }
 
-OperandBase *Model::GetNamedOperand(std::string name) {
+const OperandBase *Model::GetNamedOperand(std::string name) {
   return named_operands_[name];
 }
 
@@ -333,6 +334,10 @@ std::string Model::GetOutputName(size_t index) {
   IE(ie_model_free_name)(&output_name);
 
   return name;
+}
+
+const std::string& Model::GetUserName(const std::string& name) {
+  return user_name_map_.at(name);
 }
 
 } // namespace ie

@@ -6,7 +6,8 @@
 
 #include "dawn_native/dawn_platform.h"
 
-#include "dawn_native/Outputs.h"
+#include "dawn_native/NamedInputs.h"
+#include "dawn_native/NamedOutputs.h"
 
 namespace dawn_native {
 
@@ -16,13 +17,13 @@ public:
   virtual ~CompilationBase() = default;
 
   // Dawn API
-  OutputsBase *Compute(InputsBase *inputs, WNNComputeCallback callback,
-                       void *userdata, OutputsBase *outputs = nullptr);
+  void Compute(NamedInputsBase *inputs, WNNComputeCallback callback,
+               void *userdata, NamedOutputsBase *outputs = nullptr);
 
 private:
-  virtual OutputsBase *ComputeImpl(InputsBase *inputs,
-                                   WNNComputeCallback callback, void *userdata,
-                                   OutputsBase *outputs = nullptr) = 0;
+  virtual void ComputeImpl(NamedInputsBase *inputs,
+                           WNNComputeCallback callback, void *userdata,
+                           NamedOutputsBase *outputs = nullptr) = 0;
 };
 }
 

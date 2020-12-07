@@ -88,11 +88,11 @@ namespace wnn {
         {%- endmacro -%}
 
         {%- macro render_cpp_to_c_method_call(type, method) -%}
-            {{as_cMethod(type.name, method.name)}}(Get()
+            {{as_cMethod(type.name, method.name)}}(GetHandle()
                 {%- for arg in method.arguments -%},{{" "}}
                     {%- if arg.annotation == "value" -%}
                         {%- if arg.type.category == "object" -%}
-                            {{as_varName(arg.name)}}.Get()
+                            {{as_varName(arg.name)}}.GetHandle()
                         {%- elif arg.type.category == "enum" or arg.type.category == "bitmask" -%}
                             static_cast<{{as_cType(arg.type.name)}}>({{as_varName(arg.name)}})
                         {%- elif arg.type.category in ["callback", "native"] -%}

@@ -22,8 +22,8 @@ uint32_t product(const std::vector<int32_t> &dims);
 
 wnn::ModelBuilder CreateCppModelBuilder();
 
-wnn::Inputs CreateCppInputs();
-wnn::Outputs CreateCppOutputs();
+wnn::NamedInputs CreateCppInputs();
+wnn::NamedOutputs CreateCppOutputs();
 
 bool Expected(float output, float expected);
 

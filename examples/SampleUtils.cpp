@@ -35,12 +35,16 @@ wnn::ModelBuilder CreateCppModelBuilder() {
   return wnn::ModelBuilder::Acquire(context.CreateModelBuilder());
 }
 
-wnn::Inputs CreateCppInputs() {
-  return wnn::Inputs::Acquire(dawn_native::CreateInputs());
+wnn::NamedInputs CreateCppNamedInputs() {
+  return wnn::NamedInputs::Acquire(dawn_native::CreateNamedInputs());
 }
 
-wnn::Outputs CreateCppOutputs() {
-  return wnn::Outputs::Acquire(dawn_native::CreateOutputs());
+wnn::NamedOperands CreateCppNamedOperands() {
+  return wnn::NamedOperands::Acquire(dawn_native::CreateNamedOperands());
+}
+
+wnn::NamedOutputs CreateCppNamedOutputs() {
+  return wnn::NamedOutputs::Acquire(dawn_native::CreateNamedOutputs());
 }
 
 bool Expected(float output, float expected) {
@@ -92,24 +96,13 @@ wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
 }
 
 WrappedModel *s_wrapped_model;
-void ComputeCallback(WNNOutputs impl, void* userData) {}
-
-void CompilationCallback(WNNCompilation impl, void* userData) {
-  wnn::Compilation exe = exe.Acquire(impl);
-
-  std::vector<float> input_buffer = s_wrapped_model->InputBuffer();
-  wnn::Input a;
-  a.buffer = input_buffer.data();
-  a.size = input_buffer.size() * sizeof(float);
-  wnn::Inputs inputs = CreateCppInputs();
-  inputs.SetInput("input", &a);
-
-  wnn::Outputs outputs = exe.Compute(inputs, ComputeCallback, nullptr, nullptr);
-  wnn::Output output = outputs.GetOutputWithIndex(0);
+void ComputeCallback(WNNNamedResults impl, void* userData) {
+  wnn::NamedResults outputs = outputs.Acquire(impl);
+  wnn::Result output = outputs.Get("output");
   std::vector<float> expected_data = s_wrapped_model->ExpectedBuffer();
   bool expected = true;
-  for (size_t i = 0; i < output.size / sizeof(float); ++i) {
-    float output_data = static_cast<float *>(output.buffer)[i];
+  for (size_t i = 0; i < output.BufferSize() / sizeof(float); ++i) {
+    float output_data = static_cast<const float *>(output.Buffer())[i];
     if (!Expected(output_data, expected_data[i])) {
       dawn::ErrorLog() << "The output doesn't output as expected for "
                        << output_data << " != " << expected_data[i]
@@ -124,13 +117,27 @@ void CompilationCallback(WNNCompilation impl, void* userData) {
   delete s_wrapped_model;
 }
 
+void CompilationCallback(WNNCompilation impl, void* userData) {
+  wnn::Compilation exe = exe.Acquire(impl);
+
+  std::vector<float> input_buffer = s_wrapped_model->InputBuffer();
+  wnn::Input a;
+  a.buffer = input_buffer.data();
+  a.size = input_buffer.size() * sizeof(float);
+  wnn::NamedInputs inputs = CreateCppNamedInputs();
+  inputs.Set("input", &a);
+
+  exe.Compute(inputs, ComputeCallback, nullptr, nullptr);
+}
+
 // Wrapped Compilation
 void Test(WrappedModel *wrapped_model) {
   s_wrapped_model = wrapped_model;
-  wnn::ModelBuilder nn = CreateCppModelBuilder();
-  wnn::Operand output_operand = wrapped_model->GenerateOutput(nn);
-  wnn::NamedOperand named_operand = {"output", output_operand};
-  wnn::Model model = nn.CreateModel(&named_operand, 1);
+  wnn::ModelBuilder builder = CreateCppModelBuilder();
+  wnn::Operand output_operand = wrapped_model->GenerateOutput(builder);
+  wnn::NamedOperands named_operands = CreateCppNamedOperands();
+  named_operands.Set("output", output_operand);
+  wnn::Model model = builder.CreateModel(named_operands);
   model.Compile(CompilationCallback, nullptr);
 }
 
