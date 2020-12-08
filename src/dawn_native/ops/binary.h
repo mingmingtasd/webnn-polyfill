@@ -12,25 +12,27 @@ namespace dawn_native {
 
 namespace op {
 
-enum BinaryType {
-  kBinaryTypeAdd = 0,
-  kBinaryTypeSub,
-  kBinaryTypeMul,
-  kBinaryTypeDiv,
-  kBinaryTypeMax,
-  kBinaryTypeMin,
+enum BinaryOpType {
+  kAdd = 0,
+  kSub,
+  kMul,
+  kDiv,
+  kMax,
+  kMin,
+  kMatMul,
 };
 
 class Binary final : public OperandBase {
 public:
-  Binary(BinaryType, OperandBase *, OperandBase *);
+  Binary(BinaryOpType type, OperandBase *a, OperandBase *b) :
+      OperandBase({a, b}), type_(type) {}
   ~Binary() override = default;
 
-  void AddToModel(ModelBase *model) override;
-  BinaryType GetType();
+  void AddToModel(ModelBase *model) override { model->AddBinary(this); }
+  BinaryOpType GetType() { return type_; }
 
 private:
-  BinaryType type_;
+  BinaryOpType type_;
 };
 
 } // namespace op
