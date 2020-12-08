@@ -24,8 +24,8 @@ enum BinaryOpType {
 
 class Binary final : public OperandBase {
 public:
-  Binary(BinaryOpType type, OperandBase *a, OperandBase *b) :
-      OperandBase({a, b}), type_(type) {}
+  Binary(BinaryOpType type, OperandBase *a, OperandBase *b)
+      : OperandBase({a, b}), type_(type) {}
   ~Binary() override = default;
 
   void AddToModel(ModelBase *model) override { model->AddBinary(this); }

@@ -114,17 +114,13 @@ source_set("dawn_native_sources") {
 
   sources += [
     "ops/binary.h",
-    "ops/constant.cc",
     "ops/constant.h",
     "ops/conv2d.cc",
     "ops/conv2d.h",
-    "ops/input.cc",
     "ops/input.h",
     "ops/pool2d.cc",
     "ops/pool2d.h",
-    "ops/reshape.cc",
     "ops/reshape.h",
-    "ops/transpose.cc",
     "ops/transpose.h",
     "ops/unary.h",
   ]

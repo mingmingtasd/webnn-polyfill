@@ -155,7 +155,7 @@ void Model::AddInput(op::Input *input) {
     return;
   }
   input->SetName(std::string(ie_operand->name));
-  named_operands_[input->GetName()] = input;
+  named_operands_[input->GetUserName()] = input;
 }
 
 void Model::AddOutput(const OperandBase *ouput) {

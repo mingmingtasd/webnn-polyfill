@@ -14,17 +14,25 @@ namespace op {
 
 class Constant final : public OperandBase {
 public:
-  Constant(const OperandDescriptor *, void const *value, size_t size);
+  Constant(const OperandDescriptor *desc, void const *value, size_t size)
+      : OperandBase({}), value_(value), size_(size) {
+    descriptor_.type = desc->type;
+    dimensions_.assign(desc->dimensions,
+                       desc->dimensions + desc->dimensionsCount);
+    descriptor_.dimensions = dimensions_.data();
+    descriptor_.dimensionsCount = dimensions_.size();
+  }
   ~Constant() override = default;
 
-  void AddToModel(ModelBase *model) override;
+  void AddToModel(ModelBase *model) override { model->AddConstant(this); }
 
-  const OperandDescriptor *GetOperandDescriptor();
-  void const *GetValue();
-  size_t GetSize();
+  const OperandDescriptor *GetOperandDescriptor() { return &descriptor_; }
+  void const *GetValue() { return value_; }
+  size_t GetSize() { return size_; }
 
 private:
-  const OperandDescriptor *descriptor_;
+  OperandDescriptor descriptor_;
+  std::vector<int32_t> dimensions_;
   void const *value_;
   size_t size_;
 };

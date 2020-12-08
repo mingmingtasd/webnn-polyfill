@@ -14,17 +14,19 @@ namespace op {
 
 class Reshape final : public OperandBase {
 public:
-  Reshape(OperandBase *input, int32_t const *new_shape, size_t new_shape_count);
+  Reshape(OperandBase *input, int32_t const *new_shape, size_t new_shape_count)
+      : OperandBase({input}) {
+    new_shape_.assign(new_shape, new_shape + new_shape_count);
+  }
   ~Reshape() override = default;
 
-  void AddToModel(ModelBase *model) override;
+  void AddToModel(ModelBase *model) override { model->AddReshape(this); }
 
-  int32_t const *GetNewShape();
-  size_t GetNewShapeCount();
+  int32_t const *GetNewShape() { return new_shape_.data(); }
+  size_t GetNewShapeCount() { return new_shape_.size(); }
 
 private:
-  int32_t const *new_shape_;
-  size_t new_shape_count_;
+  std::vector<int32_t> new_shape_;
 };
 
 } // namespace op
