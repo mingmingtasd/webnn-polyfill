@@ -32,14 +32,7 @@ Compilation::Compilation(Ref<Model> model) : model_(model) {
 }
 
 Compilation::~Compilation() {
-  // IE(ie_compilation_free)(ie_compilation_);
-}
-
-void Compilation::FreeUnusedData() {
-  for (auto &output : outputs_) {
-    IE(ie_compilation_free_buffer)(&output->buffer);
-    delete output;
-  }
+  IE(ie_compilation_free)(ie_compilation_);
 }
 
 void Compilation::ComputeImpl(NamedInputsBase *inputs,
@@ -71,7 +64,6 @@ void Compilation::ComputeImpl(NamedInputsBase *inputs,
   // TODO(junwei). new memory for output data.
   if (outputs == nullptr) {
     Ref<NamedResultsBase> results = AcquireRef(new NamedResultsBase());
-    FreeUnusedData();
     size_t output_number = model_->GetOutputsNumber();
     for (size_t i = 0; i < output_number; ++i) {
       std::string output_name = model_->GetOutputName(i);

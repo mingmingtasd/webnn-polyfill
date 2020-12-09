@@ -30,7 +30,7 @@ describe('test conv2d', function() {
       12.,  21., 27., 33.,  24.,  33.,  54.,  63., 72.,  51.,  63.,  99., 108.,
       117., 81., 93., 144., 153., 162., 111., 72., 111., 117., 123., 84.,
     ];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.output.buffer, expected);
   });
 
   it('conv2d without padding', async function() {
@@ -54,7 +54,7 @@ describe('test conv2d', function() {
     const outputs = await compiledModel.compute(inputs);
     // utils.checkShape(outputs.output.dimensions, [1, 1, 3, 3]);
     const expected = [54., 63., 72., 99., 108., 117., 144., 153., 162.];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.output.buffer, expected);
   });
 
   it('conv2d with strides=2 and padding', async function() {
@@ -82,6 +82,6 @@ describe('test conv2d', function() {
     // utils.checkShape(outputs.output.dimensions, [1, 1, 4, 3]);
     const expected =
         [12., 27., 24., 63., 108., 81., 123., 198., 141., 112., 177., 124.];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.output.buffer, expected);
   });
 });

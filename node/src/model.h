@@ -15,10 +15,12 @@ public:
 
   Napi::Value Compile(const Napi::CallbackInfo &info);
   void SetWNNCompilation(WNNCompilation);
+  std::vector<std::string> &GetOutputName();
 
 private:
   WNNModel model_;
   WNNCompilation compilation_;
+  std::vector<std::string> output_name_;
 };
 
 #endif // __Model_H__

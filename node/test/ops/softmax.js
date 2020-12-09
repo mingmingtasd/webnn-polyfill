@@ -45,6 +45,6 @@ describe('test softmax', function() {
       0.35717794,
       0.21167983,
     ];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   });
 });

@@ -60,7 +60,7 @@ describe('test add', function() {
       0.32315564,  -1.5743638,  -2.220419,   -2.2253585,  0.72509193,
       -0.74065745, -0.34546167, 1.1473255,   1.9020991,   -0.7194648,
     ];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.c.buffer, expected);
   });
 
   it('add two inputs', async function() {
@@ -120,7 +120,7 @@ describe('test add', function() {
       0.32315564,  -1.5743638,  -2.220419,   -2.2253585,  0.72509193,
       -0.74065745, -0.34546167, 1.1473255,   1.9020991,   -0.7194648,
     ];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.c.buffer, expected);
   });
 
   it('add broadcast', async function() {
@@ -173,6 +173,6 @@ describe('test add', function() {
       -0.21699047, 0.2963624, -0.8351137, -1.1870228,  0.90084743,
       0.95775616,  2.79817,   -1.3517822, -0.12901783, 2.1257153,
     ];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.c.buffer, expected);
   });
 });

@@ -17,8 +17,7 @@ describe('test matmul', function() {
     const outputs = await compiledModel.compute(inputs);
     // TODO(junwei): fix the issue.
     // utils.checkShape(outputs.c.dimensions, expected.shape);
-    // utils.checkValue(outputs.c.buffer, expected.value);
-    utils.checkValue(outputs.buffer, expected.value);
+    utils.checkValue(outputs.c.buffer, expected.value);
   }
 
   it('matmul 1d', async function() {

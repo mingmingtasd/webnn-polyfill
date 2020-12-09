@@ -15,25 +15,20 @@
 
 Napi::FunctionReference ModelBuilder::constructor;
 
-WNNNamedOperand GetNamedOperand(Napi::Object item, std::string& name) {
-  WNNNamedOperand named_operand;
-  Napi::Object obj = item;
-  Napi::Array property_names = item.GetPropertyNames();
-  if (property_names.Length() == 0) {
-    // unnamed operand like '{c}'
-  } else if (property_names.Length() == 1) {
-    uint32_t index = 0;
-    name = property_names.Get(index).As<Napi::String>().Utf8Value();
-    obj = item.Get(name).As<Napi::Object>();
-  } else {
-    // assert(0);
+WNNNamedOperands GetNamedOperands(Napi::Object obj) {
+  WNNNamedOperands named_operands = dawn_native::CreateNamedOperands();
+  Napi::Array property_names = obj.GetPropertyNames();
+  for (size_t j = 0; j < property_names.Length(); ++j) {
+    std::string name = property_names.Get(j).As<Napi::String>().Utf8Value();
+    Napi::Object item = obj.Get(name).As<Napi::Object>();
+    if (!item.InstanceOf(Operand::constructor.Value())) {
+      std::cout << "Expected 'Operand' for 'NamedOperand'" << std::endl;
+      return named_operands;
+    }
+    WNNOperand operand = Napi::ObjectWrap<Operand>::Unwrap(item)->GetOperand();
+    wnnNamedOperandsSet(named_operands, name.data(), operand);
   }
-  if (!obj.InstanceOf(Operand::constructor.Value())) {
-    std::cout << "Expected 'Operand' for 'NamedOperand'" << std::endl;
-    return named_operand;
-  }
-  named_operand.operand = Napi::ObjectWrap<Operand>::Unwrap(obj)->GetOperand();
-  return named_operand;
+  return named_operands;
 }
 
 ModelBuilder::ModelBuilder(const Napi::CallbackInfo& info) : 
@@ -171,31 +166,14 @@ Napi::Value ModelBuilder::Transpose(const Napi::CallbackInfo &info) {
 
 Napi::Value ModelBuilder::CreateModel(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
-  Napi::Object model = Model::constructor.New({});
 
-  std::vector<WNNNamedOperand> operands;
-  uint32_t length = 1;
-  if (info[0].IsArray()) {
-    Napi::Array array = info[0].As<Napi::Array>();
-    length = array.Length();
-    for (size_t i = 0; i < length; ++i) {
-      Napi::Object item = array.Get(i).As<Napi::Object>();
-      std::string name;
-      auto named_operand = GetNamedOperand(item, name);
-      named_operand.name = name.data();
-      operands.push_back(named_operand);
-    }
-  } else if (info[0].IsObject()) {
-    Napi::Object item = info[0].As<Napi::Object>();
-    std::string name;
-    auto named_operand = GetNamedOperand(item, name);
-    named_operand.name = name.data();
-    operands.push_back(named_operand);
-  }
+  WNNNamedOperands named_operands =
+      GetNamedOperands(info[0].As<Napi::Object>());
+  std::vector<napi_value> args = {info[0].As<Napi::Value>()};
+  Napi::Object model = Model::constructor.New(args);
   Model* unwrapped = Napi::ObjectWrap<Model>::Unwrap(model);
-  unwrapped->SetModel(wnnModelBuilderCreateModel(model_builder_,
-                                              operands.data(),
-                                              length));
+  unwrapped->SetModel(
+      wnnModelBuilderCreateModel(model_builder_, named_operands));
 
   return model;
 }
