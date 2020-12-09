@@ -6,7 +6,6 @@
 #include "common/Assert.h"
 #include "common/Log.h"
 #include "dawn_native/ie/compilation_ie.h"
-#include "dawn_native/ops/pool2d.h"
 #include "dawn_native/NamedOperands.h"
 #include "ienn_symbol_table.h"
 
@@ -156,7 +155,7 @@ void Model::AddInput(op::Input *input) {
     return;
   }
   input->SetName(std::string(ie_operand->name));
-  named_operands_[input->GetName()] = input;
+  named_operands_[input->GetUserName()] = input;
 }
 
 void Model::AddOutput(const OperandBase *ouput) {
@@ -169,32 +168,22 @@ void Model::AddOutput(const OperandBase *ouput) {
   }
 }
 
-void Model::AddMatMul(op::MatMul *mutmul) {
-  auto inputs = mutmul->Inputs();
-  ie_operand_t primary;
-  primary.name = const_cast<char *>(inputs[0]->GetName().c_str());
-  ie_operand_t secondary;
-  secondary.name = const_cast<char *>(inputs[1]->GetName().c_str());
-  ie_operand_t *ie_operand;
-  IEStatusCode code =
-      IE(ie_model_add_mat_mul)(ie_model_, &primary, &secondary, &ie_operand);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add matmul, the code is " << code << ".";
-    return;
-  }
-  mutmul->SetName(std::string(ie_operand->name));
-}
-
 void Model::AddBinary(op::Binary *binary) {
   auto inputs = binary->Inputs();
   ie_operand_t primary;
   primary.name = const_cast<char *>(inputs[0]->GetName().c_str());
   ie_operand_t secondary;
   secondary.name = const_cast<char *>(inputs[1]->GetName().c_str());
-  ie_operand_t *ie_operand;
-  IEStatusCode code = IE(ie_model_add_binary)(
+  ie_operand_t *ie_operand = nullptr;
+  IEStatusCode code = NOT_FOUND;
+  if (binary->GetType() == op::BinaryOpType::kMatMul) {
+    code = IE(ie_model_add_mat_mul)(
+        ie_model_, &primary, &secondary, &ie_operand);
+  } else {
+    code = IE(ie_model_add_binary)(
       ie_model_, static_cast<ie_binary_type>(binary->GetType()), &primary,
       &secondary, &ie_operand);
+  }
   if (code != IEStatusCode::OK) {
     dawn::ErrorLog() << "Failing to add binary, the code is " << code << ".";
     return;
@@ -235,17 +224,22 @@ void Model::AddPool2d(op::Pool2d *pool2d) {
   pool2d->SetName(std::string(ie_operand->name));
 }
 
-void Model::AddRelu(op::Relu *relu) {
-  auto inputs = relu->Inputs();
+void Model::AddUnary(op::Unary *unary) {
+  auto inputs = unary->Inputs();
   ie_operand_t input;
   input.name = const_cast<char *>(inputs[0]->GetName().c_str());
-  ie_operand_t *ie_operand;
-  IEStatusCode code = IE(ie_model_add_relu)(ie_model_, &input, &ie_operand);
+  ie_operand_t *ie_operand = nullptr;
+  IEStatusCode code = NOT_FOUND;
+  if (unary->GetType() == op::UnaryOpType::kRelu) {
+    code = IE(ie_model_add_relu)(ie_model_, &input, &ie_operand);
+  } else if (unary->GetType() == op::UnaryOpType::kSoftmax) {
+    code = IE(ie_model_add_softmax)(ie_model_, &input, &ie_operand);
+  }
   if (code != IEStatusCode::OK) {
     dawn::ErrorLog() << "Failing to add relu, the code is " << code << ".";
     return;
   }
-  relu->SetName(std::string(ie_operand->name));
+  unary->SetName(std::string(ie_operand->name));
 }
 
 void Model::AddReshape(op::Reshape *reshape) {
@@ -261,19 +255,6 @@ void Model::AddReshape(op::Reshape *reshape) {
     return;
   }
   reshape->SetName(std::string(ie_operand->name));
-}
-
-void Model::AddSoftmax(op::Softmax *softmax) {
-  auto inputs = softmax->Inputs();
-  ie_operand_t input;
-  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
-  ie_operand_t *ie_operand;
-  IEStatusCode code = IE(ie_model_add_softmax)(ie_model_, &input, &ie_operand);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add softmax, the code is " << code << ".";
-    return;
-  }
-  softmax->SetName(std::string(ie_operand->name));
 }
 
 void Model::AddTranspose(op::Transpose *transpose) {

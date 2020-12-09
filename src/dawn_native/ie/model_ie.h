@@ -11,11 +11,10 @@
 #include "dawn_native/ops/constant.h"
 #include "dawn_native/ops/conv2d.h"
 #include "dawn_native/ops/input.h"
-#include "dawn_native/ops/matmul.h"
-#include "dawn_native/ops/relu.h"
+#include "dawn_native/ops/pool2d.h"
 #include "dawn_native/ops/reshape.h"
-#include "dawn_native/ops/softmax.h"
 #include "dawn_native/ops/transpose.h"
+#include "dawn_native/ops/unary.h"
 
 namespace dawn_native {
 
@@ -28,14 +27,12 @@ public:
 
   virtual void AddConstant(op::Constant *constant) override;
   virtual void AddInput(op::Input *input) override;
-  virtual void AddMatMul(op::MatMul *mat_mul) override;
   virtual void AddBinary(op::Binary *binary) override;
   virtual void AddConv2d(op::Conv2d *conv2d) override;
   virtual void AddPool2d(op::Pool2d *pool2d) override;
-  virtual void AddRelu(op::Relu *relu) override;
   virtual void AddReshape(op::Reshape *relu) override;
-  virtual void AddSoftmax(op::Softmax *softmax) override;
   virtual void AddTranspose(op::Transpose *transpose) override;
+  virtual void AddUnary(op::Unary *unary) override;
 
   const OperandBase *GetNamedOperand(std::string name);
   ie_model_t *GetInferenceEngineModel();

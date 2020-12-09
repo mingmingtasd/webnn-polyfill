@@ -14,15 +14,24 @@ namespace op {
 
 class Transpose final : public OperandBase {
 public:
-  Transpose(OperandBase *input, TransposeOptions const *options);
+  Transpose(OperandBase *input, TransposeOptions const *options)
+      : OperandBase({input}) {
+    if (options) {
+      permutation_.assign(options->permutation,
+                          options->permutation + options->permutationCount);
+      options_.permutation = permutation_.data();
+      options_.permutationCount = permutation_.size();
+    }
+  }
   ~Transpose() override = default;
 
-  void AddToModel(ModelBase *model) override;
+  void AddToModel(ModelBase *model) override { model->AddTranspose(this); }
 
-  TransposeOptions const *Options();
+  TransposeOptions const *Options() { return &options_; }
 
 private:
   TransposeOptions options_;
+  std::vector<int32_t> permutation_;
 };
 
 } // namespace op
