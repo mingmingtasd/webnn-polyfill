@@ -21,7 +21,7 @@ import utils from '../utils.js';
   const result = await lenet.predict(input);
   const inferenceTime = Date.now() - start.toFixed(2);
   console.log(`execution elapsed time: ${inferenceTime.toFixed(2)} ms`);
-  const expected = [ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0];
+  const expected = [ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0];
   utils.checkValue(result, expected);
   console.log("sucess for outputs buffer " + result);
 })();

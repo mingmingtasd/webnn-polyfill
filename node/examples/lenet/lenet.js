@@ -131,8 +131,8 @@ class LeNet {
   async predict(inputBuffer) {
     const inputs = {input: {buffer: inputBuffer}};
     const outputs = await this.compilation_.compute(inputs);
-    console.log(outputs.buffer);
-    return outputs.buffer;
+    console.log(outputs.output.buffer);
+    return outputs.output.buffer;
   }
 }
 

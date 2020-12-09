@@ -43,6 +43,6 @@ describe('test relu', function() {
       0.,        1.1774449, 0.8999488,  0.,         1.0122099, 0.,
       0.,        0.,        1.4515465,  0.,         2.0361354, 0.7899623,
     ];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   });
 });

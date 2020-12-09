@@ -20,7 +20,7 @@ describe('test reshape', function() {
     const outputs = await compiledModel.compute(inputs);
     // utils.checkShape(
     //     outputs.y.dimensions, expectedShape ? expectedShape : newShape);
-    utils.checkValue(outputs.buffer, inputBuffer);
+    utils.checkValue(outputs.y.buffer, inputBuffer);
   }
 
   it('reshape reordered_all_dims', async function() {

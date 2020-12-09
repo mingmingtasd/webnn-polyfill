@@ -15,7 +15,7 @@ describe('test transpose', function() {
     const inputs = {'x': {buffer: new Float32Array(inputData)}};
     const outputs = await compiledModel.compute(inputs);
     // utils.checkShape(outputs.y.dimensions, expectedShape);
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   }
 
   it('transpose default', async function() {

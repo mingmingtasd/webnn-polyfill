@@ -21,7 +21,7 @@ describe('test pool2d', function() {
     const outputs = await compiledModel.compute(inputs);
     // utils.checkShape(outputs.y.dimensions, [1, 1, 2, 2]);
     const expected = [11, 12, 15, 16];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   });
 
   it('maxPool2d dilations', async function() {
@@ -41,7 +41,7 @@ describe('test pool2d', function() {
     const outputs = await compiledModel.compute(inputs);
     // utils.checkShape(outputs.y.dimensions, [1, 1, 2, 2]);
     const expected = [11, 12, 15, 16];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   });
 
   it('maxPool2d pads', async function() {
@@ -66,7 +66,7 @@ describe('test pool2d', function() {
       13, 14, 15, 15, 15, 18, 19, 20, 20, 20, 23, 24, 25,
       25, 25, 23, 24, 25, 25, 25, 23, 24, 25, 25, 25,
     ];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   });
 
   it('maxPool2d strides', async function() {
@@ -88,7 +88,7 @@ describe('test pool2d', function() {
     const outputs = await compiledModel.compute(inputs);
     // utils.checkShape(outputs.y.dimensions, [1, 1, 2, 2]);
     const expected = [7, 9, 17, 19];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   });
 
   it('averagePool2d', async function() {
@@ -107,7 +107,7 @@ describe('test pool2d', function() {
     const outputs = await compiledModel.compute(inputs);
     // utils.checkShape(outputs.y.dimensions, [1, 1, 2, 2]);
     const expected = [6, 7, 10, 11];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   });
 
   it('averagePool2d pads', async function() {
@@ -132,7 +132,7 @@ describe('test pool2d', function() {
       7,    7.5, 8,    8.5, 9,    9.5, 10,   10.5, 11,   11.5, 12,   12.5, 13,
       13.5, 14,  14.5, 15,  15.5, 16,  16.5, 17,   17.5, 18,   18.5, 19,
     ];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   });
 
   it('averagePool2d strides', async function() {
@@ -154,7 +154,7 @@ describe('test pool2d', function() {
     const outputs = await compiledModel.compute(inputs);
     // utils.checkShape(outputs.y.dimensions, [1, 1, 2, 2]);
     const expected = [4, 6, 14, 16];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   });
 
   it('global averagePool2d', async function() {
@@ -187,6 +187,6 @@ describe('test pool2d', function() {
     const outputs = await compiledModel.compute(inputs);
     // utils.checkShape(outputs.y.dimensions, [1, 3, 1, 1]);
     const expected = [0.07170041, 0.05194739, 0.07117923];
-    utils.checkValue(outputs.buffer, expected);
+    utils.checkValue(outputs.y.buffer, expected);
   });
 });
