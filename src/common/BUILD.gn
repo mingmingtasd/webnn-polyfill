@@ -59,6 +59,14 @@ config("dawn_internal") {
     defines += [ "DAWN_ABORT_ON_ASSERT" ]
   }
 
+  if (dawn_enable_ie) {
+    defines += [ "DAWN_ENABLE_BACKEND_IE" ]
+  }
+
+  if (dawn_enable_dml) {
+    defines += [ "DAWN_ENABLE_BACKEND_DML" ]
+  }
+
   if (dawn_enable_d3d12) {
     defines += [ "DAWN_ENABLE_BACKEND_D3D12" ]
   }

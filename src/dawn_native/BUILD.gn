@@ -125,18 +125,64 @@ source_set("dawn_native_sources") {
     "ops/unary.h",
   ]
 
-  sources += [
-    "ie/compilation_ie.cc",
-    "ie/compilation_ie.h",
-    "ie/ienn_symbol_table.cc",
-    "ie/ienn_symbol_table.h",
-    "ie/late_binding_symbol_table.cc",
-    "ie/late_binding_symbol_table.h",
-    "ie/model_builder_ie.cc",
-    "ie/model_builder_ie.h",
-    "ie/model_ie.cc",
-    "ie/model_ie.h",
-  ]
+  if (dawn_enable_ie) {
+    sources += [
+      "ie/compilation_ie.cc",
+      "ie/compilation_ie.h",
+      "ie/ienn_symbol_table.cc",
+      "ie/ienn_symbol_table.h",
+      "ie/late_binding_symbol_table.cc",
+      "ie/late_binding_symbol_table.h",
+      "ie/model_builder_ie.cc",
+      "ie/model_builder_ie.h",
+      "ie/model_ie.cc",
+      "ie/model_ie.h",
+    ]
+  }
+
+  if (dawn_enable_dml) {
+    sources += [
+      "dml/deps/src/device.cpp",
+      "dml/deps/src/device.h",
+      "dml/deps/src/model.h",
+      "dml/deps/src/precomp.h",
+      "dml/deps/src/typeconvert.h",
+      "dml/deps/src/util.cpp",
+      "dml/deps/src/util.h",
+    ]
+
+    sources += [
+      "dml/compilation_dml.cc",
+      "dml/compilation_dml.h",
+      "dml/model_builder_dml.cc",
+      "dml/model_builder_dml.h",
+      "dml/model_dml.cc",
+      "dml/model_dml.h",
+    ]
+
+    include_dirs = [
+      "dml/deps/"
+    ]
+
+    lib_dirs = [
+      "dml/deps/microsoft.ai.directml.1.4.0/bin/x64-win"
+    ]
+
+    libs = [
+      "dxgi.lib", 
+      "d3d12.lib",
+      "directml.lib"
+    ]
+
+    cflags = [
+      "/std:c++17",
+      "-Wno-address-of-temporary",
+      "-Wno-logical-not-parentheses",
+      "-Wno-extra-semi-stmt",
+      "-Wno-c++98-compat-extra-semi",
+      "-Wno-macro-redefined",
+    ]
+  }
 }
 
 # The static and shared libraries for dawn_native. Most of the files are
@@ -161,17 +207,29 @@ dawn_component("dawn_native") {
   ]
 }
 
-if (is_win) {
-  ie_nn_dll = "ie_nn_c_api.dll"
-  os_folder = "Windows64"
-} else if (is_linux) {
-  ie_nn_dll = "libie_nn_c_api.so"
-  os_folder = "Linux64"
+if (dawn_enable_ie) {
+  if (is_win) {
+    ie_nn_dll = "ie_nn_c_api.dll"
+    os_folder = "Windows64"
+  } else if (is_linux) {
+    ie_nn_dll = "libie_nn_c_api.so"
+    os_folder = "Linux64"
+  }
+  if (is_win || is_linux) {
+    ie_nn_dll_path = "//src/dawn_native/ie/ienn/lib/${os_folder}"
+    copy("copy_ie_nn_dll") {
+      sources = [ "${ie_nn_dll_path}/${ie_nn_dll}" ]
+      outputs = [ "$root_out_dir/{{source_file_part}}" ]
+    }
+  }
 }
-if (is_win || is_linux) {
-  ie_nn_dll_path = "//src/dawn_native/ie/ienn/lib/${os_folder}"
-  copy("copy_ie_nn_dll") {
-    sources = [ "${ie_nn_dll_path}/${ie_nn_dll}" ]
+
+if (dawn_enable_dml) {
+  dml_dll = "DirectML.dll"
+  os_folder = "x64-win"
+  dml_dll_path = "//src/dawn_native/dml/deps/microsoft.ai.directml.1.4.0/bin/${os_folder}"
+  copy("copy_dml_dll") {
+    sources = [ "${dml_dll_path}/${dml_dll}" ]
     outputs = [ "$root_out_dir/{{source_file_part}}" ]
   }
 }

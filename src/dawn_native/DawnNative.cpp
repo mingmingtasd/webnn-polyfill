@@ -23,16 +23,21 @@
 
 // Contains the entry-points into dawn_native
 namespace dawn_native {
-namespace ie {
-ModelBuilderBase *Create();
-}
+namespace ie { ModelBuilderBase *Create(); }
+namespace dml { ModelBuilderBase* Create(); }
 // Context
 NeuralNetworkContext::NeuralNetworkContext() = default;
 
 NeuralNetworkContext::~NeuralNetworkContext() = default;
 
 WNNModelBuilder NeuralNetworkContext::CreateModelBuilder() {
+#if defined(DAWN_ENABLE_BACKEND_IE)
   return reinterpret_cast<WNNModelBuilder>(ie::Create());
+#elif defined(DAWN_ENABLE_BACKEND_DML)
+  return reinterpret_cast<WNNModelBuilder>(dml::Create());
+#else
+  return nullptr;
+#endif
 }
 
 DawnProcTable GetProcsAutogen();
