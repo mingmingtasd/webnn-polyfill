@@ -22,6 +22,7 @@
 #include <utility>
 #include <type_traits>
 #include <functional>
+#include <stdexcept>
 
 #if !DMLX_USE_ABSEIL
     #include <optional>
@@ -604,6 +605,24 @@ namespace dml
 
     } // namespace detail
 
+    class Expression
+    {
+    public:
+        /*implicit*/ Expression(detail::NodeOutput* nodeOutput = nullptr)
+            : m_nodeOutput(nodeOutput)
+        {}
+
+        // Returns a struct containing the required properties of the tensor to hold the output of this expression,
+        // once evaluated.
+        const TensorDesc& GetOutputDesc() const { return Impl()->GetOutputDesc(); }
+
+        // For internal use only
+        detail::NodeOutput* Impl() const { return m_nodeOutput; }
+
+    private:
+        detail::NodeOutput* m_nodeOutput; // weak; this is owned by the GraphBuilder
+    };
+
     class Graph
     {
     public:
@@ -632,7 +651,7 @@ namespace dml
                 IDMLDevice* device = m_graphBuilder->GetDevice();
 
                 Microsoft::WRL::ComPtr<IDMLCompiledOperator> compiledOp;
-                DMLX_THROW_IF_FAILED(device->CompileOperator(graph.nodes[0].Operator, flags, IID_PPV_ARGS(&compiledOp)));
+                DMLX_THROW_IF_FAILED(device->CompileOperator(graph.nodes[0].Operator, flags, IID_PPV_ARGS(&compiledOp)))
 
                 return compiledOp;
             }
@@ -674,10 +693,10 @@ namespace dml
             graphDesc.IntermediateEdges = intermediateEdges.data();
 
             Microsoft::WRL::ComPtr<IDMLDevice1> device1;
-            DMLX_THROW_IF_FAILED(m_graphBuilder->GetDevice()->QueryInterface(IID_PPV_ARGS(&device1)));
+            DMLX_THROW_IF_FAILED(m_graphBuilder->GetDevice()->QueryInterface(IID_PPV_ARGS(&device1)))
 
             Microsoft::WRL::ComPtr<IDMLCompiledOperator> compiledGraph;
-            DMLX_THROW_IF_FAILED(device1->CompileGraph(&graphDesc, flags, IID_PPV_ARGS(&compiledGraph)));
+            DMLX_THROW_IF_FAILED(device1->CompileGraph(&graphDesc, flags, IID_PPV_ARGS(&compiledGraph)))
 
             return compiledGraph;
         }
@@ -686,23 +705,7 @@ namespace dml
         std::unique_ptr<detail::GraphBuilder> m_graphBuilder;
     };
 
-    class Expression
-    {
-    public:
-        /*implicit*/ Expression(detail::NodeOutput* nodeOutput = nullptr)
-            : m_nodeOutput(nodeOutput)
-        {}
-
-        // Returns a struct containing the required properties of the tensor to hold the output of this expression,
-        // once evaluated.
-        const TensorDesc& GetOutputDesc() const { return Impl()->GetOutputDesc(); }
-
-        // For internal use only
-        detail::NodeOutput* Impl() const { return m_nodeOutput; }
-
-    private:
-        detail::NodeOutput* m_nodeOutput; // weak; this is owned by the GraphBuilder
-    };
+   
 
     // Represents an activation to be fused with an existing operator. The meaning of param1 and param2 depend on the
     // activation to be fused.
@@ -1755,7 +1758,7 @@ namespace dml
             else
             {
                 assert(false);
-                DMLX_THROW(E_UNEXPECTED);
+                DMLX_THROW(E_UNEXPECTED)
             }
         }
 
@@ -2781,7 +2784,7 @@ namespace dml
         uint32_t activationCount = static_cast<uint32_t>(activationDescs.size());
         if (activationCount > 4)
         {
-            DMLX_THROW(E_INVALIDARG);
+            DMLX_THROW(E_INVALIDARG)
         }
 
         detail::FusedActivationStorage storage[4];
@@ -3260,7 +3263,7 @@ namespace dml
             DML_OPERATOR_DESC opDesc = { type, desc };
 
             Microsoft::WRL::ComPtr<IDMLOperator> op;
-            DMLX_THROW_IF_FAILED(m_device->CreateOperator(&opDesc, IID_PPV_ARGS(&op)));
+            DMLX_THROW_IF_FAILED(m_device->CreateOperator(&opDesc, IID_PPV_ARGS(&op)))
 
             OperatorNode node = {};
             node.op = std::move(op);
@@ -3303,7 +3306,7 @@ namespace dml
             for (const OperatorNode& node : m_operatorNodes)
             {
                 uint32_t nodeIndex = static_cast<uint32_t>(desc.nodes.size());
-                desc.nodes.push_back(DML_OPERATOR_GRAPH_NODE_DESC{ node.op.Get() });
+                desc.nodes.push_back(DML_OPERATOR_GRAPH_NODE_DESC{ node.op.Get(), nullptr});
 
                 // Walk through each of this node's inputs and add it as an edge
                 const uint32_t inputCount = static_cast<uint32_t>(node.inputs.size());
@@ -3346,7 +3349,7 @@ namespace dml
                     else
                     {
                         assert(false); // Invalid node type
-                        DMLX_THROW(E_UNEXPECTED);
+                        DMLX_THROW(E_UNEXPECTED)
                     }
                 }
             }
@@ -3374,7 +3377,7 @@ namespace dml
                     // It's not valid to connect an output of the graph directly to an input without an intervening
                     // node. If this behavior is desired, it should instead be accomplished with a copy e.g. using
                     // the elementwise identity operator.
-                    DMLX_THROW(E_INVALIDARG);
+                    DMLX_THROW(E_INVALIDARG)
                 }
 
                 assert(outputNode.type == NodeType::Operator);

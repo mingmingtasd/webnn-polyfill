@@ -138,7 +138,7 @@ public:
     template <typename T>
     T* AllocateUsing(const T& src)
     {
-        T* t = this->Allocate<T>();
+        T* t = this->template Allocate<T>();
         *t = src;
         return t;
     }
@@ -146,7 +146,7 @@ public:
     template <typename T>
     T* AllocateArrayUsing(dml::Span<const T> src)
     {
-        T* t = this->Allocate<T>(src.size());
+        T* t = this->template Allocate<T>(src.size());
         std::copy(src.begin(), src.end(), t);
         return t;
     }
@@ -163,7 +163,7 @@ public:
     DML_BUFFER_ARRAY_BINDING Convert(const DmlBufferArrayBinding& src)
     {
         const size_t count = src.bindings.size();
-        DML_BUFFER_BINDING* bindings = this->Allocate<DML_BUFFER_BINDING>(count);
+        DML_BUFFER_BINDING* bindings = this->template Allocate<DML_BUFFER_BINDING>(count);
         for (size_t i = 0; i < count; ++i)
         {
             bindings[i] = Convert(src.bindings[i]);
@@ -185,7 +185,7 @@ public:
 
     DML_BINDING_DESC ToBindingDesc(const DmlBufferBinding& src)
     {
-        auto* binding = this->Allocate<DML_BUFFER_BINDING>();
+        auto* binding = this->template Allocate<DML_BUFFER_BINDING>();
         *binding = Convert(src);
 
         DML_BINDING_DESC dst;
@@ -196,7 +196,7 @@ public:
 
     DML_BINDING_DESC ToBindingDesc(const DmlBufferArrayBinding& src)
     {
-        auto* binding = this->Allocate<DML_BUFFER_ARRAY_BINDING>();
+        auto* binding = this->template Allocate<DML_BUFFER_ARRAY_BINDING>();
         *binding = Convert(src);
 
         DML_BINDING_DESC dst;

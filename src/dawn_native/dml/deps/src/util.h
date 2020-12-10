@@ -6,16 +6,20 @@
 
 #pragma once
 
+// Dawn assert
+#include "common/Assert.h"
+#include "common/Log.h"
+
+#define FAILED(hr) (((HRESULT)(hr)) < 0)
+
 inline void ThrowIfFailed(HRESULT hr)
 {
-    if (FAILED(hr))
-        throw std::exception();
+    DAWN_ASSERT (!FAILED(hr));
 }
 
 inline void ThrowIfNull(void* p)
 {
-    if (!p)
-        throw std::exception();
+    DAWN_ASSERT (!p);
 }
 
 // DML_BUFFER_TENSOR_DESC (DML_TENSOR_TYPE_BUFFER)
