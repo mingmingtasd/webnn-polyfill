@@ -54,9 +54,12 @@ function writeGeneratedFile(path, text, includeNotice = true) {
 
 async function generateBindings(version, enableMinification, includeMemoryLayouts) {
   // copy dawn.json specification from dawn folder into into specification folder
+
+  let specDirPath = pkg.config.SPEC_DIR;
+  if (!fs.existsSync(specDirPath)) fs.mkdirSync(specDirPath);
   fs.copyFileSync(
     DAWN_PATH + "/webnn.json",
-    pkg.config.SPEC_DIR + `/${version}.json`
+    specDirPath + `/${version}.json`
   );
   let JSONspecification = fs.readFileSync(pkg.config.SPEC_DIR + `/${version}.json`, "utf-8");
   let fakePlatform = process.env.npm_config_fake_platform;
