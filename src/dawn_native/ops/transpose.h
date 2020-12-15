@@ -25,7 +25,7 @@ public:
   }
   ~Transpose() override = default;
 
-  void AddToModel(ModelBase *model) override { model->AddTranspose(this); }
+  void AddToModel(ModelBase *model) const override { model->AddTranspose(this); }
 
   TransposeOptions const *Options() { return &options_; }
 

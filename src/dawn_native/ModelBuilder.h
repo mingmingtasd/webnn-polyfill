@@ -31,7 +31,12 @@ public:
   ModelBase *CreateModel(NamedOperandsBase const *named_operands);
 
 private:
-  virtual ModelBase *CreateModelImpl(NamedOperandsBase const *named_operand) = 0;
+  // Create concrete model.
+  virtual ModelBase *CreateModelImpl() = 0;
+
+  // Topological sort of nodes needed to compute root_nodes
+  std::vector<const OperandBase*> TopologicalSort(
+    std::vector<const OperandBase*>& root_nodes);
 };
 
 } // namespace dawn_native

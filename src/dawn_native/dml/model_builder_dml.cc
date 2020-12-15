@@ -9,19 +9,13 @@ namespace dawn_native {
 
 namespace dml {
 
-pydml::Device* ModelBuilder::g_dml_device_ = nullptr;
-
 ModelBuilderBase *Create() {
   Ref<ModelBuilderBase> builder = AcquireRef(new ModelBuilder());
   return builder.Detach();
 }
 
-ModelBase *ModelBuilder::CreateModelImpl(
-    NamedOperandsBase const *named_operands) {
-  if (g_dml_device_ == nullptr) {
-    g_dml_device_ = new pydml::Device();
-  }
-  Ref<ModelBase> model = AcquireRef(new Model(named_operands));
+ModelBase *ModelBuilder::CreateModelImpl() {
+  Ref<ModelBase> model = AcquireRef(new Model());
   return model.Detach();
 }
 

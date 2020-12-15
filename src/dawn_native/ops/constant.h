@@ -24,7 +24,7 @@ public:
   }
   ~Constant() override = default;
 
-  void AddToModel(ModelBase *model) override { model->AddConstant(this); }
+  void AddToModel(ModelBase *model) const override { model->AddConstant(this); }
 
   const OperandDescriptor *GetOperandDescriptor() { return &descriptor_; }
   void const *GetValue() { return value_; }

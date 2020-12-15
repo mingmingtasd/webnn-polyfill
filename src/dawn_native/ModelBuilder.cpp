@@ -2,6 +2,9 @@
 #include "dawn_native/ModelBuilder.h"
 
 #include <string>
+#include <vector>
+#include <stack>
+#include <unordered_set>
 
 #include "common/Assert.h"
 #include "common/RefCounted.h"
@@ -94,7 +97,50 @@ OperandBase *ModelBuilderBase::Transpose(OperandBase *input,
 }
 
 ModelBase *ModelBuilderBase::CreateModel(NamedOperandsBase const *named_operands) {
-  return CreateModelImpl(named_operands);
+  ModelBase* model = CreateModelImpl();
+  std::vector<const OperandBase*> outputs;
+  for (auto& named_output : named_operands->GetRecords()) {
+    outputs.push_back(named_output.second);
+  }
+  std::vector<const OperandBase*> sorted_operands = TopologicalSort(outputs);
+  for (auto& op : sorted_operands) {
+    op->AddToModel(model);
+  }
+  for (auto& output : outputs) {
+    model->AddOutput(output);
+  }
+  return model;
+}
+
+std::vector<const OperandBase*> ModelBuilderBase::TopologicalSort(
+    std::vector<const OperandBase*>& root_nodes) {
+  std::stack<const OperandBase*> nodes_to_do;
+  std::unordered_set<const OperandBase*> nodes_done;
+  std::vector<const OperandBase*> result;
+
+  for (auto& node : root_nodes) {
+    nodes_to_do.push(node);
+  }
+  while (nodes_to_do.size() > 0) {
+    const OperandBase* node = nodes_to_do.top();
+    if (nodes_done.count(node) == 0) {
+      bool can_add = true;
+      for (auto& dep : node->Inputs()) {
+        if (nodes_done.count(dep.Get()) == 0){
+          can_add = false;
+          nodes_to_do.push(dep.Get());
+        }
+      }
+      if (can_add) {
+        result.push_back(node);
+        nodes_to_do.pop();
+        nodes_done.insert(node);
+      }
+    } else {
+      nodes_to_do.pop();
+    }
+  }
+  return result;
 }
 
 } // namespace dawn_native

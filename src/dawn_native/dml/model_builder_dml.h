@@ -3,8 +3,6 @@
 
 #include "dawn_native/ModelBuilder.h"
 
-namespace pydml { class Device; }
-
 namespace dawn_native {
 
 namespace dml {
@@ -15,9 +13,7 @@ public:
   ModelBuilder() = default;
 
 private:
-  ModelBase *CreateModelImpl(NamedOperandsBase const *named_operand) override;
-
-  static pydml::Device* g_dml_device_;
+  ModelBase *CreateModelImpl() override;
 };
 
 } // namespace dml

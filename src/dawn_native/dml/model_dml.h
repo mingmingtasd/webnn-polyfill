@@ -21,17 +21,18 @@ namespace dml {
 
 class Model : public ModelBase {
 public:
-  Model(NamedOperandsBase const *named_operands);
+  Model();
   ~Model() override = default;
 
-  virtual void AddConstant(op::Constant *constant) override;
-  virtual void AddInput(op::Input *input) override;
-  virtual void AddBinary(op::Binary *binary) override;
-  virtual void AddConv2d(op::Conv2d *conv2d) override;
-  virtual void AddPool2d(op::Pool2d *pool2d) override;
-  virtual void AddReshape(op::Reshape *relu) override;
-  virtual void AddTranspose(op::Transpose *transpose) override;
-  virtual void AddUnary(op::Unary *unary) override;
+  virtual void AddConstant(const op::Constant *constant) override;
+  virtual void AddInput(const op::Input *input) override;
+  virtual void AddOutput(const OperandBase* output) override;
+  virtual void AddBinary(const op::Binary *binary) override;
+  virtual void AddConv2d(const op::Conv2d *conv2d) override;
+  virtual void AddPool2d(const op::Pool2d *pool2d) override;
+  virtual void AddReshape(const op::Reshape *relu) override;
+  virtual void AddTranspose(const op::Transpose *transpose) override;
+  virtual void AddUnary(const op::Unary *unary) override;
 
 private:
   void CompileImpl(WNNCompileCallback callback, void *userdata,

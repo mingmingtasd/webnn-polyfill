@@ -51,7 +51,7 @@ Pool2d::Pool2d(Pool2dType type, OperandBase *input,
   options_.layout = options->layout;
 }
 
-void Pool2d::AddToModel(ModelBase *model) { model->AddPool2d(this); }
+void Pool2d::AddToModel(ModelBase *model) const { model->AddPool2d(this); }
 
 Pool2dOptions const *Pool2d::Options() { return &options_; }
 

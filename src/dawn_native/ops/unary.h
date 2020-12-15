@@ -23,7 +23,7 @@ public:
       OperandBase({input}), type_(type) {}
   ~Unary() override = default;
 
-  void AddToModel(ModelBase *model) override { model->AddUnary(this); }
+  void AddToModel(ModelBase *model) const override { model->AddUnary(this); }
   UnaryOpType GetType() { return type_; }
 
 private:

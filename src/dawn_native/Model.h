@@ -29,14 +29,15 @@ public:
   void Compile(WNNCompileCallback callback, void *userdata,
                CompilationOptions const *options);
 
-  virtual void AddConstant(op::Constant *constant) = 0;
-  virtual void AddInput(op::Input *input) = 0;
-  virtual void AddBinary(op::Binary *binary) = 0;
-  virtual void AddConv2d(op::Conv2d *conv2d) = 0;
-  virtual void AddPool2d(op::Pool2d *pool2d) = 0;
-  virtual void AddReshape(op::Reshape *relu) = 0;
-  virtual void AddTranspose(op::Transpose *transpose) = 0;
-  virtual void AddUnary(op::Unary *unary) = 0;
+  virtual void AddConstant(const op::Constant *constant) = 0;
+  virtual void AddInput(const op::Input *input) = 0;
+  virtual void AddOutput(const OperandBase* output) = 0;
+  virtual void AddBinary(const op::Binary *binary) = 0;
+  virtual void AddConv2d(const op::Conv2d *conv2d) = 0;
+  virtual void AddPool2d(const op::Pool2d *pool2d) = 0;
+  virtual void AddReshape(const op::Reshape *relu) = 0;
+  virtual void AddTranspose(const op::Transpose *transpose) = 0;
+  virtual void AddUnary(const op::Unary *unary) = 0;
 
 private:
   virtual void CompileImpl(WNNCompileCallback callback, void *userdata,

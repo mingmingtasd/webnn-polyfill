@@ -20,7 +20,7 @@ public:
   }
   ~Reshape() override = default;
 
-  void AddToModel(ModelBase *model) override { model->AddReshape(this); }
+  void AddToModel(ModelBase *model) const override { model->AddReshape(this); }
 
   int32_t const *GetNewShape() { return new_shape_.data(); }
   size_t GetNewShapeCount() { return new_shape_.size(); }

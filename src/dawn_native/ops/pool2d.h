@@ -23,7 +23,7 @@ public:
   Pool2d(Pool2dType type, OperandBase *input, Pool2dOptions const *options);
   ~Pool2d() override = default;
 
-  void AddToModel(ModelBase *model) override;
+  void AddToModel(ModelBase *model) const override;
 
   Pool2dOptions const *Options();
   Pool2dType GetType();

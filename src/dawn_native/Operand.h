@@ -19,7 +19,7 @@ public:
   // It's used for getting inputs when traversaling model tree.
   const std::vector<Ref<OperandBase>> &Inputs() const;
   // Add the operand to model for specific backend.
-  virtual void AddToModel(ModelBase *model);
+  virtual void AddToModel(ModelBase *model) const;
   // The name is uniquely identifies getting from native api.
   void SetName(std::string name);
   const std::string& GetName() const {
