@@ -53,6 +53,10 @@ dawn_sample("matmul") {
   sources = [ "matmul.cpp" ]
 }
 
+dawn_sample("lenet") {
+  sources = [ "lenet.cpp" ]
+}
+
 dawn_sample("add") {
   sources = [ "add.cpp" ]
 }
