@@ -2,7 +2,6 @@
 
 #include "common/Log.h"
 #include "dawn_native/dml/model_dml.h"
-
 #include "dawn_native/dml/deps/src/precomp.h"
 
 namespace dawn_native {

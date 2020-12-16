@@ -29,7 +29,7 @@ public:
   ~Binary() override = default;
 
   void AddToModel(ModelBase *model) const override { model->AddBinary(this); }
-  BinaryOpType GetType() { return type_; }
+  BinaryOpType GetType() const { return type_; }
 
 private:
   BinaryOpType type_;

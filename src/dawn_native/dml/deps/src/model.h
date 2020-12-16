@@ -24,14 +24,9 @@ namespace pydml
     struct TensorData
     {
         TensorData(void * buffer,
-                   size_t size,
-                   int32_t const * dimensions,
-                   uint32_t dimensionsCount) :
+                   size_t size) :
             buffer_(buffer),
-            size_(size)
-        {
-            dimensions_.assign(dimensions, dimensions + dimensionsCount);
-        }
+            size_(size) {}
 
         TensorData(dml::TensorDesc* desc)
         {
@@ -59,11 +54,9 @@ namespace pydml
     {
         explicit Binding(dml::Expression& expression, 
                          void * buffer,
-                         size_t size,
-                         int32_t const * dimensions,
-                         uint32_t dimensionsCount)
+                         size_t size)
             :   desc(expression.GetOutputDesc()),
-                data(buffer, size, dimensions, dimensionsCount)
+                data(buffer, size)
         {}
 
         Binding() = default;

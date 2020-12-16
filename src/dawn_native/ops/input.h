@@ -29,8 +29,8 @@ public:
 
   void AddToModel(ModelBase *model) const override { model->AddInput(this); }
 
-  const OperandDescriptor *GetOperandDescriptor() { return &descriptor_; }
-  const std::string& GetUserName() { return user_name_; }
+  const OperandDescriptor *GetOperandDescriptor() const { return &descriptor_; }
+  const std::string& GetUserName() const { return user_name_; }
 
 private:
   std::string user_name_;

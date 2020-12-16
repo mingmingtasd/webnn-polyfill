@@ -31,7 +31,7 @@ public:
 
   virtual void AddConstant(const op::Constant *constant) = 0;
   virtual void AddInput(const op::Input *input) = 0;
-  virtual void AddOutput(const OperandBase* output) = 0;
+  virtual void AddOutput(const std::string& name, const OperandBase* output) = 0;
   virtual void AddBinary(const op::Binary *binary) = 0;
   virtual void AddConv2d(const op::Conv2d *conv2d) = 0;
   virtual void AddPool2d(const op::Pool2d *pool2d) = 0;

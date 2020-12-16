@@ -15,6 +15,16 @@
 #include "dawn_native/ops/transpose.h"
 #include "dawn_native/ops/unary.h"
 
+namespace dml {
+class Graph;
+class Expression;
+}
+
+namespace pydml {
+class Device;
+struct Binding;
+}
+
 namespace dawn_native {
 
 namespace dml {
@@ -26,7 +36,7 @@ public:
 
   virtual void AddConstant(const op::Constant *constant) override;
   virtual void AddInput(const op::Input *input) override;
-  virtual void AddOutput(const OperandBase* output) override;
+  virtual void AddOutput(const std::string& name, const OperandBase* output) override;
   virtual void AddBinary(const op::Binary *binary) override;
   virtual void AddConv2d(const op::Conv2d *conv2d) override;
   virtual void AddPool2d(const op::Pool2d *pool2d) override;
@@ -34,9 +44,18 @@ public:
   virtual void AddTranspose(const op::Transpose *transpose) override;
   virtual void AddUnary(const op::Unary *unary) override;
 
+  friend class Compilation;
 private:
   void CompileImpl(WNNCompileCallback callback, void *userdata,
                    CompilationOptions const *options) override;
+
+  std::shared_ptr<::pydml::Device> device_;
+  std::unique_ptr<::dml::Graph> graph_;
+  uint32_t input_index_;
+  std::map<const OperandBase*, ::dml::Expression> expressions_;
+  std::vector<std::unique_ptr<::pydml::Binding>> bindings_;
+  std::map<std::string, ::dml::Expression> inputs_;
+  std::map<std::string, ::dml::Expression> outputs_;
 };
 
 } // namespace dml

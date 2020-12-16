@@ -2,53 +2,124 @@
 
 #include "common/Assert.h"
 #include "common/Log.h"
+#include "dawn_native/dml/deps/src/precomp.h"
+#include "dawn_native/dml/compilation_dml.h"
 
 namespace dawn_native {
 namespace dml {
 
-Model::Model() {
-  DAWN_DEBUG();
+namespace {
+DML_TENSOR_DATA_TYPE getDmlTensorDataType(wnn::OperandType operand_type) {
+  if (operand_type == wnn::OperandType::Float32) {
+    return DML_TENSOR_DATA_TYPE_FLOAT32;
+  } else if (operand_type == wnn::OperandType::Float16) {
+    return DML_TENSOR_DATA_TYPE_FLOAT16;
+  } else if (operand_type == wnn::OperandType::Int32) {
+    return DML_TENSOR_DATA_TYPE_INT32;
+  } else if (operand_type == wnn::OperandType::Uint32) {
+    return DML_TENSOR_DATA_TYPE_UINT32;
+  }
+  return DML_TENSOR_DATA_TYPE_UNKNOWN;
+}
+
+::dml::TensorDimensions getDmlTensorDimensions(
+    int32_t const * dimensions, uint32_t dimensionsCount) {
+  // DML dimension order [N, C, H, W]
+  ::dml::TensorDimensions tensor_dimensions({1, 1, 1, 1});
+  DAWN_ASSERT(dimensionsCount <= 4);
+  for (uint32_t i = 0; i < dimensionsCount; ++i) {
+    tensor_dimensions[3 - i] = dimensions[i];
+  }
+  return tensor_dimensions;
+}
+}  // namespace
+
+Model::Model() : input_index_(0) {
+  device_.reset(new ::pydml::Device());
+  graph_.reset(new ::dml::Graph(device_->GetDevice()));
 }
 
 void Model::AddConstant(const op::Constant *constant) {
-  DAWN_DEBUG();
-}
-  
-void Model::AddInput(const op::Input *input) {
-  DAWN_DEBUG();
+  const OperandDescriptor* desc = constant->GetOperandDescriptor();
+  ::dml::TensorDimensions dml_dims =
+      getDmlTensorDimensions(desc->dimensions, desc->dimensionsCount);
+  ::dml::TensorDesc tensor_desc(
+      getDmlTensorDataType(desc->type),
+      ::DML_TENSOR_FLAGS::DML_TENSOR_FLAG_OWNED_BY_DML,
+      dml_dims,
+      ::dml::TensorPolicy::Default());
+  ::dml::Expression exp =
+      ::dml::InputTensor(*graph_, input_index_++, tensor_desc);
+  expressions_.insert(std::make_pair(constant, exp));
+  std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(
+      exp, const_cast<void*>(constant->GetValue()), constant->GetSize()));
+  bindings_.push_back(std::move(binding));
 }
 
-void Model::AddOutput(const OperandBase* output) {
-  DAWN_DEBUG();
+void Model::AddInput(const op::Input *input) {
+  const OperandDescriptor* desc = input->GetOperandDescriptor();
+  ::dml::TensorDimensions dml_dims =
+      getDmlTensorDimensions(desc->dimensions, desc->dimensionsCount);
+  ::dml::TensorDesc tensor_desc(
+      getDmlTensorDataType(desc->type),
+      ::DML_TENSOR_FLAGS::DML_TENSOR_FLAG_OWNED_BY_DML,
+      dml_dims,
+      ::dml::TensorPolicy::Default());
+  ::dml::Expression exp =
+      ::dml::InputTensor(*graph_, input_index_++, tensor_desc);
+  expressions_.insert(std::make_pair(input, exp));
+#ifdef GetUserName
+#undef GetUserName
+  inputs_.insert(std::make_pair(input->GetUserName(), exp));
+#endif
+}
+
+void Model::AddOutput(const std::string& name, const OperandBase* output) {
+  DAWN_ASSERT(expressions_.find(output) != expressions_.end());
+  outputs_.insert(std::make_pair(name, expressions_.at(output)));
 }
   
 void Model::AddBinary(const op::Binary *binary) {
-  DAWN_DEBUG();
+  DAWN_ASSERT(binary->Inputs().size() == 2);
+  DAWN_ASSERT(
+      expressions_.find(binary->Inputs()[0].Get()) != expressions_.end());
+  ::dml::Expression a = expressions_.at(binary->Inputs()[0].Get());
+  DAWN_ASSERT(
+      expressions_.find(binary->Inputs()[1].Get()) != expressions_.end());
+  ::dml::Expression b = expressions_.at(binary->Inputs()[1].Get());
+  ::dml::Expression c;
+  if (binary->GetType() == op::BinaryOpType::kAdd) {
+    c = ::dml::Add(a, b);
+  } else {
+    UNREACHABLE();
+  }
+  expressions_.insert(std::make_pair(binary, c));
 }
 
 void Model::AddConv2d(const op::Conv2d *conv2d) {
-  DAWN_DEBUG();
+  UNREACHABLE();
 }
   
 void Model::AddPool2d(const op::Pool2d *pool2d) {
-  DAWN_DEBUG();
+  UNREACHABLE();
 }
 
 void Model::AddReshape(const op::Reshape *relu) {
-  DAWN_DEBUG();
+  UNREACHABLE();
 }
 
 void Model::AddTranspose(const op::Transpose *transpose) {
-  DAWN_DEBUG();
+  UNREACHABLE();
 }
   
 void Model::AddUnary(const op::Unary *unary) {
-  DAWN_DEBUG();
+  UNREACHABLE();
 }
 
 void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {
-  DAWN_DEBUG();
+  // FIXME(nhu): implement async
+  callback(reinterpret_cast<WNNCompilation>(new Compilation(this)), userdata);
 }
 
 }  // namespace dml
