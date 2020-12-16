@@ -19,7 +19,7 @@ public:
   // It's used for getting inputs when traversaling model tree.
   const std::vector<Ref<OperandBase>> &Inputs() const;
   // Add the operand to model for specific backend.
-  virtual void AddToModel(ModelBase *model) const;
+  virtual MaybeError AddToModel(ModelBase *model) const;
 
 private:
   // the inputs of operand.

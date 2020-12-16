@@ -28,11 +28,10 @@ uint32_t product(const std::vector<int32_t> &dims) {
   return prod;
 }
 
-wnn::ModelBuilder CreateCppModelBuilder() {
+wnn::NeuralNetworkContext CreateCppNeuralNetworkContext() {
   DawnProcTable backendProcs = dawn_native::GetProcs();
   dawnProcSetProcs(&backendProcs);
-  dawn_native::NeuralNetworkContext context;
-  return wnn::ModelBuilder::Acquire(context.CreateModelBuilder());
+  return wnn::NeuralNetworkContext::Acquire(dawn_native::CreateNeuralNetworkContext());
 }
 
 wnn::NamedInputs CreateCppNamedInputs() {
@@ -101,11 +100,17 @@ wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
   UNREACHABLE();
 }
 
-WrappedModel *s_wrapped_model;
-void ComputeCallback(WNNNamedResults impl, void* userData) {
+wnn::NeuralNetworkContext g_context;
+WrappedModel *g_wrapped_model;
+void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
+    char const * message, void* userData) {
+  if (status != WNNComputeStatus_Success) {
+    dawn::ErrorLog() << message;
+    return;
+  }
   wnn::NamedResults outputs = outputs.Acquire(impl);
   wnn::Result output = outputs.Get("output");
-  std::vector<float> expected_data = s_wrapped_model->ExpectedBuffer();
+  std::vector<float> expected_data = g_wrapped_model->ExpectedBuffer();
   bool expected = true;
   for (size_t i = 0; i < output.BufferSize() / sizeof(float); ++i) {
     float output_data = static_cast<const float *>(output.Buffer())[i];
@@ -133,13 +138,19 @@ void ComputeCallback(WNNNamedResults impl, void* userData) {
   if (expected) {
     dawn::InfoLog() << "The output output as expected.";
   }
-  delete s_wrapped_model;
+  delete g_wrapped_model;
+  g_context = nullptr;
 }
 
-void CompilationCallback(WNNCompilation impl, void* userData) {
+void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
+    char const * message, void* userData) {
+  if (status != WNNCompileStatus_Success) {
+    dawn::ErrorLog() << message;
+    return;
+  }
   wnn::Compilation exe = exe.Acquire(impl);
 
-  std::vector<float> input_buffer = s_wrapped_model->InputBuffer();
+  std::vector<float> input_buffer = g_wrapped_model->InputBuffer();
   wnn::Input a;
   a.buffer = input_buffer.data();
   a.size = input_buffer.size() * sizeof(float);
@@ -149,10 +160,17 @@ void CompilationCallback(WNNCompilation impl, void* userData) {
   exe.Compute(inputs, ComputeCallback, nullptr, nullptr);
 }
 
+void ErrorCallback(WNNErrorType type, char const * message, void * userdata) {
+  dawn::ErrorLog() << message;
+}
+
 // Wrapped Compilation
 void Test(WrappedModel *wrapped_model) {
-  s_wrapped_model = wrapped_model;
-  wnn::ModelBuilder builder = CreateCppModelBuilder();
+  g_wrapped_model = wrapped_model;
+  g_context = CreateCppNeuralNetworkContext();
+  g_context.SetUncapturedErrorCallback(ErrorCallback, nullptr);
+
+  wnn::ModelBuilder builder = g_context.CreateModelBuilder();
   wnn::Operand output_operand = wrapped_model->GenerateOutput(builder);
   wnn::NamedOperands named_operands = CreateCppNamedOperands();
   named_operands.Set("output", output_operand);

@@ -1,13 +1,12 @@
 #ifndef WEBNN_NATIVE_COMPILATION_H_
 #define WEBNN_NATIVE_COMPILATION_H_
 
-#include "dawn_native/Forward.h"
 #include "common/RefCounted.h"
-
-#include "dawn_native/dawn_platform.h"
-
+#include "dawn_native/Forward.h"
 #include "dawn_native/NamedInputs.h"
 #include "dawn_native/NamedOutputs.h"
+#include "dawn_native/ObjectBase.h"
+#include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
 
@@ -21,9 +20,9 @@ public:
                void *userdata, NamedOutputsBase *outputs = nullptr);
 
 private:
-  virtual void ComputeImpl(NamedInputsBase *inputs,
-                           WNNComputeCallback callback, void *userdata,
-                           NamedOutputsBase *outputs = nullptr) = 0;
+  virtual ResultOrError<Ref<NamedResultsBase>>
+  ComputeImpl(NamedInputsBase *inputs, NamedOutputsBase *outputs,
+              WNNComputeStatus *status) = 0;
 };
 }
 

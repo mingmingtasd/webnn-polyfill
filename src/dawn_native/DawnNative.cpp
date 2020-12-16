@@ -20,29 +20,28 @@
 #include "dawn_native/Compilation.h"
 #include "dawn_native/ModelBuilder.h"
 
-
 // Contains the entry-points into dawn_native
 namespace dawn_native {
-namespace ie { ModelBuilderBase *Create(); }
-namespace dml { ModelBuilderBase* Create(); }
-// Context
-NeuralNetworkContext::NeuralNetworkContext() = default;
+DawnProcTable GetProcsAutogen();
 
-NeuralNetworkContext::~NeuralNetworkContext() = default;
+DawnProcTable GetProcs() { return GetProcsAutogen(); }
 
-WNNModelBuilder NeuralNetworkContext::CreateModelBuilder() {
+namespace ie {
+NeuralNetworkContextBase *Create();
+}
+namespace dml {
+NeuralNetworkContextBase *Create();
+}
+
+WNNNeuralNetworkContext CreateNeuralNetworkContext() {
 #if defined(DAWN_ENABLE_BACKEND_IE)
-  return reinterpret_cast<WNNModelBuilder>(ie::Create());
+  return reinterpret_cast<WNNNeuralNetworkContext>(ie::Create());
 #elif defined(DAWN_ENABLE_BACKEND_DML)
-  return reinterpret_cast<WNNModelBuilder>(dml::Create());
+  return reinterpret_cast<WNNNeuralNetworkContext>(dml::Create());
 #else
   return nullptr;
 #endif
 }
-
-DawnProcTable GetProcsAutogen();
-
-DawnProcTable GetProcs() { return GetProcsAutogen(); }
 
 WNNNamedInputs CreateNamedInputs() {
   return reinterpret_cast<WNNNamedInputs>(new NamedInputsBase());

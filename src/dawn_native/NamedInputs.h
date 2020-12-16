@@ -5,6 +5,7 @@
 #include <string>
 
 #include "dawn_native/NamedRecords.h"
+#include "dawn_native/dawn_platform.h"
 
 namespace dawn_native {
 

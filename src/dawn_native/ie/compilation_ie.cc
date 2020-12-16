@@ -4,9 +4,10 @@
 #include <vector>
 
 #include "common/Log.h"
+#include "dawn_native/NamedResults.h"
 #include "dawn_native/Operand.h"
 #include "dawn_native/Result.h"
-#include "dawn_native/NamedResults.h"
+#include "error_ie.h"
 #include "ienn_symbol_table.h"
 
 namespace dawn_native {
@@ -21,23 +22,24 @@ public:
   }
 };
 
-Compilation::Compilation(Ref<Model> model) : model_(model) {
+Compilation::Compilation(Ref<Model> model) : model_(model) {}
+
+Compilation::~Compilation() { IE(ie_compilation_free)(ie_compilation_); }
+
+MaybeError Compilation::Init(WNNCompileStatus *status) {
+  *status = WNNCompileStatus_Error;
   // Create compilation for IE backend.
   IEStatusCode code = IE(ie_create_compilation)(
-      model->GetInferenceEngineModel(), &ie_compilation_);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to create compilation for IE.";
-    return;
-  }
+      model_->GetInferenceEngineModel(), &ie_compilation_);
+  DAWN_TRY(CheckStatusCode(code, "IE create compilation"));
+  *status = WNNCompileStatus_Success;
+  return {};
 }
 
-Compilation::~Compilation() {
-  IE(ie_compilation_free)(ie_compilation_);
-}
-
-void Compilation::ComputeImpl(NamedInputsBase *inputs,
-                              WNNComputeCallback callback,
-                              void *userdata, NamedOutputsBase *outputs) {
+ResultOrError<Ref<NamedResultsBase>>
+Compilation::ComputeImpl(NamedInputsBase *inputs, NamedOutputsBase *outputs,
+                         WNNComputeStatus *status) {
+  *status = WNNComputeStatus_Error;
   // Set input data to nGraph.
   for (auto &input : inputs->GetRecords()) {
     ie_operand_t ie_operand;
@@ -45,20 +47,12 @@ void Compilation::ComputeImpl(NamedInputsBase *inputs,
         const_cast<char *>(model_->input_id_map_[input.first].c_str());
     IEStatusCode code = IE(ie_compilation_set_input)(
         ie_compilation_, &ie_operand, input.second->buffer, input.second->size);
-    if (code != IEStatusCode::OK) {
-      dawn::ErrorLog() << "Failing to set input for IE.";
-      callback(nullptr, userdata);
-      return;
-    }
+    DAWN_TRY(CheckStatusCode(code, "IE set input to model"));
   }
 
   // Compute the compiled model.
   IEStatusCode code = IE(ie_compilation_compute)(ie_compilation_);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to compute for IE.";
-    callback(nullptr, userdata);
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE compute model"));
 
   // Get Data from nGraph with output.
   // TODO(junwei). new memory for output data.
@@ -70,32 +64,24 @@ void Compilation::ComputeImpl(NamedInputsBase *inputs,
     size_t buffer_length;
     IEStatusCode code = IE(ie_compilation_get_buffer)(
         ie_compilation_, output_id.data(), &output_buffer, &buffer_length);
-    if (code != IEStatusCode::OK) {
-      dawn::ErrorLog() << "Failing to get output name for IE.";
-      callback(nullptr, userdata);
-      return;
-    }
+    DAWN_TRY(CheckStatusCode(code, "IE get buffer"));
     // TODO(junwei): get the output dimensions;
     std::vector<int32_t> dimensions;
     Ref<ResultBase> result = AcquireRef(
         new Result::ResultBase(output_buffer, buffer_length, dimensions));
     std::string output_name = model_->output_name_map_[output_id];
-    results->Set(output_name.c_str(),
-                  result.Detach());
+    results->Set(output_name.c_str(), result.Detach());
     if (outputs != nullptr) {
-      const Output* output = outputs->GetRecords().at(output_name);
+      const Output *output = outputs->GetRecords().at(output_name);
       ie_operand_t ie_operand;
       ie_operand.name = const_cast<char *>(output_id.c_str());
       IEStatusCode code = IE(ie_compilation_get_output)(
           ie_compilation_, &ie_operand, output->buffer, output->size);
-      if (code != IEStatusCode::OK) {
-        dawn::ErrorLog() << "Failing to get output for IE.";
-        callback(nullptr, userdata);
-      }
+      DAWN_TRY(CheckStatusCode(code, "IE get output"));
     }
   }
-  callback(reinterpret_cast<WNNNamedResults>(results.Detach()), userdata);
-  return;
+  *status = WNNComputeStatus_Success;
+  return std::move(results);
 }
 
 } // namespace ie

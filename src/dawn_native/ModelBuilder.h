@@ -3,16 +3,17 @@
 
 #include "common/RefCounted.h"
 #include "dawn_native/Forward.h"
-#include "dawn_native/dawn_platform.h"
 #include "dawn_native/NamedOperands.h"
+#include "dawn_native/ObjectBase.h"
+#include "dawn_native/dawn_platform.h"
 
 #include <vector>
 
 namespace dawn_native {
 
-class ModelBuilderBase : public RefCounted {
+class ModelBuilderBase : public ObjectBase {
 public:
-  ModelBuilderBase() = default;
+  ModelBuilderBase(NeuralNetworkContextBase *context);
   virtual ~ModelBuilderBase() = default;
 
   // DAWN API
@@ -37,8 +38,8 @@ private:
   virtual ModelBase *CreateModelImpl() = 0;
 
   // Topological sort of nodes needed to compute root_nodes
-  std::vector<const OperandBase*> TopologicalSort(
-    std::vector<const OperandBase*>& root_nodes);
+  std::vector<const OperandBase *>
+  TopologicalSort(std::vector<const OperandBase *> &root_nodes);
 };
 
 } // namespace dawn_native

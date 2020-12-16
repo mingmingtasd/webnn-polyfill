@@ -14,11 +14,11 @@ Pool2d::Pool2d(Pool2dType type, OperandBase *input,
                Pool2dOptions const *options)
     : OperandBase({input}), type_(type) {
   if (options == nullptr || options->windowDimensions == nullptr) {
-    window_dimensions_ = std::vector<int32_t>(2, 1);  
+    window_dimensions_ = std::vector<int32_t>(2, 1);
   } else {
-    window_dimensions_.assign(
-        options->windowDimensions,
-        options->windowDimensions + options->windowDimensionsCount);
+    window_dimensions_.assign(options->windowDimensions,
+                              options->windowDimensions +
+                                  options->windowDimensionsCount);
   }
   options_.windowDimensions = window_dimensions_.data();
   options_.windowDimensionsCount = window_dimensions_.size();
@@ -51,7 +51,9 @@ Pool2d::Pool2d(Pool2dType type, OperandBase *input,
   options_.layout = options->layout;
 }
 
-void Pool2d::AddToModel(ModelBase *model) const { model->AddPool2d(this); }
+MaybeError Pool2d::AddToModel(ModelBase *model) const {
+  return model->AddPool2d(this);
+}
 
 Pool2dOptions const *Pool2d::Options() const { return &options_; }
 

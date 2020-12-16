@@ -11,16 +11,14 @@ namespace dawn_native {
 
 class ResultBase : public RefCounted {
 public:
-  explicit ResultBase(
-    void* buffer,
-    uint32_t buffer_size,
-    std::vector<int32_t>& dimensions);
+  explicit ResultBase(void *buffer, uint32_t buffer_size,
+                      std::vector<int32_t> &dimensions);
   virtual ~ResultBase() = default;
 
   // Dawn API
   const void* Buffer() const { return buffer_; }
   uint32_t BufferSize() const { return buffer_size_; }
-  const int32_t* Dimensions() const { return dimensions_.data(); }
+  const int32_t *Dimensions() const { return dimensions_.data(); }
   uint32_t DimensionsSize() const {return dimensions_.size(); }
 
 protected:

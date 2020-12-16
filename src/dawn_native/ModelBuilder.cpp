@@ -1,13 +1,15 @@
 
 #include "dawn_native/ModelBuilder.h"
 
-#include <string>
-#include <vector>
 #include <stack>
+#include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "common/Assert.h"
 #include "common/RefCounted.h"
+#include "dawn_native/Model.h"
+#include "dawn_native/NeuralNetworkContext.h"
 #include "dawn_native/Operand.h"
 #include "dawn_native/ops/binary.h"
 #include "dawn_native/ops/constant.h"
@@ -19,6 +21,9 @@
 #include "dawn_native/ops/unary.h"
 
 namespace dawn_native {
+
+ModelBuilderBase::ModelBuilderBase(NeuralNetworkContextBase *context)
+    : ObjectBase(context) {}
 
 OperandBase *ModelBuilderBase::Constant(OperandDescriptor const *desc,
                                         void const *value, size_t size) {
@@ -33,7 +38,7 @@ OperandBase *ModelBuilderBase::Input(char const *name,
 }
 
 OperandBase *ModelBuilderBase::Matmul(OperandBase *a, OperandBase *b) {
-   Ref<OperandBase> context =
+  Ref<OperandBase> context =
       AcquireRef(new op::Binary(op::BinaryOpType::kMatMul, a, b));
   return context.Detach();
 }
@@ -97,19 +102,29 @@ OperandBase *ModelBuilderBase::Transpose(OperandBase *input,
 }
 
 ModelBase *ModelBuilderBase::CreateModel(NamedOperandsBase const *named_operands) {
-  ModelBase* model = CreateModelImpl();
-  std::vector<const OperandBase*> outputs;
-  for (auto& named_output : named_operands->GetRecords()) {
+  ModelBase *model = CreateModelImpl();
+  std::vector<const OperandBase *> outputs;
+  for (auto &named_output : named_operands->GetRecords()) {
     outputs.push_back(named_output.second);
   }
-  std::vector<const OperandBase*> sorted_operands = TopologicalSort(outputs);
-  for (auto& op : sorted_operands) {
-    op->AddToModel(model);
+  std::vector<const OperandBase *> sorted_operands = TopologicalSort(outputs);
+  for (auto &op : sorted_operands) {
+    if (GetContext()->ConsumedError(op->AddToModel(model))) {
+      model->Release();
+      return ModelBase::MakeError(this);
+    }
   }
-  for (auto& named_output : named_operands->GetRecords()) {
-    model->AddOutput(named_output.first, named_output.second);
+  for (auto &named_output : named_operands->GetRecords()) {
+    if (GetContext()->ConsumedError(
+            model->AddOutput(named_output.first, named_output.second))) {
+      model->Release();
+      return ModelBase::MakeError(this);
+    }
   }
-  model->Finish();
+  if (GetContext()->ConsumedError(model->Finish())) {
+    model->Release();
+    return ModelBase::MakeError(this);
+  }
   return model;
 }
 
@@ -131,21 +146,21 @@ ModelBase *ModelBuilderBase::CreateModel(NamedOperandsBase const *named_operands
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //*****************************************************************************
-std::vector<const OperandBase*> ModelBuilderBase::TopologicalSort(
-    std::vector<const OperandBase*>& root_nodes) {
-  std::stack<const OperandBase*> nodes_to_do;
-  std::unordered_set<const OperandBase*> nodes_done;
-  std::vector<const OperandBase*> result;
+std::vector<const OperandBase *> ModelBuilderBase::TopologicalSort(
+    std::vector<const OperandBase *> &root_nodes) {
+  std::stack<const OperandBase *> nodes_to_do;
+  std::unordered_set<const OperandBase *> nodes_done;
+  std::vector<const OperandBase *> result;
 
-  for (auto& node : root_nodes) {
+  for (auto &node : root_nodes) {
     nodes_to_do.push(node);
   }
   while (nodes_to_do.size() > 0) {
-    const OperandBase* node = nodes_to_do.top();
+    const OperandBase *node = nodes_to_do.top();
     if (nodes_done.count(node) == 0) {
       bool can_add = true;
-      for (auto& dep : node->Inputs()) {
-        if (nodes_done.count(dep.Get()) == 0){
+      for (auto &dep : node->Inputs()) {
+        if (nodes_done.count(dep.Get()) == 0) {
           can_add = false;
           nodes_to_do.push(dep.Get());
         }

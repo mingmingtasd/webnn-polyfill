@@ -8,7 +8,7 @@ namespace dawn_native {
 OperandBase::OperandBase(std::vector<Ref<OperandBase>> inputs)
     : inputs_(std::move(inputs)) {}
 
-void OperandBase::AddToModel(ModelBase *model) const { UNREACHABLE(); }
+MaybeError OperandBase::AddToModel(ModelBase *model) const { UNREACHABLE(); }
 
 const std::vector<Ref<OperandBase>> &OperandBase::Inputs() const { return inputs_; }
 

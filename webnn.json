@@ -33,6 +33,38 @@
   "size_t": {
     "category": "native"
   },
+  "error filter": {
+    "category": "enum",
+    "values": [
+        {"value": 0, "name": "none"},
+        {"value": 1, "name": "validation"},
+        {"value": 2, "name": "out of memory"}
+    ]
+  },
+  "error callback": {
+    "category": "callback",
+    "args": [
+        {"name": "type", "type": "error type"},
+        {"name": "message", "type": "char", "annotation": "const*"},
+        {"name": "userdata", "type": "void", "annotation": "*"}
+    ]
+  },
+  "neural network context": {
+    "category": "object",
+    "methods": [
+      {
+        "name": "create model builder",
+        "returns": "model builder"
+      },
+      {
+        "name": "set uncaptured error callback",
+        "args": [
+            {"name": "callback", "type": "error callback"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
+      }
+    ]
+  },
   "operand type": {
     "category": "enum",
     "values": [
@@ -232,8 +264,19 @@
   "compile callback": {
     "category": "callback",
     "args": [
+      {"name": "status", "type": "compile status"},
       {"name": "compilation", "type": "compilation"},
+      {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
       {"name": "userdata", "type": "void", "annotation": "*"}
+    ]
+  },
+  "compile status": {
+    "category": "enum",
+    "values": [
+        {"value": 0, "name": "success"},
+        {"value": 1, "name": "error"},
+        {"value": 2, "name": "context lost"},
+        {"value": 3, "name": "unknown"}
     ]
   },
   "model": {
@@ -327,8 +370,19 @@
   "compute callback": {
     "category": "callback",
     "args": [
+      {"name": "status", "type": "compute status"},
       {"name": "outputs", "type": "named results"},
+      {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"},
       {"name": "userdata", "type": "void", "annotation": "*"}
+    ]
+  },
+  "compute status": {
+    "category": "enum",
+    "values": [
+        {"value": 0, "name": "success"},
+        {"value": 1, "name": "error"},
+        {"value": 2, "name": "context lost"},
+        {"value": 3, "name": "unknown"}
     ]
   },
   "compilation": {
