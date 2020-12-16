@@ -68,10 +68,7 @@ void Model::AddInput(const op::Input *input) {
   ::dml::Expression exp =
       ::dml::InputTensor(*graph_, input_index_++, tensor_desc);
   expressions_.insert(std::make_pair(input, exp));
-#ifdef GetUserName
-#undef GetUserName
-  inputs_.insert(std::make_pair(input->GetUserName(), exp));
-#endif
+  inputs_.insert(std::make_pair(input->GetName(), exp));
 }
 
 void Model::AddOutput(const std::string& name, const OperandBase* output) {
@@ -115,6 +112,8 @@ void Model::AddTranspose(const op::Transpose *transpose) {
 void Model::AddUnary(const op::Unary *unary) {
   UNREACHABLE();
 }
+
+void Model::Finish() {}
 
 void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {

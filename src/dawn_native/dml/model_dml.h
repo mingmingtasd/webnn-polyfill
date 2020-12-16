@@ -43,6 +43,7 @@ public:
   virtual void AddReshape(const op::Reshape *relu) override;
   virtual void AddTranspose(const op::Transpose *transpose) override;
   virtual void AddUnary(const op::Unary *unary) override;
+  virtual void Finish() override;
 
   friend class Compilation;
 private:
