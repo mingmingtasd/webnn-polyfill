@@ -25,8 +25,8 @@ public:
 
   void AddToModel(ModelBase *model) const override;
 
-  Pool2dOptions const *Options();
-  Pool2dType GetType();
+  Pool2dOptions const *Options() const;
+  Pool2dType GetType() const;
 
 private:
   Pool2dOptions options_;

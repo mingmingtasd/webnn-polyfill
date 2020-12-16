@@ -19,7 +19,7 @@ public:
 
   void AddToModel(ModelBase *model) const override;
 
-  Conv2dOptions const *Options();
+  Conv2dOptions const *Options() const;
 
 private:
   Conv2dOptions options_;

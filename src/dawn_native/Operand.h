@@ -20,17 +20,10 @@ public:
   const std::vector<Ref<OperandBase>> &Inputs() const;
   // Add the operand to model for specific backend.
   virtual void AddToModel(ModelBase *model) const;
-  // The name is uniquely identifies getting from native api.
-  void SetName(std::string name);
-  const std::string& GetName() const {
-    return name_;
-  }
 
 private:
   // the inputs of operand.
   std::vector<Ref<OperandBase>> inputs_;
-  // The operand name.
-  std::string name_;
 };
 }
 

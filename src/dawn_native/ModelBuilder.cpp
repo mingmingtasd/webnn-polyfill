@@ -109,6 +109,7 @@ ModelBase *ModelBuilderBase::CreateModel(NamedOperandsBase const *named_operands
   for (auto& named_output : named_operands->GetRecords()) {
     model->AddOutput(named_output.first, named_output.second);
   }
+  model->Finish();
   return model;
 }
 

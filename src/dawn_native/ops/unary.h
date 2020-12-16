@@ -24,7 +24,7 @@ public:
   ~Unary() override = default;
 
   void AddToModel(ModelBase *model) const override { model->AddUnary(this); }
-  UnaryOpType GetType() { return type_; }
+  UnaryOpType GetType() const { return type_; }
 
 private:
   UnaryOpType type_;

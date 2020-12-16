@@ -13,8 +13,8 @@ ModelBuilderBase *Create() {
   return builder.Detach();
 }
 
-ModelBase *ModelBuilder::CreateModelImpl(NamedOperandsBase const *named_operands) {
-  Ref<ModelBase> model = AcquireRef(new Model(named_operands));
+ModelBase *ModelBuilder::CreateModelImpl() {
+  Ref<ModelBase> model = AcquireRef(new Model());
   return model.Detach();
 }
 

@@ -27,7 +27,7 @@ public:
 
   void AddToModel(ModelBase *model) const override { model->AddTranspose(this); }
 
-  TransposeOptions const *Options() { return &options_; }
+  TransposeOptions const *Options() const { return &options_; }
 
 private:
   TransposeOptions options_;

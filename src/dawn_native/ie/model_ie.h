@@ -22,36 +22,37 @@ namespace ie {
 
 class Model : public ModelBase {
 public:
-  Model(NamedOperandsBase const *named_operands);
+  Model();
   ~Model() override = default;
 
-  virtual void AddConstant(op::Constant *constant) override;
-  virtual void AddInput(op::Input *input) override;
-  virtual void AddBinary(op::Binary *binary) override;
-  virtual void AddConv2d(op::Conv2d *conv2d) override;
-  virtual void AddPool2d(op::Pool2d *pool2d) override;
-  virtual void AddReshape(op::Reshape *relu) override;
-  virtual void AddTranspose(op::Transpose *transpose) override;
-  virtual void AddUnary(op::Unary *unary) override;
+  virtual void AddConstant(const op::Constant *constant) override;
+  virtual void AddInput(const op::Input *input) override;
+  virtual void AddOutput(const std::string&name, const OperandBase *ouput) override;
+  virtual void AddBinary(const op::Binary *binary) override;
+  virtual void AddConv2d(const op::Conv2d *conv2d) override;
+  virtual void AddPool2d(const op::Pool2d *pool2d) override;
+  virtual void AddReshape(const op::Reshape *relu) override;
+  virtual void AddTranspose(const op::Transpose *transpose) override;
+  virtual void AddUnary(const op::Unary *unary) override;
+  virtual void Finish() override;
 
-  const OperandBase *GetNamedOperand(std::string name);
   ie_model_t *GetInferenceEngineModel();
   size_t GetOutputsNumber();
-  std::string GetOutputName(size_t index);
-  const std::string& GetUserName(const std::string& name);
+  std::string GetOutputId(size_t index);
 
+  friend class Compilation;
 private:
   void CompileImpl(WNNCompileCallback callback, void *userdata,
-                   CompilationOptions const *options) override;
-  void BuildNeuralNetworkModel(const OperandBase *root);
-  void AddOutput(const OperandBase *ouput);
-  void Finish();
+                   CompilationOptions const *options) override;  
 
   ie_model_t *ie_model_;
 
-  std::set<const OperandBase *> traversalled_;
-  std::map<std::string, const OperandBase*> named_operands_;
-  std::map<std::string, std::string> user_name_map_;
+  // Map the input name to IE internal id
+  std::map<std::string, std::string> input_id_map_;
+  // Map the IE internal id to output name
+  std::map<std::string, std::string> output_name_map_;
+  // Map the operand to IE internal id
+  std::map<const OperandBase*, std::string> operand_id_map_;
 };
 
 } // namespace ie

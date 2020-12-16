@@ -17,8 +17,8 @@ namespace op {
 
 class Input final : public OperandBase {
 public:
-  Input(const std::string &user_name, const OperandDescriptor *desc)
-      : OperandBase({}), user_name_(user_name) {
+  Input(const std::string &name, const OperandDescriptor *desc)
+      : OperandBase({}), name_(name) {
     descriptor_.type = desc->type;
     dimensions_.assign(desc->dimensions,
                        desc->dimensions + desc->dimensionsCount);
@@ -30,10 +30,10 @@ public:
   void AddToModel(ModelBase *model) const override { model->AddInput(this); }
 
   const OperandDescriptor *GetOperandDescriptor() const { return &descriptor_; }
-  const std::string& GetUserName() const { return user_name_; }
+  const std::string& GetName() const { return name_; }
 
 private:
-  std::string user_name_;
+  std::string name_;
   OperandDescriptor descriptor_;
   std::vector<int32_t> dimensions_;
 };

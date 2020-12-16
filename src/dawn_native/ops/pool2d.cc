@@ -53,9 +53,9 @@ Pool2d::Pool2d(Pool2dType type, OperandBase *input,
 
 void Pool2d::AddToModel(ModelBase *model) const { model->AddPool2d(this); }
 
-Pool2dOptions const *Pool2d::Options() { return &options_; }
+Pool2dOptions const *Pool2d::Options() const { return &options_; }
 
-Pool2dType Pool2d::GetType() { return type_; }
+Pool2dType Pool2d::GetType() const { return type_; }
 
 } // namespace op
 

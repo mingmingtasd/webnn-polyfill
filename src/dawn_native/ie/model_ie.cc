@@ -68,72 +68,16 @@ ie_pool2d_options Pool2dOptionsForIE(Pool2dOptions const *options) {
 
 } // namespace
 
-Model::Model(NamedOperandsBase const *named_operands) {
+Model::Model() {
   // Load ienn_c_api.dll to compile the model.
   IEStatusCode code = IE(ie_create_model)(&ie_model_);
   if (code != IEStatusCode::OK) {
     dawn::ErrorLog() << "Failing to load ienn_c_api.dll.";
     return;
   }
-
-  
-  for (auto &itr : named_operands->GetRecords()) {
-    named_operands_[itr.first] = itr.second;
-    BuildNeuralNetworkModel(itr.second);
-    // Add output node to ngraph.
-    AddOutput(itr.second);
-    user_name_map_[itr.second->GetName()] = itr.first;
-  }
-
-  
-  // Finish to create the model that is CNNNetwork.
-  Finish();
 }
 
-// Traversal graph inorder to create model.
-void Model::BuildNeuralNetworkModel(const OperandBase *root) {
-  if (!root)
-    return;
-  // the stack is used for traversaling model tree.
-  std::vector<Ref<OperandBase>> stack;
-  // Push back the root node so that only child node need to be add to stack in
-  // secondary while loop.
-  stack.push_back(const_cast<OperandBase*>(root));
-  traversalled_.insert(root);
-  const OperandBase *operand = root;
-  while (!stack.empty()) {
-    while (operand) {
-      bool sub_graph = false;
-      for (auto &input : operand->Inputs()) {
-        // Push back the operand if it's not traversalled.
-        if (traversalled_.find(input.Get()) == traversalled_.end()) {
-          stack.push_back(input);
-          traversalled_.insert(input.Get());
-          // traversal next sub graph with the operand that isn't nullptr;
-          if (!sub_graph) {
-            operand = input.Get();
-            sub_graph = true;
-          }
-        }
-      }
-      // the sub graph of the operand has been add to model or input/constant.
-      if (!sub_graph) {
-        operand = nullptr;
-      }
-    }
-    // The sub graph of the operand has been add to model by native api or the
-    // the operand is input/constant, then add current operand with AddOperand
-    // virtual function.
-    stack.back()->AddToModel(this);
-    // Pop the node.
-    stack.pop_back();
-
-    // Continue to traversal unused operand.
-    operand = stack.back().Get();
-  }
-}
-
-void Model::AddConstant(op::Constant *constant) {
+void Model::AddConstant(const op::Constant *constant) {
   ie_operand_descriptor ie_desc = ConvertTo(constant->GetOperandDescriptor());
   ie_operand_t *ie_operand;
   IEStatusCode code =
@@ -143,10 +87,10 @@ void Model::AddConstant(op::Constant *constant) {
     dawn::ErrorLog() << "Failing to add constant, the code is " << code << ".";
     return;
   }
-  constant->SetName(std::string(ie_operand->name));
+  operand_id_map_[constant] = std::string(ie_operand->name);
 }
 
-void Model::AddInput(op::Input *input) {
+void Model::AddInput(const op::Input *input) {
   ie_operand_descriptor ie_desc = ConvertTo(input->GetOperandDescriptor());
   ie_operand_t *ie_operand;
   IEStatusCode code = IE(ie_model_add_input)(ie_model_, &ie_desc, &ie_operand);
@@ -154,26 +98,27 @@ void Model::AddInput(op::Input *input) {
     dawn::ErrorLog() << "Failing to add input , the code is " << code << ".";
     return;
   }
-  input->SetName(std::string(ie_operand->name));
-  named_operands_[input->GetUserName()] = input;
+  operand_id_map_[input] = std::string(ie_operand->name);
+  input_id_map_[input->GetName()] = std::string(ie_operand->name);
 }
 
-void Model::AddOutput(const OperandBase *ouput) {
+void Model::AddOutput(const std::string& name, const OperandBase *output) {
   ie_operand_t ie_operand;
-  ie_operand.name = const_cast<char *>(ouput->GetName().c_str());
+  ie_operand.name = const_cast<char *>(operand_id_map_[output].c_str());
   IEStatusCode code = IE(ie_model_add_output)(ie_model_, &ie_operand);
   if (code != IEStatusCode::OK) {
     dawn::ErrorLog() << "Failing to add input , the code is " << code << ".";
     return;
   }
+  output_name_map_[ie_operand.name] = name;
 }
 
-void Model::AddBinary(op::Binary *binary) {
+void Model::AddBinary(const op::Binary *binary) {
   auto inputs = binary->Inputs();
   ie_operand_t primary;
-  primary.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  primary.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
   ie_operand_t secondary;
-  secondary.name = const_cast<char *>(inputs[1]->GetName().c_str());
+  secondary.name = const_cast<char *>(operand_id_map_[inputs[1].Get()].c_str());
   ie_operand_t *ie_operand = nullptr;
   IEStatusCode code = NOT_FOUND;
   if (binary->GetType() == op::BinaryOpType::kMatMul) {
@@ -188,15 +133,15 @@ void Model::AddBinary(op::Binary *binary) {
     dawn::ErrorLog() << "Failing to add binary, the code is " << code << ".";
     return;
   }
-  binary->SetName(std::string(ie_operand->name));
+  operand_id_map_[binary] = std::string(ie_operand->name);
 }
 
-void Model::AddConv2d(op::Conv2d *conv2d) {
+void Model::AddConv2d(const op::Conv2d *conv2d) {
   auto inputs = conv2d->Inputs();
   ie_operand_t input;
-  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
   ie_operand_t filter;
-  filter.name = const_cast<char *>(inputs[1]->GetName().c_str());
+  filter.name = const_cast<char *>(operand_id_map_[inputs[1].Get()].c_str());
   ie_operand_t *ie_operand;
   ie_conv2d_options_t ie_options = Conv2dOptionsForIE(conv2d->Options());
   IEStatusCode code = IE(ie_model_add_conv2d)(ie_model_, &input, &filter,
@@ -205,13 +150,13 @@ void Model::AddConv2d(op::Conv2d *conv2d) {
     dawn::ErrorLog() << "Failing to add matmul, the code is " << code << ".";
     return;
   }
-  conv2d->SetName(std::string(ie_operand->name));
+  operand_id_map_[conv2d] = std::string(ie_operand->name);
 }
 
-void Model::AddPool2d(op::Pool2d *pool2d) {
+void Model::AddPool2d(const op::Pool2d *pool2d) {
   auto inputs = pool2d->Inputs();
   ie_operand_t input;
-  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
   ie_operand_t *ie_operand;
   ie_pool2d_options_t ie_options = Pool2dOptionsForIE(pool2d->Options());
   IEStatusCode code = IE(ie_model_add_pool2d)(
@@ -221,13 +166,13 @@ void Model::AddPool2d(op::Pool2d *pool2d) {
     dawn::ErrorLog() << "Failing to add matmul, the code is " << code << ".";
     return;
   }
-  pool2d->SetName(std::string(ie_operand->name));
+  operand_id_map_[pool2d] = std::string(ie_operand->name);
 }
 
-void Model::AddUnary(op::Unary *unary) {
+void Model::AddUnary(const op::Unary *unary) {
   auto inputs = unary->Inputs();
   ie_operand_t input;
-  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
   ie_operand_t *ie_operand = nullptr;
   IEStatusCode code = NOT_FOUND;
   if (unary->GetType() == op::UnaryOpType::kRelu) {
@@ -239,13 +184,13 @@ void Model::AddUnary(op::Unary *unary) {
     dawn::ErrorLog() << "Failing to add relu, the code is " << code << ".";
     return;
   }
-  unary->SetName(std::string(ie_operand->name));
+  operand_id_map_[unary] = std::string(ie_operand->name);
 }
 
-void Model::AddReshape(op::Reshape *reshape) {
+void Model::AddReshape(const op::Reshape *reshape) {
   auto inputs = reshape->Inputs();
   ie_operand_t input;
-  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
   ie_operand_t *ie_operand;
   IEStatusCode code =
       IE(ie_model_add_reshape)(ie_model_, &input, reshape->GetNewShape(),
@@ -254,13 +199,13 @@ void Model::AddReshape(op::Reshape *reshape) {
     dawn::ErrorLog() << "Failing to add relu, the code is " << code << ".";
     return;
   }
-  reshape->SetName(std::string(ie_operand->name));
+  operand_id_map_[reshape] = std::string(ie_operand->name);
 }
 
-void Model::AddTranspose(op::Transpose *transpose) {
+void Model::AddTranspose(const op::Transpose *transpose) {
   auto inputs = transpose->Inputs();
   ie_operand_t input;
-  input.name = const_cast<char *>(inputs[0]->GetName().c_str());
+  input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
   ie_operand_t *ie_operand;
   ie_transpose_options_t ie_options =
       TransposeOptionsForIE(transpose->Options());
@@ -270,7 +215,7 @@ void Model::AddTranspose(op::Transpose *transpose) {
     dawn::ErrorLog() << "Failing to add transpose, the code is " << code << ".";
     return;
   }
-  transpose->SetName(std::string(ie_operand->name));
+  operand_id_map_[transpose] = std::string(ie_operand->name);
 }
 
 void Model::Finish() {
@@ -279,10 +224,6 @@ void Model::Finish() {
     dawn::ErrorLog() << "Failing to finish the model.";
     return;
   }
-}
-
-const OperandBase *Model::GetNamedOperand(std::string name) {
-  return named_operands_[name];
 }
 
 void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
@@ -302,7 +243,7 @@ size_t Model::GetOutputsNumber() {
   return output_number;
 }
 
-std::string Model::GetOutputName(size_t index) {
+std::string Model::GetOutputId(size_t index) {
   char *output_name;
   IEStatusCode code =
       IE(ie_model_get_output_name)(ie_model_, index, &output_name);
@@ -315,10 +256,6 @@ std::string Model::GetOutputName(size_t index) {
   IE(ie_model_free_name)(&output_name);
 
   return name;
-}
-
-const std::string& Model::GetUserName(const std::string& name) {
-  return user_name_map_.at(name);
 }
 
 } // namespace ie

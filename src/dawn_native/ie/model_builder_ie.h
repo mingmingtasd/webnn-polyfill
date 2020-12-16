@@ -13,7 +13,7 @@ public:
   ModelBuilder() = default;
 
 private:
-  ModelBase *CreateModelImpl(NamedOperandsBase const *named_operand) override;
+  ModelBase *CreateModelImpl() override;
 };
 
 } // namespace ie

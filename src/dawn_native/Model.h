@@ -38,6 +38,7 @@ public:
   virtual void AddReshape(const op::Reshape *relu) = 0;
   virtual void AddTranspose(const op::Transpose *transpose) = 0;
   virtual void AddUnary(const op::Unary *unary) = 0;
+  virtual void Finish() = 0;
 
 private:
   virtual void CompileImpl(WNNCompileCallback callback, void *userdata,

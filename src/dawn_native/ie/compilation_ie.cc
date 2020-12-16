@@ -40,9 +40,9 @@ void Compilation::ComputeImpl(NamedInputsBase *inputs,
                               void *userdata, NamedOutputsBase *outputs) {
   // Set input data to nGraph.
   for (auto &input : inputs->GetRecords()) {
-    OperandBase const *operand = model_->GetNamedOperand(input.first);
     ie_operand_t ie_operand;
-    ie_operand.name = const_cast<char *>(operand->GetName().c_str());
+    ie_operand.name =
+        const_cast<char *>(model_->input_id_map_[input.first].c_str());
     IEStatusCode code = IE(ie_compilation_set_input)(
         ie_compilation_, &ie_operand, input.second->buffer, input.second->size);
     if (code != IEStatusCode::OK) {
@@ -62,43 +62,39 @@ void Compilation::ComputeImpl(NamedInputsBase *inputs,
 
   // Get Data from nGraph with output.
   // TODO(junwei). new memory for output data.
-  if (outputs == nullptr) {
-    Ref<NamedResultsBase> results = AcquireRef(new NamedResultsBase());
-    size_t output_number = model_->GetOutputsNumber();
-    for (size_t i = 0; i < output_number; ++i) {
-      std::string output_name = model_->GetOutputName(i);
-      void *output_buffer;
-      size_t buffer_length;
-      IEStatusCode code = IE(ie_compilation_get_buffer)(
-          ie_compilation_, output_name.data(), &output_buffer, &buffer_length);
-      if (code != IEStatusCode::OK) {
-        dawn::ErrorLog() << "Failing to get output name for IE.";
-        callback(nullptr, userdata);
-        return;
-      }
-      // TODO(junwei): get the output dimensions;
-      std::vector<uint32_t> dimensions;
-      Ref<ResultBase> result = AcquireRef(
-          new Result::ResultBase(output_buffer, buffer_length, dimensions));
-      results->Set(model_->GetUserName(output_name).c_str(), result.Detach());
-    }
-    callback(reinterpret_cast<WNNNamedResults>(results.Detach()), userdata);
-    return;
-  }
-
-  for (auto &output : outputs->GetRecords()) {
-    OperandBase const *operand = model_->GetNamedOperand(output.first);
-    ie_operand_t ie_operand;
-    ie_operand.name = const_cast<char *>(operand->GetName().c_str());
-    IEStatusCode code = IE(ie_compilation_get_output)(
-        ie_compilation_, &ie_operand, output.second->buffer,
-        output.second->size);
+  Ref<NamedResultsBase> results = AcquireRef(new NamedResultsBase());
+  size_t output_number = model_->GetOutputsNumber();
+  for (size_t i = 0; i < output_number; ++i) {
+    std::string output_id = model_->GetOutputId(i);
+    void *output_buffer;
+    size_t buffer_length;
+    IEStatusCode code = IE(ie_compilation_get_buffer)(
+        ie_compilation_, output_id.data(), &output_buffer, &buffer_length);
     if (code != IEStatusCode::OK) {
-      dawn::ErrorLog() << "Failing to get output for IE.";
+      dawn::ErrorLog() << "Failing to get output name for IE.";
       callback(nullptr, userdata);
+      return;
+    }
+    // TODO(junwei): get the output dimensions;
+    std::vector<int32_t> dimensions;
+    Ref<ResultBase> result = AcquireRef(
+        new Result::ResultBase(output_buffer, buffer_length, dimensions));
+    std::string output_name = model_->output_name_map_[output_id];
+    results->Set(output_name.c_str(),
+                  result.Detach());
+    if (outputs != nullptr) {
+      const Output* output = outputs->GetRecords().at(output_name);
+      ie_operand_t ie_operand;
+      ie_operand.name = const_cast<char *>(output_id.c_str());
+      IEStatusCode code = IE(ie_compilation_get_output)(
+          ie_compilation_, &ie_operand, output->buffer, output->size);
+      if (code != IEStatusCode::OK) {
+        dawn::ErrorLog() << "Failing to get output for IE.";
+        callback(nullptr, userdata);
+      }
     }
   }
-  callback(nullptr, userdata);
+  callback(reinterpret_cast<WNNNamedResults>(results.Detach()), userdata);
   return;
 }
 
