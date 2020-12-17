@@ -96,7 +96,44 @@ void Model::AddBinary(const op::Binary *binary) {
 }
 
 void Model::AddConv2d(const op::Conv2d *conv2d) {
-  UNREACHABLE();
+  DAWN_ASSERT(conv2d->Inputs().size() == 2);
+  const OperandBase* input_operand = conv2d->Inputs()[0].Get();
+  DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
+  ::dml::Expression input = expressions_.at(input_operand);
+  const OperandBase* filter_operand = conv2d->Inputs()[1].Get();
+  DAWN_ASSERT(expressions_.find(filter_operand) != expressions_.end());
+  ::dml::Expression filter = expressions_.at(filter_operand);
+  const Conv2dOptions* options = conv2d->Options();
+  ::dml::Expression output = ::dml::Convolution(
+      input, filter, ::dml::NullOpt, DML_CONVOLUTION_MODE_CROSS_CORRELATION,
+      DML_CONVOLUTION_DIRECTION_FORWARD,
+      // FIXME(nhu): strides, dilations, padding should be uint32_t
+      // need to fix the spec.
+      // strides
+      {
+        reinterpret_cast<const uint32_t*>(options->strides),
+        options->stridesCount
+      },
+      // dilations
+      {
+        reinterpret_cast<const uint32_t*>(options->dilations),
+        options->dilationsCount
+      },
+      // startPadding
+      {
+        (const uint32_t)options->padding[0],
+        (const uint32_t)options->padding[2]
+      },
+      // endPadding
+      {
+        (const uint32_t)options->padding[1],
+        (const uint32_t)options->padding[3],
+      },
+      // outPadding
+      {},
+      // groupCount
+      options->groups);
+  expressions_.insert(std::make_pair(conv2d, output));
 }
   
 void Model::AddPool2d(const op::Pool2d *pool2d) {
