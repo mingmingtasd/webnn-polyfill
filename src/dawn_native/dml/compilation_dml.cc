@@ -25,6 +25,8 @@ Compilation::Compilation(const Ref<Model>& model) : model_(model) {
   for (auto& output : model_->outputs_) {
     outputs.push_back(output.second);
   }
+  // TODO(nhu): investigate other execution flag,
+  // e.g. DML_EXECUTION_FLAG_ALLOW_HALF_PRECISION_COMPUTATION
   compiled_model_.reset(
       new pydml::CompiledModel(
           *(model_->graph_), DML_EXECUTION_FLAG_NONE, outputs));
