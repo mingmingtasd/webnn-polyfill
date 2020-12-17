@@ -42,9 +42,9 @@ Conv2d::Conv2d(OperandBase *input, OperandBase *filter,
   options_.layout = options->layout;
 }
 
-void Conv2d::AddToModel(ModelBase *model) { model->AddConv2d(this); }
+void Conv2d::AddToModel(ModelBase *model) const { model->AddConv2d(this); }
 
-Conv2dOptions const *Conv2d::Options() { return &options_; }
+Conv2dOptions const *Conv2d::Options() const { return &options_; }
 
 } // namespace op
 

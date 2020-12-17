@@ -17,9 +17,9 @@ public:
   Conv2d(OperandBase *input, OperandBase *filter, Conv2dOptions const *options);
   ~Conv2d() override = default;
 
-  void AddToModel(ModelBase *model) override;
+  void AddToModel(ModelBase *model) const override;
 
-  Conv2dOptions const *Options();
+  Conv2dOptions const *Options() const;
 
 private:
   Conv2dOptions options_;

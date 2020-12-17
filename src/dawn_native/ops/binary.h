@@ -28,8 +28,8 @@ public:
       : OperandBase({a, b}), type_(type) {}
   ~Binary() override = default;
 
-  void AddToModel(ModelBase *model) override { model->AddBinary(this); }
-  BinaryOpType GetType() { return type_; }
+  void AddToModel(ModelBase *model) const override { model->AddBinary(this); }
+  BinaryOpType GetType() const { return type_; }
 
 private:
   BinaryOpType type_;

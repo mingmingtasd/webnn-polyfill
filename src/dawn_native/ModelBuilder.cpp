@@ -2,6 +2,9 @@
 #include "dawn_native/ModelBuilder.h"
 
 #include <string>
+#include <vector>
+#include <stack>
+#include <unordered_set>
 
 #include "common/Assert.h"
 #include "common/RefCounted.h"
@@ -94,7 +97,69 @@ OperandBase *ModelBuilderBase::Transpose(OperandBase *input,
 }
 
 ModelBase *ModelBuilderBase::CreateModel(NamedOperandsBase const *named_operands) {
-  return CreateModelImpl(named_operands);
+  ModelBase* model = CreateModelImpl();
+  std::vector<const OperandBase*> outputs;
+  for (auto& named_output : named_operands->GetRecords()) {
+    outputs.push_back(named_output.second);
+  }
+  std::vector<const OperandBase*> sorted_operands = TopologicalSort(outputs);
+  for (auto& op : sorted_operands) {
+    op->AddToModel(model);
+  }
+  for (auto& named_output : named_operands->GetRecords()) {
+    model->AddOutput(named_output.first, named_output.second);
+  }
+  model->Finish();
+  return model;
+}
+
+// The implementation derives from nGraph topological_sort in
+// https://github.com/openvinotoolkit/openvino/blob/master/ngraph/core/include/ngraph/graph_util.hpp
+//
+//*****************************************************************************
+// Copyright 2017-2020 Intel Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//*****************************************************************************
+std::vector<const OperandBase*> ModelBuilderBase::TopologicalSort(
+    std::vector<const OperandBase*>& root_nodes) {
+  std::stack<const OperandBase*> nodes_to_do;
+  std::unordered_set<const OperandBase*> nodes_done;
+  std::vector<const OperandBase*> result;
+
+  for (auto& node : root_nodes) {
+    nodes_to_do.push(node);
+  }
+  while (nodes_to_do.size() > 0) {
+    const OperandBase* node = nodes_to_do.top();
+    if (nodes_done.count(node) == 0) {
+      bool can_add = true;
+      for (auto& dep : node->Inputs()) {
+        if (nodes_done.count(dep.Get()) == 0){
+          can_add = false;
+          nodes_to_do.push(dep.Get());
+        }
+      }
+      if (can_add) {
+        result.push_back(node);
+        nodes_to_do.pop();
+        nodes_done.insert(node);
+      }
+    } else {
+      nodes_to_do.pop();
+    }
+  }
+  return result;
 }
 
 } // namespace dawn_native

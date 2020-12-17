@@ -24,6 +24,9 @@
   "const uint32_t*": {
     "category": "native"
   },
+  "const int32_t*": {
+    "category": "native"
+  },
   "int32_t": {
     "category": "native"
   },
@@ -305,7 +308,7 @@
       },
       {
         "name": "dimensions",
-        "returns": "const uint32_t*"
+        "returns": "const int32_t*"
       }
     ]
   },

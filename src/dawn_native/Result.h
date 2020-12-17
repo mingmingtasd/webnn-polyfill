@@ -14,19 +14,19 @@ public:
   explicit ResultBase(
     void* buffer,
     uint32_t buffer_size,
-    std::vector<uint32_t>& dimensions);
+    std::vector<int32_t>& dimensions);
   virtual ~ResultBase() = default;
 
   // Dawn API
   const void* Buffer() const { return buffer_; }
   uint32_t BufferSize() const { return buffer_size_; }
-  const uint32_t* Dimensions() const { return dimensions_.data(); }
+  const int32_t* Dimensions() const { return dimensions_.data(); }
   uint32_t DimensionsSize() const {return dimensions_.size(); }
 
 protected:
   void* buffer_;
   uint32_t buffer_size_;
-  std::vector<uint32_t> dimensions_;
+  std::vector<int32_t> dimensions_;
 };
 }
 

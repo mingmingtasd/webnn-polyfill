@@ -20,10 +20,10 @@ public:
   }
   ~Reshape() override = default;
 
-  void AddToModel(ModelBase *model) override { model->AddReshape(this); }
+  void AddToModel(ModelBase *model) const override { model->AddReshape(this); }
 
-  int32_t const *GetNewShape() { return new_shape_.data(); }
-  size_t GetNewShapeCount() { return new_shape_.size(); }
+  int32_t const *GetNewShape() const { return new_shape_.data(); }
+  size_t GetNewShapeCount() const { return new_shape_.size(); }
 
 private:
   std::vector<int32_t> new_shape_;

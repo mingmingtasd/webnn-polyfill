@@ -1,7 +1,6 @@
 # webnn-native
 
-## Build
-
+## Get the code
 Create a `.gclient` file with the following content:
 ```
 solutions = [
@@ -18,19 +17,24 @@ Sync the dependencies.
 > gclient sync
 ```
 
-Generate projects.
+## Generate projects
+Build with OpenVINO backend
 ```sh
-Use Release mode when running OpenVINO backend.
-> gn gen out/Release --args="is_debug = false"
+> gn gen out/Default --args="dawn_enable_ie = true"
 ```
 
-Build
+Build with DirectML backend
 ```sh
-> ninja -C out/Release
+> gn gen out/Default --args="dawn_enable_dml = true"
+```
+
+## Build
+```sh
+> ninja -C out/Default
 ```
 
 ## Test
-
+For OpenVINO build, please [set the environment variables](https://docs.openvinotoolkit.org/2021.1/openvino_docs_install_guides_installing_openvino_windows.html#set-the-environment-variables) first.
 ```sh
-> out/Release/matmul
+> out/Default/add
 ```
