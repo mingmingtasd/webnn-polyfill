@@ -6,6 +6,8 @@
 #include "dawn_native/dawn_platform.h"
 #include "dawn_native/NamedOperands.h"
 
+#include <vector>
+
 namespace dawn_native {
 
 class ModelBuilderBase : public RefCounted {
