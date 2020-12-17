@@ -87,6 +87,8 @@ void Model::AddBinary(const op::Binary *binary) {
   ::dml::Expression c;
   if (binary->GetType() == op::BinaryOpType::kAdd) {
     c = ::dml::Add(a, b);
+  } else if (binary->GetType() == op::BinaryOpType::kMul) {
+    c = ::dml::Multiply(a, b);
   } else {
     UNREACHABLE();
   }
