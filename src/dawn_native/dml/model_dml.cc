@@ -23,12 +23,14 @@ DML_TENSOR_DATA_TYPE getDmlTensorDataType(wnn::OperandType operand_type) {
 }
 
 ::dml::TensorDimensions getDmlTensorDimensions(
-    int32_t const * dimensions, uint32_t dimensionsCount) {
+    int32_t const * dimensions, uint32_t dimensions_count) {
   // DML dimension order [N, C, H, W]
+  const size_t dml_dimensions_count = 4;
   ::dml::TensorDimensions tensor_dimensions({1, 1, 1, 1});
-  DAWN_ASSERT(dimensionsCount <= 4);
-  for (uint32_t i = 0; i < dimensionsCount; ++i) {
-    tensor_dimensions[3 - i] = dimensions[i];
+  DAWN_ASSERT(dimensions_count <= 4);
+  for (uint32_t i = 0; i < dimensions_count; ++i) {
+    tensor_dimensions[dml_dimensions_count - i - 1] =
+        dimensions[dimensions_count - i - 1];
   }
   return tensor_dimensions;
 }
@@ -62,7 +64,6 @@ void Model::AddInput(const op::Input *input) {
       getDmlTensorDimensions(desc->dimensions, desc->dimensionsCount);
   ::dml::TensorDesc tensor_desc(
       getDmlTensorDataType(desc->type),
-      ::DML_TENSOR_FLAGS::DML_TENSOR_FLAG_OWNED_BY_DML,
       dml_dims,
       ::dml::TensorPolicy::Default());
   ::dml::Expression exp =
