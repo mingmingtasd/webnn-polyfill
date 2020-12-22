@@ -181,8 +181,18 @@ void Model::AddPool2d(const op::Pool2d *pool2d) {
   expressions_.insert(std::make_pair(pool2d, output));
 }
 
-void Model::AddReshape(const op::Reshape *relu) {
-  UNREACHABLE();
+void Model::AddReshape(const op::Reshape *reshape) {
+  DAWN_ASSERT(reshape->Inputs().size() == 1);
+  const OperandBase* input_operand = reshape->Inputs()[0].Get();
+  DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
+  ::dml::Expression input = expressions_.at(input_operand);
+  ::dml::TensorDimensions new_sizes;
+  DAWN_ASSERT(reshape->GetNewShapeCount() <= 4);
+  new_sizes.assign(reshape->GetNewShape(),
+                   reshape->GetNewShape() + reshape->GetNewShapeCount());
+  ::dml::Expression output =
+      ::dml::Reinterpret(input, new_sizes, ::dml::NullOpt);
+  expressions_.insert(std::make_pair(reshape, output));
 }
 
 void Model::AddTranspose(const op::Transpose *transpose) {
