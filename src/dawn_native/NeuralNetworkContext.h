@@ -22,14 +22,17 @@ public:
   }
 
   // Dawn API
-  void SetUncapturedErrorCallback(wnn::ErrorCallback callback, void *userdata);
   ModelBuilderBase *CreateModelBuilder();
+  void PushErrorScope(wnn::ErrorFilter filter);
+  bool PopErrorScope(wnn::ErrorCallback callback, void* userdata);
+  void SetUncapturedErrorCallback(wnn::ErrorCallback callback, void *userdata);
 
 private:
   void HandleError(std::unique_ptr<ErrorData> error);
   virtual ModelBuilderBase *CreateModelBuilderImpl();
 
   Ref<ErrorScope> root_error_scope_;
+  Ref<ErrorScope> current_error_scope_;
 };
 
 } // namespace dawn_native

@@ -3,10 +3,14 @@
 
 #include <sstream>
 
+#include "dawn_native/ValidationUtils_autogen.h"
+#include "dawn_native/dawn_platform.h"
+
 namespace dawn_native {
 
 NeuralNetworkContextBase::NeuralNetworkContextBase() {
   root_error_scope_ = AcquireRef(new ErrorScope());
+  current_error_scope_ = root_error_scope_.Get();
 }
 
 ModelBuilderBase *NeuralNetworkContextBase::CreateModelBuilder() {
@@ -15,6 +19,25 @@ ModelBuilderBase *NeuralNetworkContextBase::CreateModelBuilder() {
 
 ModelBuilderBase *NeuralNetworkContextBase::CreateModelBuilderImpl() {
   UNREACHABLE();
+}
+
+void NeuralNetworkContextBase::PushErrorScope(wnn::ErrorFilter filter) {
+  if (ConsumedError(ValidateErrorFilter(filter))) {
+    return;
+  }
+  current_error_scope_ =
+      AcquireRef(new ErrorScope(filter, current_error_scope_.Get()));
+}
+
+bool NeuralNetworkContextBase::PopErrorScope(wnn::ErrorCallback callback,
+                                             void *userdata) {
+  if (DAWN_UNLIKELY(current_error_scope_.Get() == root_error_scope_.Get())) {
+    return false;
+  }
+  current_error_scope_->SetCallback(callback, userdata);
+  current_error_scope_ = Ref<ErrorScope>(current_error_scope_->GetParent());
+
+  return true;
 }
 
 void NeuralNetworkContextBase::SetUncapturedErrorCallback(
@@ -33,8 +56,8 @@ void NeuralNetworkContextBase::HandleError(std::unique_ptr<ErrorData> error) {
 
   // Still forward device loss and internal errors to the error scopes so they
   // all reject.
-  root_error_scope_->HandleError(ToWNNErrorType(error->GetType()),
-                                 ss.str().c_str());
+  current_error_scope_->HandleError(ToWNNErrorType(error->GetType()),
+                                    ss.str().c_str());
 }
 
 } // namespace dawn_native

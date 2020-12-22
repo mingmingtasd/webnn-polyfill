@@ -161,7 +161,7 @@ void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
 }
 
 void ErrorCallback(WNNErrorType type, char const * message, void * userdata) {
-  dawn::ErrorLog() << message;
+  dawn::ErrorLog() << "error type is " << type << ", messages are " << message;
 }
 
 // Wrapped Compilation
@@ -174,7 +174,10 @@ void Test(WrappedModel *wrapped_model) {
   wnn::Operand output_operand = wrapped_model->GenerateOutput(builder);
   wnn::NamedOperands named_operands = CreateCppNamedOperands();
   named_operands.Set("output", output_operand);
+  // Use Promise in JS to await callback. 
+  g_context.PushErrorScope(wnn::ErrorFilter::Validation);
   wnn::Model model = builder.CreateModel(named_operands);
+  g_context.PopErrorScope(ErrorCallback, nullptr);
   model.Compile(CompilationCallback, nullptr);
 }
 

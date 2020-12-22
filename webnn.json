@@ -33,6 +33,9 @@
   "size_t": {
     "category": "native"
   },
+  "bool": {
+    "category": "native"
+  },
   "error filter": {
     "category": "enum",
     "values": [
@@ -62,6 +65,20 @@
             {"name": "callback", "type": "error callback"},
             {"name": "userdata", "type": "void", "annotation": "*"}
         ]
+      },
+      {
+          "name": "push error scope",
+          "args": [
+              {"name": "filter", "type": "error filter"}
+          ]
+      },
+      {
+          "name": "pop error scope",
+          "returns": "bool",
+          "args": [
+              {"name": "callback", "type": "error callback"},
+              {"name": "userdata", "type": "void", "annotation": "*"}
+          ]
       }
     ]
   },
