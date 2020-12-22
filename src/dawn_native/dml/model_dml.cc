@@ -36,7 +36,7 @@ DML_TENSOR_DATA_TYPE getDmlTensorDataType(wnn::OperandType operand_type) {
 }
 }  // namespace
 
-Model::Model() : input_index_(0) {
+Model::Model() {
   device_.reset(new ::pydml::Device());
   graph_.reset(new ::dml::Graph(device_->GetDevice()));
 }
@@ -51,11 +51,12 @@ void Model::AddConstant(const op::Constant *constant) {
       dml_dims,
       ::dml::TensorPolicy::Default());
   ::dml::Expression exp =
-      ::dml::InputTensor(*graph_, input_index_++, tensor_desc);
+      ::dml::InputTensor(*graph_, bindings_.size(), tensor_desc);
   expressions_.insert(std::make_pair(constant, exp));
   std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(
       exp, const_cast<void*>(constant->GetValue()), constant->GetSize()));
   bindings_.push_back(std::move(binding));
+  DAWN_DEBUG();
 }
 
 void Model::AddInput(const op::Input *input) {
@@ -67,14 +68,19 @@ void Model::AddInput(const op::Input *input) {
       dml_dims,
       ::dml::TensorPolicy::Default());
   ::dml::Expression exp =
-      ::dml::InputTensor(*graph_, input_index_++, tensor_desc);
+      ::dml::InputTensor(*graph_, bindings_.size(), tensor_desc);
   expressions_.insert(std::make_pair(input, exp));
-  inputs_.insert(std::make_pair(input->GetName(), exp));
+  std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(
+      exp, nullptr, 0));
+  bindings_.push_back(std::move(binding));
+  inputs_.insert(std::make_pair(input->GetName(), bindings_.back().get()));
+  DAWN_DEBUG() << " " << input->GetName();
 }
 
 void Model::AddOutput(const std::string& name, const OperandBase* output) {
   DAWN_ASSERT(expressions_.find(output) != expressions_.end());
   outputs_.insert(std::make_pair(name, expressions_.at(output)));
+  DAWN_DEBUG() << " " << name;
 }
   
 void Model::AddBinary(const op::Binary *binary) {
@@ -90,6 +96,8 @@ void Model::AddBinary(const op::Binary *binary) {
     c = ::dml::Add(a, b);
   } else if (binary->GetType() == op::BinaryOpType::kMul) {
     c = ::dml::Multiply(a, b);
+  } else if (binary->GetType() == op::BinaryOpType::kMatMul) {
+    c = ::dml::Gemm(a, b);
   } else {
     UNREACHABLE();
   }
@@ -105,20 +113,20 @@ void Model::AddConv2d(const op::Conv2d *conv2d) {
   DAWN_ASSERT(expressions_.find(filter_operand) != expressions_.end());
   ::dml::Expression filter = expressions_.at(filter_operand);
   const Conv2dOptions* options = conv2d->Options();
-  ::dml::Expression output = ::dml::Convolution(
+  ::dml::Expression conv = ::dml::Convolution(
       input, filter, ::dml::NullOpt, DML_CONVOLUTION_MODE_CROSS_CORRELATION,
       DML_CONVOLUTION_DIRECTION_FORWARD,
       // FIXME(nhu): strides, dilations, padding should be uint32_t
       // need to fix the spec.
       // strides
       {
-        reinterpret_cast<const uint32_t*>(options->strides),
-        options->stridesCount
+        (const uint32_t)options->strides[0],
+        (const uint32_t)options->strides[1]
       },
       // dilations
       {
-        reinterpret_cast<const uint32_t*>(options->dilations),
-        options->dilationsCount
+        (const uint32_t)options->dilations[0],
+        (const uint32_t)options->dilations[1]
       },
       // startPadding
       {
@@ -128,15 +136,15 @@ void Model::AddConv2d(const op::Conv2d *conv2d) {
       // endPadding
       {
         (const uint32_t)options->padding[1],
-        (const uint32_t)options->padding[3],
+        (const uint32_t)options->padding[3]
       },
       // outPadding
       {},
       // groupCount
       options->groups);
-  expressions_.insert(std::make_pair(conv2d, output));
+  expressions_.insert(std::make_pair(conv2d, conv));
 }
-  
+
 void Model::AddPool2d(const op::Pool2d *pool2d) {
   UNREACHABLE();
 }
@@ -153,7 +161,18 @@ void Model::AddUnary(const op::Unary *unary) {
   UNREACHABLE();
 }
 
-void Model::Finish() {}
+void Model::Finish() {
+  size_t op_count = expressions_.size() - bindings_.size();
+  DAWN_DEBUG() << "op count: " << op_count;
+  // FIXME(nhu): workaround the optional tensor issue of DML
+  // https://github.com/microsoft/DirectML/issues/64
+  if (op_count == 1) {
+    for (auto& output : outputs_) {
+      ::dml::Expression identity = ::dml::ActivationIdentity(output.second);
+      outputs_[output.first] = identity;
+    }
+  }
+}
 
 void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {
