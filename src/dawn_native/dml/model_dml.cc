@@ -146,7 +146,39 @@ void Model::AddConv2d(const op::Conv2d *conv2d) {
 }
 
 void Model::AddPool2d(const op::Pool2d *pool2d) {
-  UNREACHABLE();
+  DAWN_ASSERT(pool2d->Inputs().size() == 1);
+  const OperandBase* input_operand = pool2d->Inputs()[0].Get();
+  DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
+  ::dml::Expression input = expressions_.at(input_operand);
+  const Pool2dOptions* options = pool2d->Options();
+  ::dml::Span<const uint32_t> strides = {
+    static_cast<uint32_t>(options->strides[0]),
+    static_cast<uint32_t>(options->strides[1])};
+  ::dml::Span<const uint32_t> windowSizes = {
+    static_cast<uint32_t>(options->windowDimensions[0]),
+    static_cast<uint32_t>(options->windowDimensions[1])};
+  ::dml::Span<const uint32_t> startPadding {
+    static_cast<uint32_t>(options->padding[0]),
+    static_cast<uint32_t>(options->padding[2])};
+  ::dml::Span<const uint32_t> endPadding = {
+    static_cast<uint32_t>(options->padding[1]),
+    static_cast<uint32_t>(options->padding[3])};
+  ::dml::Span<const uint32_t> dilations = {
+    static_cast<uint32_t>(options->dilations[0]),
+    static_cast<uint32_t>(options->dilations[1])};
+  ::dml::Expression output;
+  if (pool2d->GetType() == op::Pool2dType::kAveragePool2d) {
+    DAWN_ASSERT(dilations[0] == 1 || dilations[1] == 1);
+    output = ::dml::AveragePooling(
+        input, strides, windowSizes, startPadding, endPadding, false);
+  } else if (pool2d->GetType() == op::Pool2dType::kMaxPool2d) {
+    output = ::dml::MaxPooling(
+        input, windowSizes, strides, startPadding, endPadding, dilations,
+        false).values;
+  } else {
+    UNREACHABLE();
+  }
+  expressions_.insert(std::make_pair(pool2d, output));
 }
 
 void Model::AddReshape(const op::Reshape *relu) {
