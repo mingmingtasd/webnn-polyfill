@@ -25,6 +25,8 @@ Compilation::Compilation(const Ref<Model>& model) : model_(model) {
   for (auto& output : model_->outputs_) {
     outputs.push_back(output.second);
   }
+  // TODO(nhu): investigate other execution flag,
+  // e.g. DML_EXECUTION_FLAG_ALLOW_HALF_PRECISION_COMPUTATION
   compiled_model_.reset(
       new pydml::CompiledModel(
           *(model_->graph_), DML_EXECUTION_FLAG_NONE, outputs));
@@ -35,17 +37,12 @@ void Compilation::ComputeImpl(
     void *userdata,
     NamedOutputsBase *outputs) {
   // FIXME(nhu): implement async
-  std::vector<std::unique_ptr<::pydml::Binding>> bindings;
   for (auto &input : inputs->GetRecords()) {
-    std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(
-        model_->inputs_.at(input.first), 
-        const_cast<void*>(input.second->buffer), input.second->size));
-    bindings.push_back(std::move(binding));
+    ::pydml::Binding* input_binding = model_->inputs_.at(input.first);
+    input_binding->data.buffer_ = const_cast<void*>(input.second->buffer);
+    input_binding->data.size_ = input.second->size;
   }
   std::vector<pydml::Binding*> input_bindings;
-  for (auto &binding : bindings) {
-    input_bindings.push_back(binding.get());
-  }
   for (auto &binding : model_->bindings_) {
     input_bindings.push_back(binding.get());
   }

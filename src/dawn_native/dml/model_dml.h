@@ -52,10 +52,9 @@ private:
 
   std::shared_ptr<::pydml::Device> device_;
   std::unique_ptr<::dml::Graph> graph_;
-  uint32_t input_index_;
   std::map<const OperandBase*, ::dml::Expression> expressions_;
   std::vector<std::unique_ptr<::pydml::Binding>> bindings_;
-  std::map<std::string, ::dml::Expression> inputs_;
+  std::map<std::string, ::pydml::Binding*> inputs_;
   std::map<std::string, ::dml::Expression> outputs_;
 };
 

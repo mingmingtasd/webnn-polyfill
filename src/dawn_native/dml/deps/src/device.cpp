@@ -242,6 +242,7 @@ std::vector<pydml::TensorData*> Device::DispatchOperator(
     bindingTableDesc.CPUDescriptorHandle = m_descriptorHeap->GetCPUDescriptorHandleForHeapStart();
     bindingTableDesc.GPUDescriptorHandle = m_descriptorHeap->GetGPUDescriptorHandleForHeapStart();
     bindingTableDesc.SizeInDescriptors = bindingProps.RequiredDescriptorCount;
+    dawn::DebugLog() << "SizeInDescriptors: " << bindingTableDesc.SizeInDescriptors;
 
     ThrowIfFailed(m_bindingTable->Reset(&bindingTableDesc));
 
@@ -251,6 +252,7 @@ std::vector<pydml::TensorData*> Device::DispatchOperator(
     {
         inputBindingDescs[i] = converter.ToBindingDesc(inputBindings[i]);
     }
+    dawn::DebugLog() << "inputBindingDescs.size(): " << (int)inputBindingDescs.size();
 
     m_bindingTable->BindInputs(static_cast<uint32_t>(inputBindingDescs.size()), inputBindingDescs.data());
 
@@ -479,10 +481,12 @@ void Device::InitializeOperator(
     bindingTableDesc.CPUDescriptorHandle = m_descriptorHeap->GetCPUDescriptorHandleForHeapStart();
     bindingTableDesc.GPUDescriptorHandle = m_descriptorHeap->GetGPUDescriptorHandleForHeapStart();
     bindingTableDesc.SizeInDescriptors = descriptorHeapSize;
+    dawn::DebugLog() << "SizeInDescriptors: " << bindingTableDesc.SizeInDescriptors;
 
     ThrowIfFailed(m_bindingTable->Reset(&bindingTableDesc));
 
     DML_BINDING_DESC inputBindingDesc = converter.ToBindingDesc(inputBinding);
+    dawn::DebugLog() << "inputBindingDesc.BindingCount: " << ((DML_BUFFER_ARRAY_BINDING*)inputBindingDesc.Desc)->BindingCount;
     m_bindingTable->BindInputs(1, &inputBindingDesc);
 
     if (persistentResourceSize != 0)

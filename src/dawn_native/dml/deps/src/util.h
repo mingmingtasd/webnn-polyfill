@@ -14,6 +14,8 @@
 
 inline void ThrowIfFailed(HRESULT hr)
 {
+    if (FAILED(hr))
+        dawn::ErrorLog() << "HRESULT " << std::hex << hr;
     DAWN_ASSERT (!FAILED(hr));
 }
 

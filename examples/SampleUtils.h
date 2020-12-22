@@ -54,6 +54,9 @@ public:
   void SetExpectedBuffer(std::vector<float> buffer);
   std::vector<float> ExpectedBuffer();
 
+  void SetExpectedShape(std::vector<int32_t> shape);
+  std::vector<int32_t> ExpectedShape();
+
 private:
   wnn::ModelBuilder model_builder_;
   std::vector<int32_t> input_shape_;
@@ -64,6 +67,7 @@ private:
   std::vector<float> constant_buffer_;
   std::vector<int32_t> output_shape_;
   std::vector<float> expected_buffer_;
+  std::vector<int32_t> expected_shape_;
 };
 
 void Test(WrappedModel *model);

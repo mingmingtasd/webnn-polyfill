@@ -85,6 +85,12 @@ void WrappedModel::SetOutputShape(std::vector<int32_t> shape) {
 
 std::vector<int32_t> WrappedModel::OutputShape() { return output_shape_; }
 
+void WrappedModel::SetExpectedShape(std::vector<int32_t> shape) {
+  expected_shape_ = std::move(shape);
+}
+
+std::vector<int32_t> WrappedModel::ExpectedShape() { return expected_shape_; }
+
 void WrappedModel::SetExpectedBuffer(std::vector<float> buffer) {
   expected_buffer_ = std::move(buffer);
 }
@@ -109,6 +115,19 @@ void ComputeCallback(WNNNamedResults impl, void* userData) {
                        << " index = " << i;
       expected = false;
       break;
+    }
+  }
+  std::vector<int32_t> expected_shape = s_wrapped_model->ExpectedShape();
+  if (!expected_shape.empty()) {
+    for (size_t i = 0; i < output.DimensionsSize(); ++i) {
+      int32_t dimension = output.Dimensions()[i];
+      if (!Expected(expected_shape[i], dimension)) {
+        dawn::ErrorLog() << "The output dimension is not as expected for "
+                       << dimension << " != " << expected_shape[i]
+                       << " index = " << i;
+        expected = false;
+        break;
+      }
     }
   }
   if (expected) {
