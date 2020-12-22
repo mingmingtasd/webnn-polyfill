@@ -190,16 +190,30 @@ void Model::AddTranspose(const op::Transpose *transpose) {
 }
   
 void Model::AddUnary(const op::Unary *unary) {
-  UNREACHABLE();
+  DAWN_ASSERT(unary->Inputs().size() == 1);
+  const OperandBase* input_operand = unary->Inputs()[0].Get();
+  DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
+  ::dml::Expression input = expressions_.at(input_operand);
+  ::dml::Expression output;
+  if (unary->GetType() == op::UnaryOpType::kRelu) {
+    output = ::dml::ActivationRelu(input);
+  } else if (unary->GetType() == op::UnaryOpType::kSoftmax) {
+    output = ::dml::ActivationSoftmax(input);
+  } else {
+    UNREACHABLE();
+  }
+  expressions_.insert(std::make_pair(unary, output));
 }
 
 void Model::Finish() {
   size_t op_count = expressions_.size() - bindings_.size();
-  DAWN_DEBUG() << "op count: " << op_count;
+  DAWN_DEBUG() << " op count: " << op_count;
   // FIXME(nhu): workaround the optional tensor issue of DML
   // https://github.com/microsoft/DirectML/issues/64
   if (op_count == 1) {
     for (auto& output : outputs_) {
+      DAWN_DEBUG() << " append an activation identity for output "
+                   << output.first;
       ::dml::Expression identity = ::dml::ActivationIdentity(output.second);
       outputs_[output.first] = identity;
     }
