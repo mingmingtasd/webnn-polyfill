@@ -122,7 +122,7 @@ void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
       break;
     }
   }
-  std::vector<int32_t> expected_shape = s_wrapped_model->ExpectedShape();
+  std::vector<int32_t> expected_shape = g_wrapped_model->ExpectedShape();
   if (!expected_shape.empty()) {
     for (size_t i = 0; i < output.DimensionsSize(); ++i) {
       int32_t dimension = output.Dimensions()[i];
@@ -161,7 +161,9 @@ void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
 }
 
 void ErrorCallback(WNNErrorType type, char const * message, void * userdata) {
-  dawn::ErrorLog() << "error type is " << type << ", messages are " << message;
+  if (type != WNNErrorType_NoError) {
+    dawn::ErrorLog() << "error type is " << type << ", messages are " << message;
+  }
 }
 
 // Wrapped Compilation

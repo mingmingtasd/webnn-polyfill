@@ -20,9 +20,8 @@ public:
                void *userdata, NamedOutputsBase *outputs = nullptr);
 
 private:
-  virtual ResultOrError<Ref<NamedResultsBase>>
-  ComputeImpl(NamedInputsBase *inputs, NamedOutputsBase *outputs,
-              WNNComputeStatus *status) = 0;
+  virtual void ComputeImpl(NamedInputsBase *inputs, WNNComputeCallback callback,
+                           void *userdata, NamedOutputsBase *outputs) = 0;
 };
 }
 

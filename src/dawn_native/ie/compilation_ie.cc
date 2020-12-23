@@ -4,11 +4,23 @@
 #include <vector>
 
 #include "common/Log.h"
+#include "dawn_native/Error.h"
+#include "dawn_native/ErrorData.h"
 #include "dawn_native/NamedResults.h"
 #include "dawn_native/Operand.h"
 #include "dawn_native/Result.h"
 #include "error_ie.h"
 #include "ienn_symbol_table.h"
+
+#define DAWN_CALLBACK_TRY(code, messages)                                      \
+  {                                                                            \
+    MaybeError maybe_error = CheckStatusCode(code, messages);                  \
+    if (maybe_error.IsError()) {                                               \
+      std::unique_ptr<ErrorData> error = maybe_error.AcquireError();           \
+      callback(status, nullptr, error->GetMessage().c_str(), userdata);        \
+      return;                                                                  \
+    }                                                                          \
+  }
 
 namespace dawn_native {
 
@@ -36,10 +48,10 @@ MaybeError Compilation::Init(WNNCompileStatus *status) {
   return {};
 }
 
-ResultOrError<Ref<NamedResultsBase>>
-Compilation::ComputeImpl(NamedInputsBase *inputs, NamedOutputsBase *outputs,
-                         WNNComputeStatus *status) {
-  *status = WNNComputeStatus_Error;
+void Compilation::ComputeImpl(NamedInputsBase *inputs,
+                              WNNComputeCallback callback, void *userdata,
+                              NamedOutputsBase *outputs) {
+  WNNComputeStatus status = WNNComputeStatus_Error;
   // Set input data to nGraph.
   for (auto &input : inputs->GetRecords()) {
     ie_operand_t ie_operand;
@@ -47,12 +59,12 @@ Compilation::ComputeImpl(NamedInputsBase *inputs, NamedOutputsBase *outputs,
         const_cast<char *>(model_->input_id_map_[input.first].c_str());
     IEStatusCode code = IE(ie_compilation_set_input)(
         ie_compilation_, &ie_operand, input.second->buffer, input.second->size);
-    DAWN_TRY(CheckStatusCode(code, "IE set input to model"));
+    DAWN_CALLBACK_TRY(code, "IE set input");
   }
 
   // Compute the compiled model.
   IEStatusCode code = IE(ie_compilation_compute)(ie_compilation_);
-  DAWN_TRY(CheckStatusCode(code, "IE compute model"));
+  DAWN_CALLBACK_TRY(code, "IE compute model");
 
   // Get Data from nGraph with output.
   // TODO(junwei). new memory for output data.
@@ -64,7 +76,7 @@ Compilation::ComputeImpl(NamedInputsBase *inputs, NamedOutputsBase *outputs,
     size_t buffer_length;
     IEStatusCode code = IE(ie_compilation_get_buffer)(
         ie_compilation_, output_id.data(), &output_buffer, &buffer_length);
-    DAWN_TRY(CheckStatusCode(code, "IE get buffer"));
+    DAWN_CALLBACK_TRY(code, "IE get buffer");
     // TODO(junwei): get the output dimensions;
     std::vector<int32_t> dimensions;
     Ref<ResultBase> result = AcquireRef(
@@ -77,11 +89,13 @@ Compilation::ComputeImpl(NamedInputsBase *inputs, NamedOutputsBase *outputs,
       ie_operand.name = const_cast<char *>(output_id.c_str());
       IEStatusCode code = IE(ie_compilation_get_output)(
           ie_compilation_, &ie_operand, output->buffer, output->size);
-      DAWN_TRY(CheckStatusCode(code, "IE get output"));
+      DAWN_CALLBACK_TRY(code, "IE get output");
     }
   }
-  *status = WNNComputeStatus_Success;
-  return std::move(results);
+  status = WNNComputeStatus_Success;
+  callback(status, reinterpret_cast<WNNNamedResults>(results.Detach()), nullptr,
+           userdata);
+  return;
 }
 
 } // namespace ie

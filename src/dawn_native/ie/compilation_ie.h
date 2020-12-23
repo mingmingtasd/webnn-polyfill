@@ -15,9 +15,8 @@ public:
   ~Compilation() override;
 
   MaybeError Init(WNNCompileStatus *status);
-  ResultOrError<Ref<NamedResultsBase>>
-  ComputeImpl(NamedInputsBase *inputs, NamedOutputsBase *outputs,
-              WNNComputeStatus *status) override;
+  void ComputeImpl(NamedInputsBase *inputs, WNNComputeCallback callback,
+                   void *userdata, NamedOutputsBase *outputs) override;
 
 private:
   Ref<Model> model_;
