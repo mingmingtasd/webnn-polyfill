@@ -20,7 +20,9 @@
       callback(status, nullptr, error->GetMessage().c_str(), userdata);        \
       return;                                                                  \
     }                                                                          \
-  }
+  }                                                                            \
+  for (;;)                                                                     \
+  break
 
 namespace dawn_native {
 
