@@ -17,7 +17,7 @@ import("scripts/dawn_overrides_with_defaults.gni")
 group("all") {
   testonly = true
   deps = [
-    # "src/tests:dawn_tests",
+    "src/tests:dawn_tests",
   ]
   if (dawn_standalone) {
     deps += [ "examples:dawn_samples" ]
