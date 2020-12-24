@@ -14,9 +14,9 @@ public:
   explicit Compilation(Ref<Model> model);
   ~Compilation() override;
 
+  MaybeError Init(WNNCompileStatus *status);
   void ComputeImpl(NamedInputsBase *inputs, WNNComputeCallback callback,
-                   void *userdata,
-                   NamedOutputsBase *outputs = nullptr) override;
+                   void *userdata, NamedOutputsBase *outputs) override;
 
 private:
   Ref<Model> model_;

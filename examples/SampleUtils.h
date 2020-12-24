@@ -20,7 +20,7 @@
 
 uint32_t product(const std::vector<int32_t> &dims);
 
-wnn::ModelBuilder CreateCppModelBuilder();
+wnn::NeuralNetworkContext CreateCppNeuralNetworkContext();
 
 wnn::NamedInputs CreateCppNamedInputs();
 

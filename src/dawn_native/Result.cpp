@@ -6,11 +6,8 @@
 
 namespace dawn_native {
 
-ResultBase::ResultBase(void* buffer, uint32_t buffer_size,
-                       std::vector<int32_t>& dimensions) :
-    buffer_(buffer),
-    buffer_size_(buffer_size), 
-    dimensions_(std::move(dimensions)) {
-}
-
+ResultBase::ResultBase(void *buffer, uint32_t buffer_size,
+                       std::vector<int32_t> &dimensions)
+    : buffer_(buffer), buffer_size_(buffer_size),
+      dimensions_(std::move(dimensions)) {}
 }

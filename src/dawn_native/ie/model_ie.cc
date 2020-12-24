@@ -5,8 +5,10 @@
 
 #include "common/Assert.h"
 #include "common/Log.h"
-#include "dawn_native/ie/compilation_ie.h"
+#include "dawn_native/ErrorData.h"
 #include "dawn_native/NamedOperands.h"
+#include "dawn_native/ie/compilation_ie.h"
+#include "error_ie.h"
 #include "ienn_symbol_table.h"
 
 namespace dawn_native {
@@ -68,7 +70,7 @@ ie_pool2d_options Pool2dOptionsForIE(Pool2dOptions const *options) {
 
 } // namespace
 
-Model::Model() {
+Model::Model(ModelBuilder *model_builder) : ModelBase(model_builder) {
   // Load ienn_c_api.dll to compile the model.
   IEStatusCode code = IE(ie_create_model)(&ie_model_);
   if (code != IEStatusCode::OK) {
@@ -77,43 +79,43 @@ Model::Model() {
   }
 }
 
-void Model::AddConstant(const op::Constant *constant) {
+Model::~Model() { IE(ie_model_free)(ie_model_); }
+
+MaybeError Model::AddConstant(const op::Constant *constant) {
   ie_operand_descriptor ie_desc = ConvertTo(constant->GetOperandDescriptor());
   ie_operand_t *ie_operand;
   IEStatusCode code =
       IE(ie_model_add_constant)(ie_model_, &ie_desc, constant->GetValue(),
                                 constant->GetSize(), &ie_operand);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add constant, the code is " << code << ".";
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE add constant"));
+
   operand_id_map_[constant] = std::string(ie_operand->name);
+  return {};
 }
 
-void Model::AddInput(const op::Input *input) {
+MaybeError Model::AddInput(const op::Input *input) {
   ie_operand_descriptor ie_desc = ConvertTo(input->GetOperandDescriptor());
   ie_operand_t *ie_operand;
   IEStatusCode code = IE(ie_model_add_input)(ie_model_, &ie_desc, &ie_operand);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add input , the code is " << code << ".";
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE add input"));
+
   operand_id_map_[input] = std::string(ie_operand->name);
   input_id_map_[input->GetName()] = std::string(ie_operand->name);
+  return {};
 }
 
-void Model::AddOutput(const std::string& name, const OperandBase *output) {
+MaybeError Model::AddOutput(const std::string &name,
+                            const OperandBase *output) {
   ie_operand_t ie_operand;
   ie_operand.name = const_cast<char *>(operand_id_map_[output].c_str());
   IEStatusCode code = IE(ie_model_add_output)(ie_model_, &ie_operand);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add input , the code is " << code << ".";
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE add output"));
+
   output_name_map_[ie_operand.name] = name;
+  return {};
 }
 
-void Model::AddBinary(const op::Binary *binary) {
+MaybeError Model::AddBinary(const op::Binary *binary) {
   auto inputs = binary->Inputs();
   ie_operand_t primary;
   primary.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
@@ -122,21 +124,20 @@ void Model::AddBinary(const op::Binary *binary) {
   ie_operand_t *ie_operand = nullptr;
   IEStatusCode code = NOT_FOUND;
   if (binary->GetType() == op::BinaryOpType::kMatMul) {
-    code = IE(ie_model_add_mat_mul)(
-        ie_model_, &primary, &secondary, &ie_operand);
+    code =
+        IE(ie_model_add_mat_mul)(ie_model_, &primary, &secondary, &ie_operand);
   } else {
     code = IE(ie_model_add_binary)(
-      ie_model_, static_cast<ie_binary_type>(binary->GetType()), &primary,
-      &secondary, &ie_operand);
+        ie_model_, static_cast<ie_binary_type>(binary->GetType()), &primary,
+        &secondary, &ie_operand);
   }
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add binary, the code is " << code << ".";
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE add binary"));
+
   operand_id_map_[binary] = std::string(ie_operand->name);
+  return {};
 }
 
-void Model::AddConv2d(const op::Conv2d *conv2d) {
+MaybeError Model::AddConv2d(const op::Conv2d *conv2d) {
   auto inputs = conv2d->Inputs();
   ie_operand_t input;
   input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
@@ -146,14 +147,13 @@ void Model::AddConv2d(const op::Conv2d *conv2d) {
   ie_conv2d_options_t ie_options = Conv2dOptionsForIE(conv2d->Options());
   IEStatusCode code = IE(ie_model_add_conv2d)(ie_model_, &input, &filter,
                                               &ie_options, &ie_operand);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add matmul, the code is " << code << ".";
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE add conv2d"));
+
   operand_id_map_[conv2d] = std::string(ie_operand->name);
+  return {};
 }
 
-void Model::AddPool2d(const op::Pool2d *pool2d) {
+MaybeError Model::AddPool2d(const op::Pool2d *pool2d) {
   auto inputs = pool2d->Inputs();
   ie_operand_t input;
   input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
@@ -162,14 +162,13 @@ void Model::AddPool2d(const op::Pool2d *pool2d) {
   IEStatusCode code = IE(ie_model_add_pool2d)(
       ie_model_, static_cast<ie_pool_type>(pool2d->GetType()), &input,
       &ie_options, &ie_operand);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add matmul, the code is " << code << ".";
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE add pool2d"));
+
   operand_id_map_[pool2d] = std::string(ie_operand->name);
+  return {};
 }
 
-void Model::AddUnary(const op::Unary *unary) {
+MaybeError Model::AddUnary(const op::Unary *unary) {
   auto inputs = unary->Inputs();
   ie_operand_t input;
   input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
@@ -180,14 +179,13 @@ void Model::AddUnary(const op::Unary *unary) {
   } else if (unary->GetType() == op::UnaryOpType::kSoftmax) {
     code = IE(ie_model_add_softmax)(ie_model_, &input, &ie_operand);
   }
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add relu, the code is " << code << ".";
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE add unary"));
+
   operand_id_map_[unary] = std::string(ie_operand->name);
+  return {};
 }
 
-void Model::AddReshape(const op::Reshape *reshape) {
+MaybeError Model::AddReshape(const op::Reshape *reshape) {
   auto inputs = reshape->Inputs();
   ie_operand_t input;
   input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
@@ -195,14 +193,13 @@ void Model::AddReshape(const op::Reshape *reshape) {
   IEStatusCode code =
       IE(ie_model_add_reshape)(ie_model_, &input, reshape->GetNewShape(),
                                reshape->GetNewShapeCount(), &ie_operand);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add relu, the code is " << code << ".";
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE add reshape"));
+
   operand_id_map_[reshape] = std::string(ie_operand->name);
+  return {};
 }
 
-void Model::AddTranspose(const op::Transpose *transpose) {
+MaybeError Model::AddTranspose(const op::Transpose *transpose) {
   auto inputs = transpose->Inputs();
   ie_operand_t input;
   input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
@@ -211,24 +208,31 @@ void Model::AddTranspose(const op::Transpose *transpose) {
       TransposeOptionsForIE(transpose->Options());
   IEStatusCode code =
       IE(ie_model_add_transpose)(ie_model_, &input, &ie_options, &ie_operand);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to add transpose, the code is " << code << ".";
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE add transpose"));
+
   operand_id_map_[transpose] = std::string(ie_operand->name);
+  return {};
 }
 
-void Model::Finish() {
+MaybeError Model::Finish() {
   IEStatusCode code = IE(ie_model_finish)(ie_model_);
-  if (code != IEStatusCode::OK) {
-    dawn::ErrorLog() << "Failing to finish the model.";
-    return;
-  }
+  DAWN_TRY(CheckStatusCode(code, "IE finish creating model"));
+  return {};
 }
 
 void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {
-  callback(reinterpret_cast<WNNCompilation>(new Compilation(this)), userdata);
+  Compilation *compilation = AcquireRef(new Compilation(this)).Detach();
+  WNNCompileStatus status;
+  MaybeError maybe_error = compilation->Init(&status);
+  if (maybe_error.IsError()) {
+    std::unique_ptr<ErrorData> error = maybe_error.AcquireError();
+    compilation->Release();
+    callback(status, nullptr, error->GetMessage().c_str(), userdata);
+  } else {
+    callback(status, reinterpret_cast<WNNCompilation>(compilation), nullptr,
+             userdata);
+  }
 }
 
 ie_model_t *Model::GetInferenceEngineModel() { return ie_model_; }

@@ -3,6 +3,7 @@
 
 #include "common/Assert.h"
 #include "common/Log.h"
+#include "dawn_native/NamedResults.h"
 
 namespace dawn_native {
 

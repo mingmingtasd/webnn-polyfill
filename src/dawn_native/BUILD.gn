@@ -98,6 +98,8 @@ source_set("dawn_native_sources") {
     "Error.h",
     "ErrorData.cpp",
     "ErrorData.h",
+    "ErrorScope.cpp",
+    "ErrorScope.h",
     "Model.cpp",
     "Model.h",
     "ModelBuilder.cpp",
@@ -106,6 +108,10 @@ source_set("dawn_native_sources") {
     "NamedOutputs.h",
     "NamedRecords.h",
     "NamedResults.h",
+    "NeuralNetworkContext.cpp",
+    "NeuralNetworkContext.h",
+    "ObjectBase.cpp",
+    "ObjectBase.h",
     "Operand.cpp",
     "Operand.h",
     "Result.cpp",
@@ -129,6 +135,8 @@ source_set("dawn_native_sources") {
     sources += [
       "ie/compilation_ie.cc",
       "ie/compilation_ie.h",
+      "ie/error_ie.cc",
+      "ie/error_ie.h",
       "ie/ienn_symbol_table.cc",
       "ie/ienn_symbol_table.h",
       "ie/late_binding_symbol_table.cc",
@@ -137,6 +145,8 @@ source_set("dawn_native_sources") {
       "ie/model_builder_ie.h",
       "ie/model_ie.cc",
       "ie/model_ie.h",
+      "ie/neural_network_context_ie.cc",
+      "ie/neural_network_context_ie.h",
     ]
   }
 
@@ -160,18 +170,14 @@ source_set("dawn_native_sources") {
       "dml/model_dml.h",
     ]
 
-    include_dirs = [
-      "dml/deps/"
-    ]
+    include_dirs = [ "dml/deps/" ]
 
-    lib_dirs = [
-      "dml/deps/microsoft.ai.directml.1.4.0/bin/x64-win"
-    ]
+    lib_dirs = [ "dml/deps/microsoft.ai.directml.1.4.0/bin/x64-win" ]
 
     libs = [
-      "dxgi.lib", 
+      "dxgi.lib",
       "d3d12.lib",
-      "directml.lib"
+      "directml.lib",
     ]
 
     cflags = [
@@ -227,7 +233,8 @@ if (dawn_enable_ie) {
 if (dawn_enable_dml) {
   dml_dll = "DirectML.dll"
   os_folder = "x64-win"
-  dml_dll_path = "//src/dawn_native/dml/deps/microsoft.ai.directml.1.4.0/bin/${os_folder}"
+  dml_dll_path =
+      "//src/dawn_native/dml/deps/microsoft.ai.directml.1.4.0/bin/${os_folder}"
   copy("copy_dml_dll") {
     sources = [ "${dml_dll_path}/${dml_dll}" ]
     outputs = [ "$root_out_dir/{{source_file_part}}" ]

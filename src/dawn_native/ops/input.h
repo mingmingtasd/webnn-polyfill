@@ -27,7 +27,7 @@ public:
   }
   ~Input() override = default;
 
-  void AddToModel(ModelBase *model) const override { model->AddInput(this); }
+  MaybeError AddToModel(ModelBase *model) const override { return model->AddInput(this); }
 
   const OperandDescriptor *GetOperandDescriptor() const { return &descriptor_; }
   const std::string& GetName() const { return name_; }
