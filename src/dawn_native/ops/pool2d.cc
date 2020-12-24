@@ -31,7 +31,7 @@ Pool2d::Pool2d(ModelBuilderBase *builder, Pool2dType op_type,
   } else {
     window_dimensions_.assign(options->windowDimensions,
                               options->windowDimensions +
-                                  options->windowDimensionsCount);
+                              options->windowDimensionsCount);
   }
   options_.windowDimensions = window_dimensions_.data();
   options_.windowDimensionsCount = window_dimensions_.size();
@@ -61,12 +61,11 @@ Pool2d::Pool2d(ModelBuilderBase *builder, Pool2dType op_type,
   options_.dilations = dilations_.data();
   options_.dilationsCount = dilations_.size();
 
-  if (options == nullptr) {
+  if (options == nullptr || &(options_.layout) == nullptr) {
     options_.layout = wnn::OperandLayout::Nchw;
   } else {
     options_.layout = options->layout;
   }
-
 }
 
 MaybeError Pool2d::AddToModel(ModelBase *model) const {
@@ -80,14 +79,26 @@ MaybeError Pool2d::ValidateAndInferTypes() {
   if (input->Dimensions().size() != 4) {
     return DAWN_VALIDATION_ERROR("Argument input is not a 4D tensor.");
   }
-  type_ = input->Type();
-  dimensions_.resize(4);
+
+  if (options_.windowDimensionsCount != 2) {
+    return DAWN_VALIDATION_ERROR("windowDimensionsCount is incorrect.");
+  }
+
+  if (options_.paddingCount != 4) {
+    return DAWN_VALIDATION_ERROR("paddingCount is incorrect.");
+  }
+
+  if (options_.stridesCount != 2) {
+    return DAWN_VALIDATION_ERROR("stridesCount is incorrect.");
+  }
+
+  if (options_.dilationsCount != 2) {
+    return DAWN_VALIDATION_ERROR("dilationsCount is incorrect.");
+  }
 
   DAWN_DEBUG() << " op: " << PoolOpTypeToString(OpType())
                << ", input.type: " << OperandTypeToString(input->Type())
-               << ", input.dimensions: " << ShapeToString(input->Dimensions())
-               << ", output.type: " << OperandTypeToString(type_)
-               << ", output.dimensions: " << ShapeToString(dimensions_);
+               << ", input.dimensions: " << ShapeToString(input->Dimensions());
   return {};
 }
 

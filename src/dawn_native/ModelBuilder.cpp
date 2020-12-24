@@ -23,7 +23,6 @@
 #define DAWN_VALIDATE_AND_INFER_TYPES(ptr)                                     \
   Ref<OperandBase> op = AcquireRef(ptr);                                       \
   if (GetContext()->ConsumedError(op->ValidateAndInferTypes())) {              \
-    op->Release();                                                             \
     return OperandBase::MakeError(this);                                       \
   }                                                                            \
   return op.Detach();                                                          \
