@@ -59,6 +59,13 @@ class ProcTableAsClass {
 	void ModelCompile(WNNModel self, WNNCompileCallback callback, 
 			  void* userdata, 
 			  WNNCompilationOptions const * options);
+
+	bool NeuralNetworkContextPopErrorScope(WNNNeuralNetworkContext neuralNetworkContext, 
+			                       WNNErrorCallback callback, void * userdata);
+
+	void NeuralNetworkContextSetUncapturedErrorCallback(WNNNeuralNetworkContext neuralNetworkContext, 
+			                       WNNErrorCallback callback, void * userdata);
+
 	struct Object {
             ProcTableAsClass* procs = nullptr;
             void* userdata = 0;
