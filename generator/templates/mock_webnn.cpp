@@ -40,6 +40,40 @@ namespace {
 ProcTableAsClass::~ProcTableAsClass() {
 }
 
+void ProcTableAsClass::CompilationCompute(WNNCompilation self,
+                                WNNNamedInputs inputs,
+                                WNNComputeCallback callback,
+                                void* userdata, WNNNamedOutputs outputs){
+   auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+   object->computeCallback = callback;
+   object->userdata = userdata;
+
+   OnCompilationComputeCallback(self, inputs, callback, userdata, outputs);
+
+}
+
+void ProcTableAsClass::ModelCompile(WNNModel self, WNNCompileCallback callback,
+                          void* userdata,
+                          WNNCompilationOptions const * options){
+   auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
+   object->compileCallback = callback;
+   object->userdata = userdata;
+
+   OnModelCompileCallback(self, callback, userdata, options);
+
+}
+
+bool ProcTableAsClass::NeuralNetworkContextPopErrorScope(WNNNeuralNetworkContext neuralNetworkContext,
+                                               WNNErrorCallback callback, void * userdata){
+  return OnNeuralNetworkContextPopErrorScopeCallback(neuralNetworkContext, callback, userdata);
+}
+
+void ProcTableAsClass::NeuralNetworkContextSetUncapturedErrorCallback(
+		       WNNNeuralNetworkContext neuralNetworkContext,
+                       WNNErrorCallback callback, void * userdata){
+}
+
+
 void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table) {
     // *device = GetNewDevice();
 
