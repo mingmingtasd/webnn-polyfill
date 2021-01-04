@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 
+#include "dawn_native/dml/model_builder_dml.h"
 #include "dawn_native/Model.h"
 #include "dawn_native/Operand.h"
 #include "dawn_native/ops/binary.h"
@@ -31,19 +32,20 @@ namespace dml {
 
 class Model : public ModelBase {
 public:
-  Model();
+  explicit Model(ModelBuilder *model_builder);
   ~Model() override = default;
 
-  virtual void AddConstant(const op::Constant *constant) override;
-  virtual void AddInput(const op::Input *input) override;
-  virtual void AddOutput(const std::string& name, const OperandBase* output) override;
-  virtual void AddBinary(const op::Binary *binary) override;
-  virtual void AddConv2d(const op::Conv2d *conv2d) override;
-  virtual void AddPool2d(const op::Pool2d *pool2d) override;
-  virtual void AddReshape(const op::Reshape *relu) override;
-  virtual void AddTranspose(const op::Transpose *transpose) override;
-  virtual void AddUnary(const op::Unary *unary) override;
-  virtual void Finish() override;
+  virtual MaybeError AddConstant(const op::Constant *constant) override;
+  virtual MaybeError AddInput(const op::Input *input) override;
+  virtual MaybeError AddOutput(const std::string& name,
+                               const OperandBase* output) override;
+  virtual MaybeError AddBinary(const op::Binary *binary) override;
+  virtual MaybeError AddConv2d(const op::Conv2d *conv2d) override;
+  virtual MaybeError AddPool2d(const op::Pool2d *pool2d) override;
+  virtual MaybeError AddReshape(const op::Reshape *relu) override;
+  virtual MaybeError AddTranspose(const op::Transpose *transpose) override;
+  virtual MaybeError AddUnary(const op::Unary *unary) override;
+  virtual MaybeError Finish() override;
 
   friend class Compilation;
 private:

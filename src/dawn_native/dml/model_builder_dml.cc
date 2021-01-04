@@ -8,13 +8,11 @@ namespace dawn_native {
 
 namespace dml {
 
-ModelBuilderBase *Create() {
-  Ref<ModelBuilderBase> builder = AcquireRef(new ModelBuilder());
-  return builder.Detach();
-}
+ModelBuilder::ModelBuilder(NeuralNetworkContextBase *context)
+    : ModelBuilderBase(context) {}
 
 ModelBase *ModelBuilder::CreateModelImpl() {
-  Ref<ModelBase> model = AcquireRef(new Model());
+  Ref<ModelBase> model = AcquireRef(new Model(this));
   return model.Detach();
 }
 

@@ -9,8 +9,8 @@ namespace dml {
 
 class ModelBuilder : public ModelBuilderBase {
 public:
+  explicit ModelBuilder(NeuralNetworkContextBase *context);
   ~ModelBuilder() override = default;
-  ModelBuilder() = default;
 
 private:
   ModelBase *CreateModelImpl() override;
