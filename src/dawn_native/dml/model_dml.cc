@@ -2,6 +2,7 @@
 
 #include "common/Assert.h"
 #include "common/Log.h"
+#include "dawn_native/ErrorData.h"
 #include "dawn_native/dml/deps/src/precomp.h"
 #include "dawn_native/dml/compilation_dml.h"
 
@@ -203,8 +204,7 @@ MaybeError Model::AddReshape(const op::Reshape *reshape) {
 }
 
 MaybeError Model::AddTranspose(const op::Transpose *transpose) {
-  UNREACHABLE();
-  return {};
+  return DAWN_UNIMPLEMENTED_ERROR("Transpose");
 }
   
 MaybeError Model::AddUnary(const op::Unary *unary) {
