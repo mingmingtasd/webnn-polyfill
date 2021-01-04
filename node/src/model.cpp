@@ -35,10 +35,14 @@ void Model::SetWNNCompilation(WNNCompilation compilation) {
 std::vector<std::string> &Model::GetOutputName() { return output_name_; }
 
 Napi::Value Model::Compile(const Napi::CallbackInfo &info) {
-  wnnModelCompile(model_, [](WNNCompilation compilation, void* userData){
-          Model* self = reinterpret_cast<Model*>(userData);
-          self->SetWNNCompilation(compilation);
-        }, reinterpret_cast<void*>(this), nullptr);
+  wnnModelCompile(
+      model_,
+      [](WNNCompileStatus status, WNNCompilation compilation,
+         char const *message, void *userData) {
+        Model *self = reinterpret_cast<Model *>(userData);
+        self->SetWNNCompilation(compilation);
+      },
+      reinterpret_cast<void *>(this), nullptr);
 
   Napi::Env env = info.Env();
   std::vector<napi_value> args = {info.This().As<Napi::Value>()};

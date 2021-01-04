@@ -5,6 +5,7 @@
 
 #include "DescriptorDecoder.h"
 #include "model.h"
+#include "neural_network_context.h"
 #include "operand.h"
 #include "ops/constant.h"
 #include "ops/conv2d.h"
@@ -33,10 +34,11 @@ WNNNamedOperands GetNamedOperands(Napi::Object obj) {
 
 ModelBuilder::ModelBuilder(const Napi::CallbackInfo& info) : 
     Napi::ObjectWrap<ModelBuilder>(info) {
-  DawnProcTable backendProcs = dawn_native::GetProcs();
-  dawnProcSetProcs(&backendProcs);
-  dawn_native::NeuralNetworkContext context;
-  model_builder_ =  context.CreateModelBuilder();
+  Napi::Object context = info[0].As<Napi::Object>();
+  NeuralNetworkContext *unwrapped =
+      Napi::ObjectWrap<NeuralNetworkContext>::Unwrap(context);
+  model_builder_ =
+      wnnNeuralNetworkContextCreateModelBuilder(unwrapped->GetContext());
 }
 
 ModelBuilder::~ModelBuilder() {

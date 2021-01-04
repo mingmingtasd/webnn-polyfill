@@ -4,14 +4,23 @@
 
 Napi::FunctionReference NeuralNetworkContext::constructor;
 
-NeuralNetworkContext::NeuralNetworkContext(const Napi::CallbackInfo& info) : 
-    Napi::ObjectWrap<NeuralNetworkContext>(info) {}
+NeuralNetworkContext::NeuralNetworkContext(const Napi::CallbackInfo &info)
+    : Napi::ObjectWrap<NeuralNetworkContext>(info) {
+  DawnProcTable backendProcs = dawn_native::GetProcs();
+  dawnProcSetProcs(&backendProcs);
+  context_ = dawn_native::CreateNeuralNetworkContext();
+}
 
-NeuralNetworkContext::~NeuralNetworkContext() {}
+NeuralNetworkContext::~NeuralNetworkContext() {
+  wnnNeuralNetworkContextRelease(context_);
+}
+
+WNNNeuralNetworkContext NeuralNetworkContext::GetContext() { return context_; }
 
 Napi::Value NeuralNetworkContext::CreateModelBuilder(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();
-  Napi::Object model_builder = ModelBuilder::constructor.New({});
+  std::vector<napi_value> args = {info.This().As<Napi::Value>()};
+  Napi::Object model_builder = ModelBuilder::constructor.New(args);
 
   return model_builder;
 }
