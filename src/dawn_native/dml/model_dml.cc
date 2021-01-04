@@ -2,6 +2,7 @@
 
 #include "common/Assert.h"
 #include "common/Log.h"
+#include "dawn_native/ErrorData.h"
 #include "dawn_native/dml/deps/src/precomp.h"
 #include "dawn_native/dml/compilation_dml.h"
 
@@ -36,12 +37,12 @@ DML_TENSOR_DATA_TYPE getDmlTensorDataType(wnn::OperandType operand_type) {
 }
 }  // namespace
 
-Model::Model() {
+Model::Model(ModelBuilder *model_builder) : ModelBase(model_builder) {
   device_.reset(new ::pydml::Device());
   graph_.reset(new ::dml::Graph(device_->GetDevice()));
 }
 
-void Model::AddConstant(const op::Constant *constant) {
+MaybeError Model::AddConstant(const op::Constant *constant) {
   const OperandDescriptor* desc = constant->GetOperandDescriptor();
   ::dml::TensorDimensions dml_dims =
       getDmlTensorDimensions(desc->dimensions, desc->dimensionsCount);
@@ -57,9 +58,10 @@ void Model::AddConstant(const op::Constant *constant) {
       exp, const_cast<void*>(constant->GetValue()), constant->GetSize()));
   bindings_.push_back(std::move(binding));
   DAWN_DEBUG();
+  return {};
 }
 
-void Model::AddInput(const op::Input *input) {
+MaybeError Model::AddInput(const op::Input *input) {
   const OperandDescriptor* desc = input->GetOperandDescriptor();
   ::dml::TensorDimensions dml_dims =
       getDmlTensorDimensions(desc->dimensions, desc->dimensionsCount);
@@ -75,15 +77,17 @@ void Model::AddInput(const op::Input *input) {
   bindings_.push_back(std::move(binding));
   inputs_.insert(std::make_pair(input->GetName(), bindings_.back().get()));
   DAWN_DEBUG() << " " << input->GetName();
+  return {};
 }
 
-void Model::AddOutput(const std::string& name, const OperandBase* output) {
+MaybeError Model::AddOutput(const std::string& name, const OperandBase* output) {
   DAWN_ASSERT(expressions_.find(output) != expressions_.end());
   outputs_.insert(std::make_pair(name, expressions_.at(output)));
   DAWN_DEBUG() << " " << name;
+  return {};
 }
   
-void Model::AddBinary(const op::Binary *binary) {
+MaybeError Model::AddBinary(const op::Binary *binary) {
   DAWN_ASSERT(binary->Inputs().size() == 2);
   DAWN_ASSERT(
       expressions_.find(binary->Inputs()[0].Get()) != expressions_.end());
@@ -102,9 +106,10 @@ void Model::AddBinary(const op::Binary *binary) {
     UNREACHABLE();
   }
   expressions_.insert(std::make_pair(binary, c));
+  return {};
 }
 
-void Model::AddConv2d(const op::Conv2d *conv2d) {
+MaybeError Model::AddConv2d(const op::Conv2d *conv2d) {
   DAWN_ASSERT(conv2d->Inputs().size() == 2);
   const OperandBase* input_operand = conv2d->Inputs()[0].Get();
   DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
@@ -143,9 +148,10 @@ void Model::AddConv2d(const op::Conv2d *conv2d) {
       // groupCount
       options->groups);
   expressions_.insert(std::make_pair(conv2d, conv));
+  return {};
 }
 
-void Model::AddPool2d(const op::Pool2d *pool2d) {
+MaybeError Model::AddPool2d(const op::Pool2d *pool2d) {
   DAWN_ASSERT(pool2d->Inputs().size() == 1);
   const OperandBase* input_operand = pool2d->Inputs()[0].Get();
   DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
@@ -179,9 +185,10 @@ void Model::AddPool2d(const op::Pool2d *pool2d) {
     UNREACHABLE();
   }
   expressions_.insert(std::make_pair(pool2d, output));
+  return {};
 }
 
-void Model::AddReshape(const op::Reshape *reshape) {
+MaybeError Model::AddReshape(const op::Reshape *reshape) {
   DAWN_ASSERT(reshape->Inputs().size() == 1);
   const OperandBase* input_operand = reshape->Inputs()[0].Get();
   DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
@@ -193,13 +200,14 @@ void Model::AddReshape(const op::Reshape *reshape) {
   ::dml::Expression output =
       ::dml::Reinterpret(input, new_sizes, ::dml::NullOpt);
   expressions_.insert(std::make_pair(reshape, output));
+  return {};
 }
 
-void Model::AddTranspose(const op::Transpose *transpose) {
-  UNREACHABLE();
+MaybeError Model::AddTranspose(const op::Transpose *transpose) {
+  return DAWN_UNIMPLEMENTED_ERROR("Transpose");
 }
   
-void Model::AddUnary(const op::Unary *unary) {
+MaybeError Model::AddUnary(const op::Unary *unary) {
   DAWN_ASSERT(unary->Inputs().size() == 1);
   const OperandBase* input_operand = unary->Inputs()[0].Get();
   DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
@@ -213,9 +221,10 @@ void Model::AddUnary(const op::Unary *unary) {
     UNREACHABLE();
   }
   expressions_.insert(std::make_pair(unary, output));
+  return {};
 }
 
-void Model::Finish() {
+MaybeError Model::Finish() {
   size_t op_count = expressions_.size() - bindings_.size();
   DAWN_DEBUG() << " op count: " << op_count;
   // FIXME(nhu): workaround the optional tensor issue of DML
@@ -228,12 +237,15 @@ void Model::Finish() {
       outputs_[output.first] = identity;
     }
   }
+  return {};
 }
 
 void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {
   // FIXME(nhu): implement async
-  callback(reinterpret_cast<WNNCompilation>(new Compilation(this)), userdata);
+  WNNCompileStatus status = WNNCompileStatus_Success;
+  callback(status, reinterpret_cast<WNNCompilation>(new Compilation(this)),
+           nullptr, userdata);
 }
 
 }  // namespace dml

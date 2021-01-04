@@ -168,6 +168,8 @@ source_set("dawn_native_sources") {
       "dml/model_builder_dml.h",
       "dml/model_dml.cc",
       "dml/model_dml.h",
+      "dml/neural_network_context_dml.cc",
+      "dml/neural_network_context_dml.h",
     ]
 
     include_dirs = [ "dml/deps/" ]

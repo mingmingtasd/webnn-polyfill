@@ -82,7 +82,9 @@ void Compilation::ComputeImpl(
     }
     delete tensor;
   }
-  callback(reinterpret_cast<WNNNamedResults>(results.Detach()), userdata);
+  WNNComputeStatus status = WNNComputeStatus_Success;
+  callback(status, reinterpret_cast<WNNNamedResults>(results.Detach()),
+           nullptr, userdata);
   return;
 }
 

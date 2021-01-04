@@ -13,6 +13,10 @@ ModelBase::ModelBase(ModelBuilderBase *model_builder)
 
 void ModelBase::Compile(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {
+  if (DAWN_UNLIKELY(this->IsError())) {
+    callback(WNNCompileStatus_Error, nullptr, "Object is an error", userdata);
+    return;
+  }
   CompileImpl(callback, userdata, options);
 }
 
