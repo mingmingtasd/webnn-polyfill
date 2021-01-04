@@ -19,17 +19,18 @@ enum UnaryOpType {
 
 class Unary final : public OperandBase {
 public:
-  Unary(UnaryOpType type, OperandBase *input)
-      : OperandBase({input}), type_(type) {}
+  Unary(ModelBuilderBase *builder, UnaryOpType op_type, OperandBase *input)
+      : OperandBase(builder, {input}), op_type_(op_type) {}
   ~Unary() override = default;
 
   MaybeError AddToModel(ModelBase *model) const override {
     return model->AddUnary(this);
   }
-  UnaryOpType GetType() const { return type_; }
+  MaybeError ValidateAndInferTypes() override { return {}; }
+  UnaryOpType OpType() const { return op_type_; }
 
 private:
-  UnaryOpType type_;
+  UnaryOpType op_type_;
 };
 
 } // namespace op

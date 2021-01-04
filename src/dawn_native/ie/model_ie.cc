@@ -16,11 +16,12 @@ namespace dawn_native {
 namespace ie {
 
 namespace {
-ie_operand_descriptor ConvertTo(OperandDescriptor const *desc) {
+ie_operand_descriptor ConvertTo(
+    wnn::OperandType type, const std::vector<int32_t>& dimensions) {
   ie_operand_descriptor ie_desc;
-  ie_desc.dimensions = desc->dimensions;
-  ie_desc.dimensionsCount = desc->dimensionsCount;
-  switch (desc->type) {
+  ie_desc.dimensions = dimensions.data();
+  ie_desc.dimensionsCount = dimensions.size();
+  switch (type) {
   case wnn::OperandType::Float32:
     ie_desc.type = ie_operand_type::Float32;
     break;
@@ -82,7 +83,8 @@ Model::Model(ModelBuilder *model_builder) : ModelBase(model_builder) {
 Model::~Model() { IE(ie_model_free)(ie_model_); }
 
 MaybeError Model::AddConstant(const op::Constant *constant) {
-  ie_operand_descriptor ie_desc = ConvertTo(constant->GetOperandDescriptor());
+  ie_operand_descriptor ie_desc =
+      ConvertTo(constant->Type(), constant->Dimensions());
   ie_operand_t *ie_operand;
   IEStatusCode code =
       IE(ie_model_add_constant)(ie_model_, &ie_desc, constant->GetValue(),
@@ -94,7 +96,7 @@ MaybeError Model::AddConstant(const op::Constant *constant) {
 }
 
 MaybeError Model::AddInput(const op::Input *input) {
-  ie_operand_descriptor ie_desc = ConvertTo(input->GetOperandDescriptor());
+  ie_operand_descriptor ie_desc = ConvertTo(input->Type(), input->Dimensions());
   ie_operand_t *ie_operand;
   IEStatusCode code = IE(ie_model_add_input)(ie_model_, &ie_desc, &ie_operand);
   DAWN_TRY(CheckStatusCode(code, "IE add input"));
@@ -123,12 +125,12 @@ MaybeError Model::AddBinary(const op::Binary *binary) {
   secondary.name = const_cast<char *>(operand_id_map_[inputs[1].Get()].c_str());
   ie_operand_t *ie_operand = nullptr;
   IEStatusCode code = NOT_FOUND;
-  if (binary->GetType() == op::BinaryOpType::kMatMul) {
+  if (binary->OpType() == op::BinaryOpType::kMatMul) {
     code =
         IE(ie_model_add_mat_mul)(ie_model_, &primary, &secondary, &ie_operand);
   } else {
     code = IE(ie_model_add_binary)(
-        ie_model_, static_cast<ie_binary_type>(binary->GetType()), &primary,
+        ie_model_, static_cast<ie_binary_type>(binary->OpType()), &primary,
         &secondary, &ie_operand);
   }
   DAWN_TRY(CheckStatusCode(code, "IE add binary"));
@@ -160,7 +162,7 @@ MaybeError Model::AddPool2d(const op::Pool2d *pool2d) {
   ie_operand_t *ie_operand;
   ie_pool2d_options_t ie_options = Pool2dOptionsForIE(pool2d->GetOptions());
   IEStatusCode code = IE(ie_model_add_pool2d)(
-      ie_model_, static_cast<ie_pool_type>(pool2d->GetType()), &input,
+      ie_model_, static_cast<ie_pool_type>(pool2d->OpType()), &input,
       &ie_options, &ie_operand);
   DAWN_TRY(CheckStatusCode(code, "IE add pool2d"));
 
@@ -174,9 +176,9 @@ MaybeError Model::AddUnary(const op::Unary *unary) {
   input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
   ie_operand_t *ie_operand = nullptr;
   IEStatusCode code = NOT_FOUND;
-  if (unary->GetType() == op::UnaryOpType::kRelu) {
+  if (unary->OpType() == op::UnaryOpType::kRelu) {
     code = IE(ie_model_add_relu)(ie_model_, &input, &ie_operand);
-  } else if (unary->GetType() == op::UnaryOpType::kSoftmax) {
+  } else if (unary->OpType() == op::UnaryOpType::kSoftmax) {
     code = IE(ie_model_add_softmax)(ie_model_, &input, &ie_operand);
   }
   DAWN_TRY(CheckStatusCode(code, "IE add unary"));

@@ -10,9 +10,9 @@ namespace dawn_native {
 
 namespace op {
 
-Pool2d::Pool2d(Pool2dType type, OperandBase *input,
-               Pool2dOptions const *options)
-    : OperandBase({input}), type_(type) {
+Pool2d::Pool2d(ModelBuilderBase *builder, Pool2dType op_type,
+               OperandBase *input, Pool2dOptions const *options)
+    : OperandBase(builder, {input}), op_type_(op_type) {
   if (options == nullptr || options->windowDimensions == nullptr) {
     window_dimensions_ = std::vector<int32_t>(2, 1);
   } else {
@@ -56,8 +56,6 @@ MaybeError Pool2d::AddToModel(ModelBase *model) const {
 }
 
 Pool2dOptions const *Pool2d::GetOptions() const { return &options_; }
-
-Pool2dType Pool2d::GetType() const { return type_; }
 
 } // namespace op
 

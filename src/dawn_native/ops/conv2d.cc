@@ -10,9 +10,10 @@ namespace dawn_native {
 
 namespace op {
 
-Conv2d::Conv2d(OperandBase *input, OperandBase *filter,
+Conv2d::Conv2d(ModelBuilderBase *builder,
+               OperandBase *input, OperandBase *filter,
                Conv2dOptions const *options)
-    : OperandBase({input, filter}) {
+    : OperandBase(builder, {input, filter}) {
   if (options == nullptr || options->padding == nullptr) {
     padding_ = std::vector<int32_t>(4, 0);  
   } else {

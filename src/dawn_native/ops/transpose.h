@@ -14,8 +14,9 @@ namespace op {
 
 class Transpose final : public OperandBase {
 public:
-  Transpose(OperandBase *input, TransposeOptions const *options)
-      : OperandBase({input}) {
+  Transpose(ModelBuilderBase *builder,
+            OperandBase *input, TransposeOptions const *options)
+      : OperandBase(builder, {input}) {
     if (options) {
       permutation_.assign(options->permutation,
                           options->permutation + options->permutationCount);
@@ -28,6 +29,7 @@ public:
   MaybeError AddToModel(ModelBase *model) const override {
     return model->AddTranspose(this);
   }
+  MaybeError ValidateAndInferTypes() override { return {}; }
 
   TransposeOptions const *GetOptions() const { return &options_; }
 

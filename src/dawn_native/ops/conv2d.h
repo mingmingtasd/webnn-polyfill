@@ -14,10 +14,12 @@ namespace op {
 
 class Conv2d final : public OperandBase {
 public:
-  Conv2d(OperandBase *input, OperandBase *filter, Conv2dOptions const *options);
+  Conv2d(ModelBuilderBase *builder,
+         OperandBase *input, OperandBase *filter, Conv2dOptions const *options);
   ~Conv2d() override = default;
 
   MaybeError AddToModel(ModelBase *model) const override;
+  MaybeError ValidateAndInferTypes() override { return {}; }
 
   Conv2dOptions const *GetOptions() const;
 
