@@ -50,7 +50,21 @@ class ProcTableAsClass {
             virtual void {{as_MethodSuffix(type.name, Name("reference"))}}({{as_cType(type.name)}} self) = 0;
             virtual void {{as_MethodSuffix(type.name, Name("release"))}}({{as_cType(type.name)}} self) = 0;
         {% endfor %}
+
+	// Special cased mockable methods
+        virtual void OnCompilationComputeCallback(WNNCompilation self,
+                                WNNNamedInputs inputs,
+                                WNNComputeCallback callback,
+                                void* userdata, WNNNamedOutputs outputs) = 0; 	
+
+	virtual void  OnModelCompileCallback(WNNModel self, WNNCompileCallback callback,
+                          void* userdata,
+                          WNNCompilationOptions const * options) = 0;
  
+	virtual bool OnNeuralNetworkContextPopErrorScopeCallback(WNNNeuralNetworkContext 
+		         neuralNetworkContext,
+                         WNNErrorCallback callback, void * userdata) = 0;
+
 	void CompilationCompute(WNNCompilation self, 
 			        WNNNamedInputs inputs, 
 				WNNComputeCallback callback, 
@@ -68,6 +82,9 @@ class ProcTableAsClass {
 
 	struct Object {
             ProcTableAsClass* procs = nullptr;
+	    WNNComputeCallback computeCallback = nullptr;
+	    WNNCompileCallback compileCallback = nullptr;
+	    WNNErrorCallback errorCallback = nullptr;
             void* userdata = 0;
         };
 
@@ -97,6 +114,26 @@ class MockProcTable : public ProcTableAsClass {
             MOCK_METHOD(void, {{as_MethodSuffix(type.name, Name("reference"))}}, ({{as_cType(type.name)}} self), (override));
             MOCK_METHOD(void, {{as_MethodSuffix(type.name, Name("release"))}}, ({{as_cType(type.name)}} self), (override));
         {% endfor %}
+
+	 MOCK_METHOD(void, 
+		     OnCompilationComputeCallback, 
+		     (WNNCompilation self,
+                     WNNNamedInputs inputs,
+                     WNNComputeCallback callback,
+                     void* userdata, WNNNamedOutputs outputs), (override));
+
+	 MOCK_METHOD(void,
+                     OnModelCompileCallback,
+                     (WNNModel self, 
+		     WNNCompileCallback callback,
+                     void* userdata,
+                     WNNCompilationOptions const * options), (override));
+
+	 MOCK_METHOD(bool,
+                     OnNeuralNetworkContextPopErrorScopeCallback,
+                     (WNNNeuralNetworkContext neuralNetworkContext,
+                      WNNErrorCallback callback, void * userdata), (override));
+
 
 };
 
