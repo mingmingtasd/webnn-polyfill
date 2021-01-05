@@ -17,6 +17,8 @@ enum UnaryOpType {
   kSoftmax,
 };
 
+std::string UnaryOpTypeToString(UnaryOpType type);
+
 class Unary final : public OperandBase {
 public:
   Unary(ModelBuilderBase *builder, UnaryOpType op_type, OperandBase *input)
@@ -26,7 +28,9 @@ public:
   MaybeError AddToModel(ModelBase *model) const override {
     return model->AddUnary(this);
   }
-  MaybeError ValidateAndInferTypes() override { return {}; }
+
+  MaybeError ValidateAndInferTypes() override;
+
   UnaryOpType OpType() const { return op_type_; }
 
 private:

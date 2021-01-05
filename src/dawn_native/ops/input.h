@@ -30,7 +30,7 @@ public:
   ~Input() override = default;
 
   MaybeError AddToModel(ModelBase *model) const override { return model->AddInput(this); }
-  MaybeError ValidateAndInferTypes() override { return {}; }
+  MaybeError ValidateAndInferTypes() override;
 
   const std::string& GetName() const { return name_; }
   const OperandDescriptor *GetOperandDescriptor() const { return &descriptor_; }

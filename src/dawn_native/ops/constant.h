@@ -25,7 +25,7 @@ public:
 
   MaybeError AddToModel(ModelBase *model) const override { return model->AddConstant(this); }
 
-  MaybeError ValidateAndInferTypes() override { return {}; }
+  MaybeError ValidateAndInferTypes() override;
 
   void const *GetValue() const { return value_; }
   size_t GetSize() const { return size_; }

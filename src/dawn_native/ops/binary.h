@@ -22,6 +22,8 @@ enum BinaryOpType {
   kMatMul,
 };
 
+std::string BinaryOpTypeToString(BinaryOpType type);
+
 class Binary final : public OperandBase {
 public:
   Binary(ModelBuilderBase *builder,
@@ -29,8 +31,12 @@ public:
       : OperandBase(builder, {a, b}), op_type_(op_type) {}
   ~Binary() override = default;
 
-  MaybeError AddToModel(ModelBase *model) const override { return model->AddBinary(this); }
-  MaybeError ValidateAndInferTypes() override { return {}; }
+  MaybeError AddToModel(ModelBase *model) const override {
+    return model->AddBinary(this);
+  }
+
+  MaybeError ValidateAndInferTypes() override;
+
   BinaryOpType OpType() const { return op_type_; }
 
 private:

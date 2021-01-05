@@ -4,6 +4,7 @@
 #include "common/Log.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/dml/compilation_dml.h"
+#include "dawn_native/ops/utils.h"
 
 namespace dawn_native {
 namespace dml {
@@ -243,9 +244,9 @@ Model::Model(ModelBuilder *model_builder) : ModelBase(model_builder) {
 
 MaybeError Model::AddConstant(const op::Constant *constant) {
   ::dml::TensorDimensions dml_dims =
-      getDmlTensorDimensions(constant->Dimensions());
+      GetDmlTensorDimensions(constant->Dimensions());
   ::dml::TensorDesc tensor_desc(
-      getDmlTensorDataType(constant->Type()),
+      GetDmlTensorDataType(constant->Type()),
       ::DML_TENSOR_FLAGS::DML_TENSOR_FLAG_OWNED_BY_DML,
       dml_dims,
       ::dml::TensorPolicy::Default());
@@ -270,9 +271,9 @@ MaybeError Model::AddConstant(const op::Constant *constant) {
 
 MaybeError Model::AddInput(const op::Input *input) {
   ::dml::TensorDimensions dml_dims =
-      getDmlTensorDimensions(input->Dimensions());
+      GetDmlTensorDimensions(input->Dimensions());
   ::dml::TensorDesc tensor_desc(
-      getDmlTensorDataType(input->Type()),
+      GetDmlTensorDataType(input->Type()),
       dml_dims,
       ::dml::TensorPolicy::Default());
   ::dml::Expression exp =
@@ -298,7 +299,6 @@ MaybeError Model::AddOutput(const std::string& name, const OperandBase* output) 
   ::dml::Expression dml_output = expressions_.at(output);
   outputs_.insert(std::make_pair(name, dml_output));
   DAWN_DEBUG() << " impl: " << dml_output.Impl()
-               << ", name: " << name;
   return {};
 }
   
