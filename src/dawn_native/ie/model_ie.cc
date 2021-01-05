@@ -222,17 +222,9 @@ MaybeError Model::Finish() {
 
 void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {
-  Compilation *compilation = AcquireRef(new Compilation(this)).Detach();
-  WNNCompileStatus status;
-  MaybeError maybe_error = compilation->Init(&status);
-  if (maybe_error.IsError()) {
-    std::unique_ptr<ErrorData> error = maybe_error.AcquireError();
-    compilation->Release();
-    callback(status, nullptr, error->GetMessage().c_str(), userdata);
-  } else {
-    callback(status, reinterpret_cast<WNNCompilation>(compilation), nullptr,
-             userdata);
-  }
+  Ref<Compilation> compilation =
+      AcquireRef(new Compilation(this, callback, userdata, options));
+  DAWN_ASSERT(compilation.Detach());
 }
 
 ie_model_t *Model::GetInferenceEngineModel() { return ie_model_; }

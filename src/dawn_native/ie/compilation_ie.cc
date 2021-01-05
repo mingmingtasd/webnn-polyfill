@@ -36,19 +36,19 @@ public:
   }
 };
 
-Compilation::Compilation(Ref<Model> model) : model_(model) {}
-
-Compilation::~Compilation() { IE(ie_compilation_free)(ie_compilation_); }
-
-MaybeError Compilation::Init(WNNCompileStatus *status) {
-  *status = WNNCompileStatus_Error;
+Compilation::Compilation(Ref<Model> model, WNNCompileCallback callback,
+                         void *userdata, CompilationOptions const *options)
+    : model_(model) {
+  WNNCompileStatus status = WNNCompileStatus_Error;
   // Create compilation for IE backend.
   IEStatusCode code = IE(ie_create_compilation)(
       model_->GetInferenceEngineModel(), &ie_compilation_);
-  DAWN_TRY(CheckStatusCode(code, "IE create compilation"));
-  *status = WNNCompileStatus_Success;
-  return {};
+  DAWN_CALLBACK_TRY(code, "IE create compilation");
+  status = WNNCompileStatus_Success;
+  callback(status, reinterpret_cast<WNNCompilation>(this), nullptr, userdata);
 }
+
+Compilation::~Compilation() { IE(ie_compilation_free)(ie_compilation_); }
 
 void Compilation::ComputeImpl(NamedInputsBase *inputs,
                               WNNComputeCallback callback, void *userdata,

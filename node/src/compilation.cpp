@@ -73,7 +73,8 @@ Napi::Value Compilation::Compute(const Napi::CallbackInfo &info) {
 
   wnnCompilationCompute(
       compilation_, named_inputs,
-      [](WNNNamedResults results, void *user_data) {
+      [](WNNComputeStatus status, WNNNamedResults results, char const *message,
+         void *user_data) {
         reinterpret_cast<Compilation *>(user_data)->SetNamedResults(results);
       },
       reinterpret_cast<void *>(this), named_outputs);

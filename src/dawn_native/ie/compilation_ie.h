@@ -11,10 +11,10 @@ namespace ie {
 
 class Compilation : public CompilationBase {
 public:
-  explicit Compilation(Ref<Model> model);
+  Compilation(Ref<Model> model, WNNCompileCallback callback, void *userdata,
+              CompilationOptions const *options);
   ~Compilation() override;
 
-  MaybeError Init(WNNCompileStatus *status);
   void ComputeImpl(NamedInputsBase *inputs, WNNComputeCallback callback,
                    void *userdata, NamedOutputsBase *outputs) override;
 

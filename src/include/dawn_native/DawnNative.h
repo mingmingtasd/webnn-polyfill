@@ -15,14 +15,11 @@
 #ifndef DAWNNATIVE_DAWNNATIVE_H_
 #define DAWNNATIVE_DAWNNATIVE_H_
 
-#include <common/RefCounted.h>
 #include <dawn/dawn_proc_table.h>
 #include <dawn/webnn.h>
 #include <dawn_native/dawn_native_export.h>
 #include <string>
 #include <vector>
-
-#include "dawn_native/NeuralNetworkContext.h"
 
 namespace dawn_native {
 
