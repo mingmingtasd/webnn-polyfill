@@ -26,6 +26,9 @@ DawnProcTable GetProcsAutogen();
 
 DawnProcTable GetProcs() { return GetProcsAutogen(); }
 
+namespace null {
+NeuralNetworkContextBase *Create();
+}
 namespace ie {
 NeuralNetworkContextBase *Create();
 }
@@ -33,11 +36,14 @@ namespace dml {
 NeuralNetworkContextBase *Create();
 }
 
+// Should put the default null backend at the end.
 WNNNeuralNetworkContext CreateNeuralNetworkContext() {
 #if defined(DAWN_ENABLE_BACKEND_IE)
   return reinterpret_cast<WNNNeuralNetworkContext>(ie::Create());
 #elif defined(DAWN_ENABLE_BACKEND_DML)
   return reinterpret_cast<WNNNeuralNetworkContext>(dml::Create());
+#elif defined(DAWN_ENABLE_BACKEND_NULL)
+  return reinterpret_cast<WNNNeuralNetworkContext>(null::Create());
 #else
   return nullptr;
 #endif

@@ -59,6 +59,10 @@ config("dawn_internal") {
     defines += [ "DAWN_ABORT_ON_ASSERT" ]
   }
 
+  if (dawn_enable_null) {
+    defines += [ "DAWN_ENABLE_BACKEND_NULL" ]
+  }
+
   if (dawn_enable_ie) {
     defines += [ "DAWN_ENABLE_BACKEND_IE" ]
   }
