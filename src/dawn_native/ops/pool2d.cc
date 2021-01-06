@@ -4,11 +4,24 @@
 
 #include "dawn_native/ops/pool2d.h"
 
-#include <memory>
+#include "common/Log.h"
+#include "dawn_native/Error.h"
+#include "dawn_native/ops/utils.h"
 
 namespace dawn_native {
 
 namespace op {
+
+std::string PoolOpTypeToString(Pool2dType type) {
+  if (type == Pool2dType::kAveragePool2d) {
+    return "averagePool2d";
+  } else if (type == Pool2dType::kL2Pool2d) {
+    return "l2Pool2d";
+  } else if (type == Pool2dType::kMaxPool2d) {
+    return "maxPool2d";
+  }
+  return std::to_string(type);
+}
 
 Pool2d::Pool2d(ModelBuilderBase *builder, Pool2dType op_type,
                OperandBase *input, Pool2dOptions const *options)
@@ -56,6 +69,22 @@ MaybeError Pool2d::AddToModel(ModelBase *model) const {
 }
 
 Pool2dOptions const *Pool2d::GetOptions() const { return &options_; }
+
+MaybeError Pool2d::ValidateAndInferTypes() {
+  auto input = inputs_[0];
+  if (input->Dimensions().size() != 4) {
+    return DAWN_VALIDATION_ERROR("Argument input is not a 4D tensor.");
+  }
+  type_ = input->Type();
+  dimensions_.resize(4);
+
+  DAWN_DEBUG() << " op: " << PoolOpTypeToString(OpType())
+               << ", input.type: " << OperandTypeToString(input->Type())
+               << ", input.dimensions: " << ShapeToString(input->Dimensions())
+               << ", output.type: " << OperandTypeToString(type_)
+               << ", output.dimensions: " << ShapeToString(dimensions_);
+  return {};
+}
 
 } // namespace op
 

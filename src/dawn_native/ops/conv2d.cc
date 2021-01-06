@@ -4,7 +4,9 @@
 
 #include "dawn_native/ops/conv2d.h"
 
-#include <memory>
+#include "common/Log.h"
+#include "dawn_native/Error.h"
+#include "dawn_native/ops/utils.h"
 
 namespace dawn_native {
 
@@ -46,6 +48,28 @@ Conv2d::Conv2d(ModelBuilderBase *builder,
 MaybeError Conv2d::AddToModel(ModelBase *model) const { return model->AddConv2d(this); }
 
 Conv2dOptions const *Conv2d::GetOptions() const { return &options_; }
+
+MaybeError Conv2d::ValidateAndInferTypes() {
+  auto input = inputs_[0];
+  auto filter = inputs_[1];
+  if (input->Type() != filter->Type()) {
+    return DAWN_VALIDATION_ERROR("Argument types are inconsistent.");
+  }
+  if (input->Dimensions().size() != 4) {
+    return DAWN_VALIDATION_ERROR("Argument input is not a 4D tensor.");
+  }
+  if (filter->Dimensions().size() != 4) {
+    return DAWN_VALIDATION_ERROR("Argument filter is not a 4D tensor.");
+  }
+  type_ = input->Type();
+  dimensions_.resize(4);
+
+  DAWN_DEBUG() << " input.type: " << OperandTypeToString(input->Type())
+               << ", input.dimensions: " << ShapeToString(input->Dimensions())
+               << ", output.type: " << OperandTypeToString(type_)
+               << ", output.dimensions: " << ShapeToString(dimensions_);
+  return {};
+}
 
 } // namespace op
 

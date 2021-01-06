@@ -26,7 +26,7 @@ MaybeError Unary::ValidateAndInferTypes() {
   type_ = input->Type();
   dimensions_ = input->Dimensions();
 
-  DAWN_DEBUG() << " op type: " << UnaryOpTypeToString(OpType())
+  DAWN_DEBUG() << " op: " << UnaryOpTypeToString(OpType())
                << ", input.type: " << OperandTypeToString(input->Type())
                << ", input.dimensions: " << ShapeToString(input->Dimensions())
                << ", output.type: " << OperandTypeToString(type_)

@@ -60,7 +60,7 @@ MaybeError Binary::ValidateAndInferTypes() {
   }
   dimensions_ = new_dims;
 
-  DAWN_DEBUG() << " op type: " << BinaryOpTypeToString(OpType())
+  DAWN_DEBUG() << " op: " << BinaryOpTypeToString(OpType())
                << ", a.type: " << OperandTypeToString(a->Type())
                << ", a.dimensions: " << ShapeToString(a->Dimensions())
                << ", b.type: " << OperandTypeToString(b->Type())

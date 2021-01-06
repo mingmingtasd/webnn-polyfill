@@ -18,6 +18,8 @@ enum Pool2dType {
   kMaxPool2d,
 };
 
+std::string PoolOpTypeToString(Pool2dType type);
+
 class Pool2d final : public OperandBase {
 public:
   Pool2d(ModelBuilderBase *builder,
@@ -25,7 +27,7 @@ public:
   ~Pool2d() override = default;
 
   MaybeError AddToModel(ModelBase *model) const override;
-  MaybeError ValidateAndInferTypes() override { return {}; }
+  MaybeError ValidateAndInferTypes() override;
 
   Pool2dOptions const *GetOptions() const;
   Pool2dType OpType() const { return op_type_; }
