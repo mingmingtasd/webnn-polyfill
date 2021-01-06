@@ -96,9 +96,9 @@ function copyFiles() {
     else if (platform === "linux") {
       files.push([`${dawnOutputDir}/libdawn_native.so`, targetDir]);
       files.push([`${dawnOutputDir}/libdawn_proc.so`, targetDir]);
-      files.push([`${dawnOutputDir}/libdawn_wire.so`, targetDir]);
+      // files.push([`${dawnOutputDir}/libdawn_wire.so`, targetDir]);
       // files.push([`${dawnOutputDir}/libshaderc_spvc.so`, targetDir]);
-      files.push([`${dawnOutputDir}/libshaderc.so`, targetDir]);
+      files.push([`${dawnOutputDir}/libie_nn_c_api.so`, targetDir]);
       files.push([`${dawnOutputDir}/libc++.so`, targetDir]);
   }
     let counter = 0;

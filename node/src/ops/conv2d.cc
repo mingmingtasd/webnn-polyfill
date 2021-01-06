@@ -1,4 +1,4 @@
-#include "Conv2d.h"
+#include "conv2d.h"
 
 #include <iostream>
 #include <unordered_map>
