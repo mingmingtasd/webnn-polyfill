@@ -29,7 +29,14 @@ Compilation::Compilation(const Ref<Model>& model) : model_(model) {
   // e.g. DML_EXECUTION_FLAG_ALLOW_HALF_PRECISION_COMPUTATION
   compiled_model_.reset(
       new pydml::CompiledModel(
-          *(model_->graph_), DML_EXECUTION_FLAG_NONE, outputs));
+          *(model_->graph_),
+  // FIXME(nhu): workaround https://github.com/microsoft/DirectML/issues/70
+#if defined(_DEBUG)
+          DML_EXECUTION_FLAG_DISABLE_META_COMMANDS,
+#else
+          DML_EXECUTION_FLAG_NONE,
+#endif
+          outputs));
 }
 
 void Compilation::ComputeImpl(
@@ -41,6 +48,13 @@ void Compilation::ComputeImpl(
     ::pydml::Binding* input_binding = model_->inputs_.at(input.first);
     input_binding->data.buffer_ = const_cast<void*>(input.second->buffer);
     input_binding->data.size_ = input.second->size;
+    DAWN_DEBUG() << " set input name: " << input.first
+                 << ", buffer " << input.second->buffer
+                 << ", buffer size: " << input.second->size
+                 << ", type: "
+                 << DmlTensorDataTypeToString(input_binding->desc.dataType)
+                 << ", dimensions: "
+                 << DmlTensorDimensionsToString(input_binding->desc.sizes);
   }
   std::vector<pydml::Binding*> input_bindings;
   for (auto &binding : model_->bindings_) {
@@ -70,7 +84,11 @@ void Compilation::ComputeImpl(
     pydml::TensorData* tensor = output_tensors[i];
     void *output_buffer = tensor->Get();
     size_t buffer_length = tensor->Size();
-    std::vector<int32_t> dimensions = output_tensors[i]->dimensions_;
+    std::vector<int32_t> dimensions;
+    for (auto size : tensor->Desc()->sizes) {
+      // convert from uint32_t to int32_t.
+      dimensions.push_back(static_cast<int32_t>(size));
+    }
     Ref<ResultBase> result = AcquireRef(
         new Result::ResultBase(output_buffer, buffer_length, dimensions));
     results->Set(output_name.c_str(), result.Detach());
@@ -80,6 +98,13 @@ void Compilation::ComputeImpl(
         memcpy(output->buffer, output_buffer, buffer_length);
       }
     }
+    DAWN_DEBUG() << " set output name: " << output_name
+                 << ", buffer: " << output_buffer
+                 << ", buffer size: " << buffer_length
+                 << ", type: "
+                 << DmlTensorDataTypeToString(tensor->Desc()->dataType)
+                 << ", dimensions: "
+                 << DmlTensorDimensionsToString(tensor->Desc()->sizes);
     delete tensor;
   }
   WNNComputeStatus status = WNNComputeStatus_Success;

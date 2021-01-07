@@ -124,19 +124,28 @@ void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
   }
   std::vector<int32_t> expected_shape = g_wrapped_model->ExpectedShape();
   if (!expected_shape.empty()) {
-    for (size_t i = 0; i < output.DimensionsSize(); ++i) {
-      int32_t dimension = output.Dimensions()[i];
-      if (!Expected(expected_shape[i], dimension)) {
-        dawn::ErrorLog() << "The output dimension is not as expected for "
-                       << dimension << " != " << expected_shape[i]
-                       << " index = " << i;
-        expected = false;
-        break;
+    if (expected_shape.size() != output.DimensionsSize()) {
+      expected = false;
+      dawn::ErrorLog() << "The output rank is not as expected for "
+                       << expected_shape.size() << " != "
+                       << output.DimensionsSize();
+    } else {
+      for (size_t i = 0; i < output.DimensionsSize(); ++i) {
+        int32_t dimension = output.Dimensions()[i];
+        if (!Expected(expected_shape[i], dimension)) {
+          dawn::ErrorLog() << "The output dimension is not as expected for "
+                           << dimension << " != " << expected_shape[i]
+                           << " index = " << i;
+          expected = false;
+          break;
+        }
       }
     }
   }
   if (expected) {
-    dawn::InfoLog() << "The output output as expected.";
+    dawn::InfoLog() << "Test succeeded.";
+  } else {
+    dawn::InfoLog() << "Test failed.";
   }
   delete g_wrapped_model;
   g_context = nullptr;

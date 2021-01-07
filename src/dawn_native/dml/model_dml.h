@@ -5,6 +5,7 @@
 #include <set>
 
 #include "dawn_native/dml/model_builder_dml.h"
+#include "dawn_native/dml/deps/src/precomp.h"
 #include "dawn_native/Model.h"
 #include "dawn_native/Operand.h"
 #include "dawn_native/ops/binary.h"
@@ -16,19 +17,12 @@
 #include "dawn_native/ops/transpose.h"
 #include "dawn_native/ops/unary.h"
 
-namespace dml {
-class Graph;
-class Expression;
-}
-
-namespace pydml {
-class Device;
-struct Binding;
-}
-
 namespace dawn_native {
 
 namespace dml {
+
+std::string DmlTensorDimensionsToString(const ::dml::TensorDimensions&);
+std::string DmlTensorDataTypeToString(DML_TENSOR_DATA_TYPE type);
 
 class Model : public ModelBase {
 public:
