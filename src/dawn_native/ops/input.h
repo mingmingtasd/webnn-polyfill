@@ -29,8 +29,8 @@ public:
 
   MaybeError AddToModel(ModelBase *model) const override { return model->AddInput(this); }
 
-  const OperandDescriptor *GetOperandDescriptor() const { return &descriptor_; }
   const std::string& GetName() const { return name_; }
+  const OperandDescriptor *GetOperandDescriptor() const { return &descriptor_; }
 
 private:
   std::string name_;

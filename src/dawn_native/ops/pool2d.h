@@ -25,7 +25,7 @@ public:
 
   MaybeError AddToModel(ModelBase *model) const override;
 
-  Pool2dOptions const *Options() const;
+  Pool2dOptions const *GetOptions() const;
   Pool2dType GetType() const;
 
 private:

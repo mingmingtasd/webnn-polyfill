@@ -29,7 +29,7 @@ public:
     return model->AddTranspose(this);
   }
 
-  TransposeOptions const *Options() const { return &options_; }
+  TransposeOptions const *GetOptions() const { return &options_; }
 
 private:
   TransposeOptions options_;

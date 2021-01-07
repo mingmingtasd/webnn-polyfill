@@ -48,5 +48,6 @@ int main(int argc, const char* argv[]) {
   average_pool2d->SetPadding({2, 2, 2, 2});
   average_pool2d->SetWindowDimensions({5, 5});
   average_pool2d->SetExpectedBuffer({7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 16.5, 17, 17.5, 18, 18.5, 19});
+  average_pool2d->SetExpectedShape({1, 1, 5, 5});
   utils::Test(average_pool2d);
 }

@@ -55,7 +55,7 @@ MaybeError Pool2d::AddToModel(ModelBase *model) const {
   return model->AddPool2d(this);
 }
 
-Pool2dOptions const *Pool2d::Options() const { return &options_; }
+Pool2dOptions const *Pool2d::GetOptions() const { return &options_; }
 
 Pool2dType Pool2d::GetType() const { return type_; }
 

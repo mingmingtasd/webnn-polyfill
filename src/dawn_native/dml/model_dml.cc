@@ -3,87 +3,196 @@
 #include "common/Assert.h"
 #include "common/Log.h"
 #include "dawn_native/ErrorData.h"
-#include "dawn_native/dml/deps/src/precomp.h"
 #include "dawn_native/dml/compilation_dml.h"
 
 namespace dawn_native {
 namespace dml {
 
 namespace {
-DML_TENSOR_DATA_TYPE getDmlTensorDataType(wnn::OperandType operand_type) {
+bool GetDmlTensorDataType(
+    wnn::OperandType operand_type, DML_TENSOR_DATA_TYPE& dml_tensor_data_type) {
   if (operand_type == wnn::OperandType::Float32) {
-    return DML_TENSOR_DATA_TYPE_FLOAT32;
+    dml_tensor_data_type = DML_TENSOR_DATA_TYPE_FLOAT32;
   } else if (operand_type == wnn::OperandType::Float16) {
-    return DML_TENSOR_DATA_TYPE_FLOAT16;
+    dml_tensor_data_type = DML_TENSOR_DATA_TYPE_FLOAT16;
   } else if (operand_type == wnn::OperandType::Int32) {
-    return DML_TENSOR_DATA_TYPE_INT32;
+    dml_tensor_data_type = DML_TENSOR_DATA_TYPE_INT32;
   } else if (operand_type == wnn::OperandType::Uint32) {
-    return DML_TENSOR_DATA_TYPE_UINT32;
+    dml_tensor_data_type = DML_TENSOR_DATA_TYPE_UINT32;
+  } else {
+    return false;
   }
-  return DML_TENSOR_DATA_TYPE_UNKNOWN;
+  return true;
 }
 
-::dml::TensorDimensions getDmlTensorDimensions(
-    int32_t const * dimensions, uint32_t dimensions_count) {
-  // DML dimension order [N, C, H, W]
-  const size_t dml_dimensions_count = 4;
-  ::dml::TensorDimensions tensor_dimensions({1, 1, 1, 1});
-  DAWN_ASSERT(dimensions_count <= 4);
-  for (uint32_t i = 0; i < dimensions_count; ++i) {
-    tensor_dimensions[dml_dimensions_count - i - 1] =
-        dimensions[dimensions_count - i - 1];
+bool GetDmlTensorDimensions(
+    int32_t const * dimensions, uint32_t dimensions_count,
+    ::dml::TensorDimensions& dml_tensor_dimensions) {
+  if (dimensions_count > DML_TENSOR_DIMENSION_COUNT_MAX) {
+    dawn::ErrorLog() << "Tensor dimension count " << dimensions_count
+                     << " is greater than DML_TENSOR_DIMENSION_COUNT_MAX "
+                     << DML_TENSOR_DIMENSION_COUNT_MAX;
+    return false;
   }
-  return tensor_dimensions;
+  dml_tensor_dimensions.resize(dimensions_count);
+  for (uint32_t i = 0; i < dimensions_count; ++i) {
+    int32_t d = dimensions[i];
+    if (d < 0) {
+      dawn::ErrorLog() << "DML doesn't support the negative dimension value";
+      return false;
+    }
+    dml_tensor_dimensions[i] = d;
+  }
+  return true;
 }
+
+std::string OpTypeToString(op::BinaryOpType type) {
+  if (type == op::BinaryOpType::kAdd) {
+    return "add";
+  } else if (type == op::BinaryOpType::kMul) {
+    return "mul";
+  } else if (type == op::BinaryOpType::kSub) {
+    return "sub";
+  } else if (type == op::BinaryOpType::kDiv) {
+    return "div";
+  } else if (type == op::BinaryOpType::kMatMul) {
+    return "matmul";
+  }
+  return std::to_string(type);
+}
+
+std::string OpTypeToString(op::UnaryOpType type) {
+  if (type == op::UnaryOpType::kRelu) {
+    return "relu";
+  } else if (type == op::UnaryOpType::kSoftmax) {
+    return "softmax";
+  }
+  return std::to_string(type);
+}
+
 }  // namespace
 
+std::string DmlTensorDimensionsToString(
+    const ::dml::TensorDimensions& dimensions) {
+  std::string output = "[";
+  for(size_t i = 0; i < dimensions.size(); ++i) {
+    output.append(std::to_string(dimensions[i]));
+    if (i != dimensions.size() - 1) {
+      output.append(",");
+    }
+  }
+  output.append("]");
+  return output;
+}
+
+std::string DmlTensorDataTypeToString(DML_TENSOR_DATA_TYPE type) {
+  if (type == DML_TENSOR_DATA_TYPE_UNKNOWN) {
+    return "UNKNOWN";
+  } else if (type == DML_TENSOR_DATA_TYPE_FLOAT32) {
+    return "FLOAT32";
+  } else if (type == DML_TENSOR_DATA_TYPE_FLOAT16) {
+    return "FLOAT16";
+  } else if (type == DML_TENSOR_DATA_TYPE_UINT32) {
+    return "UINT32";
+  } else if (type == DML_TENSOR_DATA_TYPE_UINT16) {
+    return "UINT16";
+  } else if (type == DML_TENSOR_DATA_TYPE_UINT8) {
+    return "UINT8";
+  } else if (type == DML_TENSOR_DATA_TYPE_INT32) {
+    return "INT32";
+  } else if (type == DML_TENSOR_DATA_TYPE_INT16) {
+    return "INT16";
+  } else if (type == DML_TENSOR_DATA_TYPE_INT8) {
+    return "INT8";
+  } else if (type == DML_TENSOR_DATA_TYPE_FLOAT64) {
+    return "FLOAT64";
+  } else if (type == DML_TENSOR_DATA_TYPE_UINT64) {
+    return "UINT64";
+  } else if (type == DML_TENSOR_DATA_TYPE_INT64) {
+    return "INT64";
+  }
+  return std::to_string(type);
+}
+
 Model::Model(ModelBuilder *model_builder) : ModelBase(model_builder) {
-  device_.reset(new ::pydml::Device());
+#if defined(_DEBUG)
+  device_.reset(new ::pydml::Device(true, true));
+#else
+  device_.reset(new ::pydml::Device(true, false));
+#endif
   graph_.reset(new ::dml::Graph(device_->GetDevice()));
 }
 
 MaybeError Model::AddConstant(const op::Constant *constant) {
   const OperandDescriptor* desc = constant->GetOperandDescriptor();
-  ::dml::TensorDimensions dml_dims =
-      getDmlTensorDimensions(desc->dimensions, desc->dimensionsCount);
-  ::dml::TensorDesc tensor_desc(
-      getDmlTensorDataType(desc->type),
-      ::DML_TENSOR_FLAGS::DML_TENSOR_FLAG_OWNED_BY_DML,
-      dml_dims,
-      ::dml::TensorPolicy::Default());
-  ::dml::Expression exp =
-      ::dml::InputTensor(*graph_, bindings_.size(), tensor_desc);
-  expressions_.insert(std::make_pair(constant, exp));
+  DML_TENSOR_DATA_TYPE dml_tensor_type;
+  if (!GetDmlTensorDataType(desc->type, dml_tensor_type)) {
+    return DAWN_INTERNAL_ERROR("Failed to get DML tensor type.");
+  }
+  ::dml::TensorDimensions dml_tensor_dims;
+  if (!GetDmlTensorDimensions(
+      desc->dimensions, desc->dimensionsCount, dml_tensor_dims)) {
+    return DAWN_INTERNAL_ERROR("Failed to get DML tensor dimensions.");
+  }
+  ::dml::TensorDesc dml_tensor_desc(
+      dml_tensor_type, ::DML_TENSOR_FLAGS::DML_TENSOR_FLAG_OWNED_BY_DML,
+      dml_tensor_dims, ::dml::TensorPolicy::Default());
+  ::dml::Expression dml_constant =
+      ::dml::InputTensor(*graph_, bindings_.size(), dml_tensor_desc);
+  expressions_.insert(std::make_pair(constant, dml_constant));
   std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(
-      exp, const_cast<void*>(constant->GetValue()), constant->GetSize()));
+      dml_constant, const_cast<void*>(constant->GetValue()),
+      constant->GetSize()));
   bindings_.push_back(std::move(binding));
-  DAWN_DEBUG();
+  DAWN_DEBUG() << " impl: " << dml_constant.Impl()
+               << " value: " << constant->GetValue()
+               << " size: " << constant->GetSize()
+               << ", type: "
+               << DmlTensorDataTypeToString(
+                  dml_constant.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(
+                  dml_constant.GetOutputDesc().sizes);
   return {};
 }
 
 MaybeError Model::AddInput(const op::Input *input) {
   const OperandDescriptor* desc = input->GetOperandDescriptor();
-  ::dml::TensorDimensions dml_dims =
-      getDmlTensorDimensions(desc->dimensions, desc->dimensionsCount);
-  ::dml::TensorDesc tensor_desc(
-      getDmlTensorDataType(desc->type),
-      dml_dims,
-      ::dml::TensorPolicy::Default());
-  ::dml::Expression exp =
-      ::dml::InputTensor(*graph_, bindings_.size(), tensor_desc);
-  expressions_.insert(std::make_pair(input, exp));
+  DML_TENSOR_DATA_TYPE dml_tensor_type;
+  if (!GetDmlTensorDataType(desc->type, dml_tensor_type)) {
+    return DAWN_INTERNAL_ERROR("Failed to get DML tensor type.");
+  }
+  ::dml::TensorDimensions dml_tensor_dims;
+  if (!GetDmlTensorDimensions(
+      desc->dimensions, desc->dimensionsCount, dml_tensor_dims)) {
+    return DAWN_INTERNAL_ERROR("Failed to get DML tensor dimensions.");
+  }
+  ::dml::TensorDesc dml_tensor_desc(
+      dml_tensor_type, dml_tensor_dims, ::dml::TensorPolicy::Default());
+  ::dml::Expression dml_input =
+      ::dml::InputTensor(*graph_, bindings_.size(), dml_tensor_desc);
+  expressions_.insert(std::make_pair(input, dml_input));
   std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(
-      exp, nullptr, 0));
+      dml_input, nullptr, 0));
   bindings_.push_back(std::move(binding));
   inputs_.insert(std::make_pair(input->GetName(), bindings_.back().get()));
-  DAWN_DEBUG() << " " << input->GetName();
+  DAWN_DEBUG() << " impl: " << dml_input.Impl()
+               << ", name: " << input->GetName()
+               << ", type: "
+               << DmlTensorDataTypeToString(
+                  dml_input.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(
+                  dml_input.GetOutputDesc().sizes);
   return {};
 }
 
 MaybeError Model::AddOutput(const std::string& name, const OperandBase* output) {
   DAWN_ASSERT(expressions_.find(output) != expressions_.end());
-  outputs_.insert(std::make_pair(name, expressions_.at(output)));
-  DAWN_DEBUG() << " " << name;
+  ::dml::Expression dml_output = expressions_.at(output);
+  outputs_.insert(std::make_pair(name, dml_output));
+  DAWN_DEBUG() << " impl: " << dml_output.Impl()
+               << ", name: " << name;
   return {};
 }
   
@@ -101,11 +210,31 @@ MaybeError Model::AddBinary(const op::Binary *binary) {
   } else if (binary->GetType() == op::BinaryOpType::kMul) {
     c = ::dml::Multiply(a, b);
   } else if (binary->GetType() == op::BinaryOpType::kMatMul) {
+    // GEMM requires inputs are 4D.
     c = ::dml::Gemm(a, b);
   } else {
-    UNREACHABLE();
+    std::string error_message = std::string(" Binary op ") +
+        OpTypeToString(binary->GetType()) + std::string(" is not implemented.");
+    return DAWN_UNIMPLEMENTED_ERROR(error_message);
   }
   expressions_.insert(std::make_pair(binary, c));
+  DAWN_DEBUG() << " op: " << OpTypeToString(binary->GetType())
+               << ", a: {impl: " << a.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(a.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(a.GetOutputDesc().sizes)
+               << "}, b: {impl: " << b.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(b.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(b.GetOutputDesc().sizes)
+               << "}, c: {impl: " << c.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(c.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(c.GetOutputDesc().sizes)
+               << "}";
   return {};
 }
 
@@ -117,7 +246,7 @@ MaybeError Model::AddConv2d(const op::Conv2d *conv2d) {
   const OperandBase* filter_operand = conv2d->Inputs()[1].Get();
   DAWN_ASSERT(expressions_.find(filter_operand) != expressions_.end());
   ::dml::Expression filter = expressions_.at(filter_operand);
-  const Conv2dOptions* options = conv2d->Options();
+  const Conv2dOptions* options = conv2d->GetOptions();
   ::dml::Expression conv = ::dml::Convolution(
       input, filter, ::dml::NullOpt, DML_CONVOLUTION_MODE_CROSS_CORRELATION,
       DML_CONVOLUTION_DIRECTION_FORWARD,
@@ -156,7 +285,7 @@ MaybeError Model::AddPool2d(const op::Pool2d *pool2d) {
   const OperandBase* input_operand = pool2d->Inputs()[0].Get();
   DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
   ::dml::Expression input = expressions_.at(input_operand);
-  const Pool2dOptions* options = pool2d->Options();
+  const Pool2dOptions* options = pool2d->GetOptions();
   ::dml::Span<const uint32_t> strides = {
     static_cast<uint32_t>(options->strides[0]),
     static_cast<uint32_t>(options->strides[1])};
@@ -218,9 +347,23 @@ MaybeError Model::AddUnary(const op::Unary *unary) {
   } else if (unary->GetType() == op::UnaryOpType::kSoftmax) {
     output = ::dml::ActivationSoftmax(input);
   } else {
-    UNREACHABLE();
+    std::string error_message = std::string(" Unary op ") +
+        OpTypeToString(unary->GetType()) + std::string(" is not implemented.");
+    return DAWN_UNIMPLEMENTED_ERROR(error_message);
   }
   expressions_.insert(std::make_pair(unary, output));
+  DAWN_DEBUG() << " op: " << OpTypeToString(unary->GetType())
+               << ", input: {impl: " << input.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(input.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(input.GetOutputDesc().sizes)
+               << "}, output: {impl: " << output.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(output.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(output.GetOutputDesc().sizes)
+               << "}";
   return {};
 }
 

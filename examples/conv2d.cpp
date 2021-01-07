@@ -44,5 +44,6 @@ int main(int argc, const char* argv[]) {
   conv2d->SetConstant({1, 1, 3, 3}, std::vector<float>(9, 1));
   conv2d->SetPadding({1, 1, 1, 1});
   conv2d->SetExpectedBuffer({12., 21., 27., 33., 24., 33., 54., 63., 72., 51., 63., 99., 108., 117., 81., 93., 144., 153., 162., 111., 72., 111., 117., 123., 84.});
+  conv2d->SetExpectedShape({1, 1, 5, 5});
   utils::Test(conv2d);
 }

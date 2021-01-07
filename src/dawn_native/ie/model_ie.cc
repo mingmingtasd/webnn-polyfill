@@ -144,7 +144,7 @@ MaybeError Model::AddConv2d(const op::Conv2d *conv2d) {
   ie_operand_t filter;
   filter.name = const_cast<char *>(operand_id_map_[inputs[1].Get()].c_str());
   ie_operand_t *ie_operand;
-  ie_conv2d_options_t ie_options = Conv2dOptionsForIE(conv2d->Options());
+  ie_conv2d_options_t ie_options = Conv2dOptionsForIE(conv2d->GetOptions());
   IEStatusCode code = IE(ie_model_add_conv2d)(ie_model_, &input, &filter,
                                               &ie_options, &ie_operand);
   DAWN_TRY(CheckStatusCode(code, "IE add conv2d"));
@@ -158,7 +158,7 @@ MaybeError Model::AddPool2d(const op::Pool2d *pool2d) {
   ie_operand_t input;
   input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
   ie_operand_t *ie_operand;
-  ie_pool2d_options_t ie_options = Pool2dOptionsForIE(pool2d->Options());
+  ie_pool2d_options_t ie_options = Pool2dOptionsForIE(pool2d->GetOptions());
   IEStatusCode code = IE(ie_model_add_pool2d)(
       ie_model_, static_cast<ie_pool_type>(pool2d->GetType()), &input,
       &ie_options, &ie_operand);
@@ -205,7 +205,7 @@ MaybeError Model::AddTranspose(const op::Transpose *transpose) {
   input.name = const_cast<char *>(operand_id_map_[inputs[0].Get()].c_str());
   ie_operand_t *ie_operand;
   ie_transpose_options_t ie_options =
-      TransposeOptionsForIE(transpose->Options());
+      TransposeOptionsForIE(transpose->GetOptions());
   IEStatusCode code =
       IE(ie_model_add_transpose)(ie_model_, &input, &ie_options, &ie_operand);
   DAWN_TRY(CheckStatusCode(code, "IE add transpose"));
