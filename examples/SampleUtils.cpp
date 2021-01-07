@@ -20,6 +20,8 @@
 #include <dawn/webnn.h>
 #include <dawn/webnn_cpp.h>
 #include <dawn_native/DawnNative.h>
+#include <condition_variable>
+#include <mutex>
 
 uint32_t product(const std::vector<int32_t> &dims) {
   uint32_t prod = 1;
@@ -102,6 +104,7 @@ wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
 
 wnn::NeuralNetworkContext g_context;
 WrappedModel *g_wrapped_model;
+std::condition_variable g_cond_var;
 void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
     char const * message, void* userData) {
   if (status != WNNComputeStatus_Success) {
@@ -149,6 +152,7 @@ void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
   }
   delete g_wrapped_model;
   g_context = nullptr;
+  g_cond_var.notify_one();
 }
 
 void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
@@ -157,7 +161,6 @@ void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
     dawn::ErrorLog() << message;
     return;
   }
-  wnn::Compilation exe = exe.Acquire(impl);
 
   std::vector<float> input_buffer = g_wrapped_model->InputBuffer();
   wnn::Input a;
@@ -165,8 +168,13 @@ void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
   a.size = input_buffer.size() * sizeof(float);
   wnn::NamedInputs inputs = CreateCppNamedInputs();
   inputs.Set("input", &a);
+  wnn::Compilation compilation = compilation.Acquire(impl);
+  compilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
 
-  exe.Compute(inputs, ComputeCallback, nullptr, nullptr);
+  // Wait async callback.
+  std::mutex mutex;
+  std::unique_lock<std::mutex> lock(mutex);
+  g_cond_var.wait(lock);
 }
 
 void ErrorCallback(WNNErrorType type, char const * message, void * userdata) {

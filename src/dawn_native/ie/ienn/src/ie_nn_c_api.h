@@ -131,6 +131,19 @@ enum ie_binary_type {
 };
 
 /**
+ * @struct ie_complete_call_back
+ * @brief Completion callback definition about the function and args
+ * @param args Use the paramter instead of declaring the std::function to pass
+ * variables to the capture clause, otherwise only support empty capture clause
+ * seeing
+ * https://stackoverflow.com/questions/59111610/how-do-you-declare-a-lambda-function-using-typedef-and-then-use-it-by-passing-to
+ */
+typedef struct ie_complete_call_back {
+  void (*completeCallBackFunc)(void *args);
+  void *args;
+} ie_complete_call_back_t;
+
+/**
  * @brief Create model. Use the ie_model_free() method to
  *  free the model memory.
  * @ingroup model
@@ -361,13 +374,16 @@ ie_compilation_get_output(ie_compilation_t *compilation, ie_operand_t *operand,
                           void *buffer, uint32_t length);
 
 /**
- * @brief Compute the compiled model.
+ * @brief Compute the compiled mode, a callback function that will be called on
+ *  success or failure of asynchronous request.
  * @ingroup compilation
  * @param ie_compilation_t the compilation.
+ * @param callback  A function to be called.
  * @return Status code of the operation: OK(0) for success.
  */
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
-ie_compilation_compute(ie_compilation_t *compilation);
+ie_compilation_compute(ie_compilation_t *compilation,
+                       ie_complete_call_back_t *callback);
 
 /**
  * @brief Get buffer with name.

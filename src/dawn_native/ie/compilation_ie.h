@@ -21,6 +21,13 @@ public:
 private:
   Ref<Model> model_;
   ie_compilation_t *ie_compilation_;
+
+  // Hold those variable to async compute.
+  void CompletedCallback();
+  ie_complete_call_back_t ie_callback_;
+  WNNComputeCallback callback_;
+  void *user_data_;
+  NamedOutputsBase *outputs_;
 };
 
 } // namespace ie
