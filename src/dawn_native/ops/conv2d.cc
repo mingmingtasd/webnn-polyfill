@@ -44,7 +44,7 @@ Conv2d::Conv2d(OperandBase *input, OperandBase *filter,
 
 MaybeError Conv2d::AddToModel(ModelBase *model) const { return model->AddConv2d(this); }
 
-Conv2dOptions const *Conv2d::Options() const { return &options_; }
+Conv2dOptions const *Conv2d::GetOptions() const { return &options_; }
 
 } // namespace op
 

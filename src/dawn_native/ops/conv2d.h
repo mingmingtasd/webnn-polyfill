@@ -19,7 +19,7 @@ public:
 
   MaybeError AddToModel(ModelBase *model) const override;
 
-  Conv2dOptions const *Options() const;
+  Conv2dOptions const *GetOptions() const;
 
 private:
   Conv2dOptions options_;

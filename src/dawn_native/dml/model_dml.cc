@@ -117,7 +117,7 @@ MaybeError Model::AddConv2d(const op::Conv2d *conv2d) {
   const OperandBase* filter_operand = conv2d->Inputs()[1].Get();
   DAWN_ASSERT(expressions_.find(filter_operand) != expressions_.end());
   ::dml::Expression filter = expressions_.at(filter_operand);
-  const Conv2dOptions* options = conv2d->Options();
+  const Conv2dOptions* options = conv2d->GetOptions();
   ::dml::Expression conv = ::dml::Convolution(
       input, filter, ::dml::NullOpt, DML_CONVOLUTION_MODE_CROSS_CORRELATION,
       DML_CONVOLUTION_DIRECTION_FORWARD,
@@ -156,7 +156,7 @@ MaybeError Model::AddPool2d(const op::Pool2d *pool2d) {
   const OperandBase* input_operand = pool2d->Inputs()[0].Get();
   DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
   ::dml::Expression input = expressions_.at(input_operand);
-  const Pool2dOptions* options = pool2d->Options();
+  const Pool2dOptions* options = pool2d->GetOptions();
   ::dml::Span<const uint32_t> strides = {
     static_cast<uint32_t>(options->strides[0]),
     static_cast<uint32_t>(options->strides[1])};
