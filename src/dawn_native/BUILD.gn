@@ -131,6 +131,13 @@ source_set("dawn_native_sources") {
     "ops/unary.h",
   ]
 
+  if (dawn_enable_null) {
+    sources += [
+    "null/neural_network_context_null.cc",
+    "null/neural_network_context_null.h",
+    ]
+  }
+
   if (dawn_enable_ie) {
     sources += [
       "ie/compilation_ie.cc",
