@@ -109,10 +109,14 @@ bool BroadcastDimensions(
   if (new_rank > a_rank) {
     a_new_dims = ExpandDimensions(a_dims, new_rank);
     a_broadcasted = true;
+  } else {
+    a_new_dims = a_dims;
   }
   if (new_rank > b_rank) {
     b_new_dims = ExpandDimensions(b_dims, new_rank);
     b_broadcasted = true;
+  } else {
+    b_new_dims = b_dims;
   }
   for (size_t i = 0; i < new_rank - skip_axis; i++) {
     if (a_new_dims[i] == 1 && b_new_dims[i] != 1) {
@@ -291,18 +295,24 @@ MaybeError Model::AddBinary(const op::Binary *binary) {
       expressions_.find(binary->Inputs()[1].Get()) != expressions_.end());
   ::dml::Expression b = expressions_.at(binary->Inputs()[1].Get());
   ::dml::Expression c;
+  ::dml::TensorDimensions a_dims = a.GetOutputDesc().sizes;
+  const size_t a_rank = a_dims.size();
+  ::dml::TensorDimensions b_dims = b.GetOutputDesc().sizes;
+  const size_t b_rank = b_dims.size();
+  ::dml::TensorDimensions a_new_dims, b_new_dims;
+  ::dml::TensorDimensions a_new_strides, b_new_strides;
+  bool a_dims_changed = false, b_dims_changed = false;
+  size_t c_rank = 0;
+  bool need_broadcast = false;
+  size_t broadcast_skip_axis = 0;
+
   if (binary->GetType() == op::BinaryOpType::kMatMul) {
-    ::dml::TensorDimensions a_dims = a.GetOutputDesc().sizes;
-    const size_t a_rank = a_dims.size();
-    ::dml::TensorDimensions b_dims = b.GetOutputDesc().sizes;
-    const size_t b_rank = b_dims.size();
     // DML GEMM requires inputs are either 4D or 5D. We use 4D.
     if (a_rank > 4 || b_rank > 4) {
       return DAWN_INTERNAL_ERROR(
           "The size of input dimensions is greater than 4.");
     }
 
-    size_t c_rank = 0;
     if (a_rank == 1 && b_rank == 1) {
       // If both a and b are 1-D, the operation is a vector dot-product,
       // which produces a scalar output.
@@ -313,9 +323,6 @@ MaybeError Model::AddBinary(const op::Binary *binary) {
       c_rank = std::max(a_rank, b_rank);
     }
 
-    ::dml::TensorDimensions a_new_dims, b_new_dims;
-    ::dml::TensorDimensions a_new_strides, b_new_strides;
-    bool a_dims_changed = false;
     if (a_rank < 4) {
       a_dims = ExpandDimensions(a_dims, 4);
       a_dims_changed = true;
@@ -323,7 +330,6 @@ MaybeError Model::AddBinary(const op::Binary *binary) {
       a_new_strides = CalculateStrides(a_new_dims);
     }
 
-    bool b_dims_changed = false;
     if (b_rank < 4) {
       if (b_rank == 1) {
         // If b is 1-D, it is converted to a 2-D tensor by by appending a 1 to
@@ -341,39 +347,50 @@ MaybeError Model::AddBinary(const op::Binary *binary) {
       // with dimensions corresponding to the last two indices. The matrix
       // multiplication will be broadcasted accordingly by following
       // [numpy-broadcasting-rule].
-      if (!BroadcastDimensions(
-          a_dims, b_dims,
-          a_dims_changed, a_new_dims, a_new_strides,
-          b_dims_changed, b_new_dims, b_new_strides, 2)) {
-        return DAWN_INTERNAL_ERROR("Failed to broadcast a and b.");
-      }
-    }
-
-    if (a_dims_changed) {
-      a = ::dml::Reinterpret(a, a_new_dims, a_new_strides);
-    }
-    if (b_dims_changed) {
-      b = ::dml::Reinterpret(b, b_new_dims, b_new_strides);
-    }
-    c = ::dml::Gemm(a, b);
-    // Reshape back according to rank.
-    ::dml::TensorDimensions c_dims = c.GetOutputDesc().sizes;
-    if (c_rank < c_dims.size()) {
-      ::dml::TensorDimensions c_new_dims = ShrinkDimensions(c_dims, c_rank);
-      ::dml::TensorDimensions c_new_strides = CalculateStrides(c_new_dims);
-      c = ::dml::Reinterpret(c, c_new_dims, c_new_strides);
+      need_broadcast = true;
+      broadcast_skip_axis = 2;
     }
   } else {
-    if (binary->GetType() == op::BinaryOpType::kAdd) {
-      c = ::dml::Add(a, b);
-    } else if (binary->GetType() == op::BinaryOpType::kMul) {
-      c = ::dml::Multiply(a, b);
-    } else {
-      std::string error_message = std::string(" Binary op ") +
-          OpTypeToString(binary->GetType()) +
-          std::string(" is not implemented.");
-      return DAWN_UNIMPLEMENTED_ERROR(error_message);
+    // The element-wise binary operation will be broadcasted according to
+    // [numpy-broadcasting-rule].
+    need_broadcast = true;
+    broadcast_skip_axis = 0;
+  }
+
+  if (need_broadcast) {
+    if (!BroadcastDimensions(
+        a_dims, b_dims, a_dims_changed, a_new_dims, a_new_strides,
+        b_dims_changed, b_new_dims, b_new_strides, broadcast_skip_axis)) {
+      return DAWN_INTERNAL_ERROR("Failed to broadcast a and b.");
     }
+  }
+
+  if (a_dims_changed) {
+    a = ::dml::Reinterpret(a, a_new_dims, a_new_strides);
+  }
+  if (b_dims_changed) {
+    b = ::dml::Reinterpret(b, b_new_dims, b_new_strides);
+  }
+
+  if (binary->GetType() == op::BinaryOpType::kMatMul) {
+    c = ::dml::Gemm(a, b);
+  } else if (binary->GetType() == op::BinaryOpType::kAdd) {
+    c = ::dml::Add(a, b);
+  } else if (binary->GetType() == op::BinaryOpType::kMul) {
+    c = ::dml::Multiply(a, b);
+  } else {
+    std::string error_message = std::string(" Binary op ") +
+        OpTypeToString(binary->GetType()) +
+        std::string(" is not implemented.");
+    return DAWN_UNIMPLEMENTED_ERROR(error_message);
+  }
+
+  // Reshape back according to c rank if needed.
+  ::dml::TensorDimensions c_dims = c.GetOutputDesc().sizes;
+  if (c_rank != 0 && c_rank < c_dims.size()) {
+    ::dml::TensorDimensions c_new_dims = ShrinkDimensions(c_dims, c_rank);
+    ::dml::TensorDimensions c_new_strides = CalculateStrides(c_new_dims);
+    c = ::dml::Reinterpret(c, c_new_dims, c_new_strides);
   }
   expressions_.insert(std::make_pair(binary, c));
   DAWN_DEBUG() << " op: " << OpTypeToString(binary->GetType())
