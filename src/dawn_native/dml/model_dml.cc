@@ -526,16 +526,15 @@ MaybeError Model::AddUnary(const op::Unary *unary) {
 }
 
 MaybeError Model::Finish() {
-  size_t op_count = expressions_.size() - bindings_.size();
-  DAWN_DEBUG() << " op count: " << op_count;
-  // FIXME(nhu): workaround the optional tensor issue of DML
-  // https://github.com/microsoft/DirectML/issues/64
-  if (op_count == 1) {
-    for (auto& output : outputs_) {
-      DAWN_DEBUG() << " append an activation identity for output "
-                   << output.first;
-      ::dml::Expression identity = ::dml::ActivationIdentity(output.second);
-      outputs_[output.first] = identity;
+  if (outputs_.size() == 1) {
+    auto output = outputs_.begin();
+    if (output->second.Impl()->GetNode().type ==
+        ::dml::detail::NodeType::Reinterpret) {
+      // Deal with a graph with single reshape node.
+      // https://github.com/microsoft/DirectML/issues/71
+      std::string name = output->first;
+      ::dml::Expression reshape = output->second;
+      outputs_[name] = ::dml::ActivationIdentity(reshape);
     }
   }
   return {};
