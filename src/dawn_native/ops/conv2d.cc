@@ -41,8 +41,17 @@ Conv2d::Conv2d(ModelBuilderBase *builder,
   options_.dilations = dilations_.data();
   options_.dilationsCount = dilations_.size();
 
-  options_.groups = options->groups;
-  options_.layout = options->layout;
+  if (options == nullptr) {
+     options_.groups = 1;
+  } else {
+     options_.groups = options->groups;
+  }
+
+  if (options == nullptr) {
+    options_.layout = wnn::OperandLayout::Nchw;
+  } else {  
+    options_.layout = options->layout;
+  }
 }
 
 MaybeError Conv2d::AddToModel(ModelBase *model) const { return model->AddConv2d(this); }

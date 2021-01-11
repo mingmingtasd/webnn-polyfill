@@ -61,7 +61,12 @@ Pool2d::Pool2d(ModelBuilderBase *builder, Pool2dType op_type,
   options_.dilations = dilations_.data();
   options_.dilationsCount = dilations_.size();
 
-  options_.layout = options->layout;
+  if (options == nullptr) {
+    options_.layout = wnn::OperandLayout::Nchw;
+  } else {
+    options_.layout = options->layout;
+  }
+
 }
 
 MaybeError Pool2d::AddToModel(ModelBase *model) const {
