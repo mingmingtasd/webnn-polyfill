@@ -19,9 +19,9 @@ public:
     if (options) {
       permutation_.assign(options->permutation,
                           options->permutation + options->permutationCount);
-      options_.permutation = permutation_.data();
-      options_.permutationCount = permutation_.size();
     }
+    options_.permutation = permutation_.data();
+    options_.permutationCount = permutation_.size();
   }
   ~Transpose() override = default;
 
