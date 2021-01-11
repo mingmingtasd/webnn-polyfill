@@ -497,13 +497,57 @@ MaybeError Model::AddReshape(const op::Reshape *reshape) {
   const OperandBase* input_operand = reshape->Inputs()[0].Get();
   DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
   ::dml::Expression input = expressions_.at(input_operand);
-  ::dml::TensorDimensions new_sizes;
-  DAWN_ASSERT(reshape->GetNewShapeCount() <= 4);
-  new_sizes.assign(reshape->GetNewShape(),
+  if(reshape->GetNewShapeCount() > DML_TENSOR_DIMENSION_COUNT_MAX) {
+    return DAWN_INTERNAL_ERROR(
+        "The size of new shape is not supported by DML.");
+  }
+  std::vector<int32_t> new_shape;
+  new_shape.assign(reshape->GetNewShape(),
                    reshape->GetNewShape() + reshape->GetNewShapeCount());
+  ::dml::TensorDimensions new_sizes(new_shape.size());
+  uint32_t output_element_count = 1;
+  int32_t infer_axis = -1;
+
+  ::dml::TensorDimensions input_dims = input.GetOutputDesc().sizes;
+  uint32_t input_element_count =
+      std::accumulate(
+          input_dims.begin(), input_dims.end(), 1, std::multiplies<uint32_t>());
+
+  for (size_t i = 0; i < new_shape.size(); ++i) {
+    if (new_shape[i] == -1) {
+      if (infer_axis != -1) {
+        return DAWN_VALIDATION_ERROR(
+            "New shape should contain only one -1 value.");
+      } else {
+        infer_axis = i;
+      }
+    } else if (new_shape[i] <= 0) {
+      return DAWN_VALIDATION_ERROR("Argument new shape is invalid");
+    } else {
+      new_sizes[i] = new_shape[i];
+      output_element_count *= new_sizes[i];
+    }
+  }
+
+  if (infer_axis != -1) {
+    new_sizes[infer_axis] = input_element_count / output_element_count;
+  }
+
   ::dml::Expression output =
       ::dml::Reinterpret(input, new_sizes, ::dml::NullOpt);
   expressions_.insert(std::make_pair(reshape, output));
+  DAWN_DEBUG() << " new sizes: " << DmlTensorDimensionsToString(new_sizes)
+               << ", input: {impl: " << input.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(input.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(input.GetOutputDesc().sizes)
+               << "}, output: {impl: " << output.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(output.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(output.GetOutputDesc().sizes)
+               << "}";
   return {};
 }
 
