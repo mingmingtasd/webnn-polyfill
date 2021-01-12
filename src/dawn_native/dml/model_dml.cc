@@ -160,6 +160,17 @@ std::string OpTypeToString(op::UnaryOpType type) {
   return std::to_string(type);
 }
 
+std::string OpTypeToString(op::Pool2dType type) {
+  if (type == op::Pool2dType::kAveragePool2d) {
+    return "averagePool2d";
+  } else if (type == op::Pool2dType::kL2Pool2d) {
+    return "l2Pool2d";
+  } else if (type == op::Pool2dType::kMaxPool2d) {
+    return "maxPool2d";
+  }
+  return std::to_string(type);
+}
+
 // Refer to ONNXRuntime DmlOperatorTranspose.cpp
 // https://github.com/microsoft/onnxruntime/blob/master/onnxruntime/core/providers/dml/DmlExecutionProvider/src/Operators/DmlOperatorTranspose.cpp
 inline ::dml::Expression Transpose(
@@ -222,6 +233,19 @@ std::string DmlTensorDimensionsToString(
   for(size_t i = 0; i < dimensions.size(); ++i) {
     output.append(std::to_string(dimensions[i]));
     if (i != dimensions.size() - 1) {
+      output.append(",");
+    }
+  }
+  output.append("]");
+  return output;
+}
+
+template <typename T>
+std::string DmlSpanToString(const ::dml::Span<T>& span) {
+  std::string output = "[";
+  for(size_t i = 0; i < span.size(); ++i) {
+    output.append(std::to_string(span[i]));
+    if (i != span.size() - 1) {
       output.append(",");
     }
   }
@@ -476,36 +500,56 @@ MaybeError Model::AddConv2d(const op::Conv2d *conv2d) {
   DAWN_ASSERT(expressions_.find(filter_operand) != expressions_.end());
   ::dml::Expression filter = expressions_.at(filter_operand);
   const Conv2dOptions* options = conv2d->GetOptions();
-  ::dml::Expression conv = ::dml::Convolution(
+  // FIXME(nhu): strides, dilations, padding should be uint32_t
+  // need to fix the spec.
+  ::dml::Span<const uint32_t> strides = {
+      static_cast<const uint32_t>(options->strides[0]),
+      static_cast<const uint32_t>(options->strides[1])
+  };
+  ::dml::Span<const uint32_t> dilations = {
+      static_cast<const uint32_t>(options->dilations[0]),
+      static_cast<const uint32_t>(options->dilations[1])
+  };
+  ::dml::Span<const uint32_t> start_padding = {
+      static_cast<const uint32_t>(options->padding[0]),
+      static_cast<const uint32_t>(options->padding[2])
+  };
+  ::dml::Span<const uint32_t> end_padding = {
+      static_cast<const uint32_t>(options->padding[1]),
+      static_cast<const uint32_t>(options->padding[3])
+  };
+  ::dml::Expression output = ::dml::Convolution(
       input, filter, ::dml::NullOpt, DML_CONVOLUTION_MODE_CROSS_CORRELATION,
       DML_CONVOLUTION_DIRECTION_FORWARD,
-      // FIXME(nhu): strides, dilations, padding should be uint32_t
-      // need to fix the spec.
-      // strides
-      {
-        (const uint32_t)options->strides[0],
-        (const uint32_t)options->strides[1]
-      },
-      // dilations
-      {
-        (const uint32_t)options->dilations[0],
-        (const uint32_t)options->dilations[1]
-      },
-      // startPadding
-      {
-        (const uint32_t)options->padding[0],
-        (const uint32_t)options->padding[2]
-      },
-      // endPadding
-      {
-        (const uint32_t)options->padding[1],
-        (const uint32_t)options->padding[3]
-      },
+      strides, dilations, start_padding, end_padding,
       // outPadding
       {},
       // groupCount
       options->groups);
-  expressions_.insert(std::make_pair(conv2d, conv));
+  expressions_.insert(std::make_pair(conv2d, output));
+  DAWN_DEBUG() << " strides: " << DmlSpanToString<const uint32_t>(strides)
+               << " dilations: " << DmlSpanToString<const uint32_t>(dilations)
+               << " start_padding: "
+               << DmlSpanToString<const uint32_t>(start_padding)
+               << " end_padding: "
+               << DmlSpanToString<const uint32_t>(end_padding)
+               << " groups: " << options->groups
+               << ", input: {impl: " << input.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(input.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(input.GetOutputDesc().sizes)
+                << "}, filter: {impl: " << filter.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(filter.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(filter.GetOutputDesc().sizes)
+               << "}, output: {impl: " << output.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(output.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(output.GetOutputDesc().sizes)
+               << "}";
   return {};
 }
 
@@ -518,13 +562,13 @@ MaybeError Model::AddPool2d(const op::Pool2d *pool2d) {
   ::dml::Span<const uint32_t> strides = {
     static_cast<uint32_t>(options->strides[0]),
     static_cast<uint32_t>(options->strides[1])};
-  ::dml::Span<const uint32_t> windowSizes = {
+  ::dml::Span<const uint32_t> window_sizes = {
     static_cast<uint32_t>(options->windowDimensions[0]),
     static_cast<uint32_t>(options->windowDimensions[1])};
-  ::dml::Span<const uint32_t> startPadding {
+  ::dml::Span<const uint32_t> start_padding {
     static_cast<uint32_t>(options->padding[0]),
     static_cast<uint32_t>(options->padding[2])};
-  ::dml::Span<const uint32_t> endPadding = {
+  ::dml::Span<const uint32_t> end_padding = {
     static_cast<uint32_t>(options->padding[1]),
     static_cast<uint32_t>(options->padding[3])};
   ::dml::Span<const uint32_t> dilations = {
@@ -532,17 +576,38 @@ MaybeError Model::AddPool2d(const op::Pool2d *pool2d) {
     static_cast<uint32_t>(options->dilations[1])};
   ::dml::Expression output;
   if (pool2d->GetType() == op::Pool2dType::kAveragePool2d) {
-    DAWN_ASSERT(dilations[0] == 1 || dilations[1] == 1);
+    if (dilations[0] != 1 || dilations[1] != 1) {
+      return DAWN_INTERNAL_ERROR(
+          "The dilations of average pool2d are not supported.");
+    }
     output = ::dml::AveragePooling(
-        input, strides, windowSizes, startPadding, endPadding, false);
+        input, strides, window_sizes, start_padding, end_padding, false);
   } else if (pool2d->GetType() == op::Pool2dType::kMaxPool2d) {
     output = ::dml::MaxPooling(
-        input, windowSizes, strides, startPadding, endPadding, dilations,
+        input, window_sizes, strides, start_padding, end_padding, dilations,
         false).values;
   } else {
-    UNREACHABLE();
+    return DAWN_INTERNAL_ERROR("l2Pool2d is not supported.");
   }
   expressions_.insert(std::make_pair(pool2d, output));
+  DAWN_DEBUG() << " op: " << OpTypeToString(pool2d->GetType())
+               << " strides: " << DmlSpanToString<const uint32_t>(strides)
+               << " dilations: " << DmlSpanToString<const uint32_t>(dilations)
+               << " start_padding: "
+               << DmlSpanToString<const uint32_t>(start_padding)
+               << " end_padding: "
+               << DmlSpanToString<const uint32_t>(end_padding)
+               << ", input: {impl: " << input.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(input.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(input.GetOutputDesc().sizes)
+               << "}, output: {impl: " << output.Impl()
+               << ", type: "
+               << DmlTensorDataTypeToString(output.GetOutputDesc().dataType)
+               << ", dimensions: "
+               << DmlTensorDimensionsToString(output.GetOutputDesc().sizes)
+               << "}";
   return {};
 }
 
