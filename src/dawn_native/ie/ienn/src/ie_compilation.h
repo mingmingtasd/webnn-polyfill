@@ -27,8 +27,8 @@ public:
   StatusCode SetInput(ie_operand_t *operand, const void *buffer,
                       uint32_t length);
   StatusCode GetOutput(ie_operand_t *operand, void *buffer, uint32_t length);
-  StatusCode Compute();
-  IEStatusCode GetBuffer(const char *name, void **buffer, size_t *byte_length);
+  StatusCode Compute(ie_complete_call_back_t *callback);
+  StatusCode GetBuffer(const char *name, void **buffer, size_t *byte_length);
 
 private:
   InferRequest *GetInferenceRequest();

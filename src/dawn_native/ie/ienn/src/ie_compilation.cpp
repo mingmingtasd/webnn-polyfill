@@ -98,27 +98,29 @@ StatusCode Compilation::GetOutput(ie_operand_t *operand, void *buffer,
   return StatusCode::OK;
 }
 
-IEStatusCode Compilation::GetBuffer(const char *name, void **buffer,
-                                    size_t *byte_length) {
+StatusCode Compilation::GetBuffer(const char *name, void **buffer,
+                                  size_t *byte_length) {
   InferRequest *infer_request = GetInferenceRequest();
   if (!infer_request) {
-    return IEStatusCode::NETWORK_NOT_LOADED;
+    return StatusCode::NETWORK_NOT_LOADED;
   }
   Blob::Ptr output_blob = infer_request->GetBlob(name);
   *byte_length = output_blob->byteSize();
   *buffer = malloc(*byte_length);
   memcpy(*buffer, output_blob->buffer(), *byte_length);
 
-  return IEStatusCode::OK;
+  return StatusCode::OK;
 }
 
-StatusCode Compilation::Compute() {
+StatusCode Compilation::Compute(ie_complete_call_back_t *callback) {
   InferRequest *infer_request = GetInferenceRequest();
   if (!infer_request) {
     return StatusCode::NETWORK_NOT_LOADED;
   }
 
-  infer_request->Infer();
+  auto fun = [=]() { callback->completeCallBackFunc(callback->args); };
+  infer_request->SetCompletionCallback(fun);
+  infer_request->StartAsync();
 
   return StatusCode::OK;
 }

@@ -317,13 +317,14 @@ IEStatusCode ie_compilation_set_input(ie_compilation_t *compilation,
   return IEStatusCode::OK;
 }
 
-IEStatusCode ie_compilation_compute(ie_compilation_t *compilation) {
-  if (compilation == nullptr) {
+IEStatusCode ie_compilation_compute(ie_compilation_t *compilation,
+                                    ie_complete_call_back_t *callback) {
+  if (compilation == nullptr || callback == nullptr) {
     return IEStatusCode::GENERAL_ERROR;
   }
 
   BEGINE_TRY
-  compilation->object->Compute();
+  compilation->object->Compute(callback);
   END_CATCH
 
   return IEStatusCode::OK;
@@ -351,10 +352,10 @@ IEStatusCode ie_compilation_get_buffer(const ie_compilation_t *compilation,
   }
 
   BEGINE_TRY
-  IEStatusCode status;
+  InferenceEngine::StatusCode status;
   status = compilation->object->GetBuffer(name, buffer, byte_length);
-  if (status != IEStatusCode::OK)
-    return status;
+  if (status != InferenceEngine::StatusCode::OK)
+    return status_map[status];
   END_CATCH
   return IEStatusCode::OK;
 }
