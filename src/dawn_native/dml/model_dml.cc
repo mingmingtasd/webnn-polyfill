@@ -69,20 +69,24 @@ bool GetDmlTensorDimensions(
 // Refer to
 // https://docs.microsoft.com/en-us/windows/win32/direct3d12/dml-helper-functions#calculatestrides
 ::dml::TensorDimensions CalculateStrides(
-    const ::dml::TensorDimensions& dims,
-    const std::vector<bool>& broadcast = {}) {
+    ::dml::TensorDimensions dims,
+    std::vector<bool> broadcast = {}) {
   size_t rank = dims.size();
-  ::dml::TensorDimensions strides(rank, 1);
+  if (broadcast.empty()) {
+    broadcast.resize(rank, false);
+  }
+  for (size_t i = 0; i < rank; ++i) {
+    if (broadcast[i]) {
+      dims[i] = 1;
+    }
+  }
+  ::dml::TensorDimensions strides(rank);
+  strides[rank - 1] = broadcast[rank - 1] ? 0 : 1;
+  size_t elements = 1;
   for (size_t i = 1; i < rank; i++) {
     size_t j = dims.size() - i - 1;
-    strides[j] = dims[j + 1] * strides[j + 1];
-  }
-  if (!broadcast.empty()) {
-    for (size_t i = 0; i < rank; i++) {
-      if (broadcast[i]) {
-        strides[i] = 0;
-      }
-    }
+    elements *= dims[j + 1];
+    strides[j] = broadcast[j] ? 0 : elements;
   }
   return strides;
 }
