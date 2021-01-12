@@ -94,8 +94,13 @@ void Compilation::CompletedCallback() {
     IEStatusCode code = IE(ie_compilation_get_buffer)(
         ie_compilation_, output_id.data(), &output_buffer, &buffer_length);
     DAWN_CALLBACK_TRY(code, "IE get buffer");
-    // TODO(junwei): get the output dimensions;
-    std::vector<int32_t> dimensions;
+    ie_dimensions_t ie_dimensions;
+    code = IE(ie_compilation_get_dimensions)(ie_compilation_, output_id.data(),
+                                             &ie_dimensions);
+    DAWN_CALLBACK_TRY(code, "IE get dimensions");
+    std::vector<int32_t> dimensions(ie_dimensions.dims,
+                                    ie_dimensions.dims + ie_dimensions.ranks);
+    code = IE(ie_compilation_free_dimensions)(&ie_dimensions);
     Ref<ResultBase> result = AcquireRef(
         new Result::ResultBase(output_buffer, buffer_length, dimensions));
     std::string output_name = model_->output_name_map_[output_id];

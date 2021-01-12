@@ -35,7 +35,9 @@ namespace dawn_native {
   X(ie_model_get_output_name)                                                  \
   X(ie_model_free_name)                                                        \
   X(ie_compilation_get_buffer)                                                 \
-  X(ie_compilation_free_buffer)
+  X(ie_compilation_free_buffer)                                                \
+  X(ie_compilation_get_dimensions)                                             \
+  X(ie_compilation_free_dimensions)
 
 LATE_BINDING_SYMBOL_TABLE_DECLARE_BEGIN(IESymbolTable)
 #define X(sym) LATE_BINDING_SYMBOL_TABLE_DECLARE_ENTRY(IESymbolTable, sym)

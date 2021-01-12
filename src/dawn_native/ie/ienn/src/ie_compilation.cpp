@@ -112,6 +112,23 @@ StatusCode Compilation::GetBuffer(const char *name, void **buffer,
   return StatusCode::OK;
 }
 
+StatusCode Compilation::GetDimensions(const char *name,
+                                      ie_dimensions_t *dimensions) {
+  InferRequest *infer_request = GetInferenceRequest();
+  if (!infer_request) {
+    return StatusCode::NETWORK_NOT_LOADED;
+  }
+  Blob::Ptr output_blob = infer_request->GetBlob(name);
+  InferenceEngine::SizeVector dims = output_blob->getTensorDesc().getDims();
+  dimensions->ranks = dims.size();
+  dimensions->dims = (int32_t *)malloc(dimensions->ranks * sizeof(int32_t));
+  for (size_t i = 0; i < dimensions->ranks; ++i) {
+    dimensions->dims[i] = dims[i];
+  }
+
+  return StatusCode::OK;
+}
+
 StatusCode Compilation::Compute(ie_complete_call_back_t *callback) {
   InferRequest *infer_request = GetInferenceRequest();
   if (!infer_request) {
