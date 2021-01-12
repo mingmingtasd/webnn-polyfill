@@ -105,10 +105,19 @@ wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
 wnn::NeuralNetworkContext g_context;
 WrappedModel *g_wrapped_model;
 std::condition_variable g_cond_var;
+std::mutex g_mutex;
+bool g_compute_done{false};
+
 void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
     char const * message, void* userData) {
   if (status != WNNComputeStatus_Success) {
+    dawn::InfoLog() << "Test failed.";
     dawn::ErrorLog() << message;
+    {
+      std::lock_guard<std::mutex> lock(g_mutex);
+      g_compute_done = true;
+    }
+    g_cond_var.notify_one();
     return;
   }
   wnn::NamedResults outputs = outputs.Acquire(impl);
@@ -152,7 +161,12 @@ void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
   }
   delete g_wrapped_model;
   g_context = nullptr;
+  {
+    std::lock_guard<std::mutex> lock(g_mutex);
+    g_compute_done = true;
+  }
   g_cond_var.notify_one();
+  return;
 }
 
 void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
@@ -171,10 +185,9 @@ void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
   wnn::Compilation compilation = compilation.Acquire(impl);
   compilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
 
-  // Wait async callback.
-  std::mutex mutex;
-  std::unique_lock<std::mutex> lock(mutex);
-  g_cond_var.wait(lock);
+  // Wait for async callback.
+  std::unique_lock<std::mutex> lock(g_mutex);
+  g_cond_var.wait(lock, []{ return g_compute_done; });
 }
 
 void ErrorCallback(WNNErrorType type, char const * message, void * userdata) {
