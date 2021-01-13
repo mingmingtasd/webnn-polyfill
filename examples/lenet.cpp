@@ -5,17 +5,22 @@
 #include <memory>
 #include <stdlib.h>
 #include <vector>
+#include <chrono>
 
 #include "SampleUtils.h"
 #include "common/Log.h"
 
-
+std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
     char const * message, void* userData) {
   if (status != WNNComputeStatus_Success) {
     dawn::ErrorLog() << message;
     return;
   }
+  end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> elapsed_time = end - start;
+  dawn::InfoLog() << "inference time: " << elapsed_time.count() << " ms";
+
   wnn::NamedResults outputs = outputs.Acquire(impl);
   wnn::Result output = outputs.Get("output");
 
@@ -53,6 +58,7 @@ void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
   wnn::NamedInputs inputs = CreateCppNamedInputs();
   inputs.Set("input", &a);
   
+  start = std::chrono::high_resolution_clock::now();
   exe.Compute(inputs, ComputeCallback, nullptr, nullptr);
 }
 
