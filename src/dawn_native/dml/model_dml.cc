@@ -175,60 +175,6 @@ std::string OpTypeToString(op::Pool2dType type) {
   return std::to_string(type);
 }
 
-// Refer to ONNXRuntime DmlOperatorTranspose.cpp
-// https://github.com/microsoft/onnxruntime/blob/master/onnxruntime/core/providers/dml/DmlExecutionProvider/src/Operators/DmlOperatorTranspose.cpp
-inline ::dml::Expression Transpose(
-    ::dml::Expression input, const ::dml::TensorDimensions& permutations) {
-  ::dml::detail::GraphBuilder* builder = input.Impl()->GetGraphBuilder();
-
-  ::dml::TensorDesc input_tensor = input.Impl()->GetOutputDesc();
-
-  ::dml::TensorDimensions input_strides(input_tensor.sizes.size());
-  uint32_t stride = 1;
-  for (size_t i = input_strides.size(); i-- > 0; ) {
-      input_strides[i] = stride;
-      stride *= input_tensor.sizes[i];
-  }
-
-  ::dml::TensorDimensions sizes(input_strides.size());
-  ::dml::TensorDimensions strides(input_strides.size());
-
-  // Permute the shape and strides.
-  for (size_t i = 0; i < input_tensor.sizes.size(); ++i) {
-      size_t dim_permuted = permutations[i];
-
-      DAWN_ASSERT(dim_permuted < input_tensor.sizes.size());
-      sizes[i] = input_tensor.sizes[dim_permuted];
-      strides[i] = input_strides[dim_permuted];
-  }
-
-  // Override the initial tensor descs. The output tensor is not strided.
-  ::dml::TensorDesc overrided_input_tensor(
-      input_tensor.dataType, input_tensor.flags,
-      sizes, strides,
-      input_tensor.totalTensorSizeInBytes,
-      input_tensor.guaranteedBaseOffsetAlignment);
-  ::dml::TensorDesc output_tensor(
-      input_tensor.dataType, DML_TENSOR_FLAG_NONE,
-      sizes, std::nullopt,
-      input_tensor.totalTensorSizeInBytes,
-      input_tensor.guaranteedBaseOffsetAlignment);
-
-  DML_ELEMENT_WISE_IDENTITY_OPERATOR_DESC desc = {};
-  desc.InputTensor = overrided_input_tensor.AsPtr<DML_TENSOR_DESC>();
-  desc.OutputTensor = output_tensor.AsPtr<DML_TENSOR_DESC>();
-  desc.ScaleBias = nullptr;
-
-  ::dml::detail::NodeOutput* const inputs[] = { input.Impl() };
-  ::dml::detail::NodeID node =
-      builder->CreateOperatorNode(
-          DML_OPERATOR_ELEMENT_WISE_IDENTITY, &desc, inputs);
-  ::dml::detail::NodeOutput* output =
-      builder->CreateNodeOutput(node, 0, std::move(output_tensor));
-
-  return output;
-}
-
 }  // namespace
 
 std::string DmlTensorDimensionsToString(
@@ -680,8 +626,7 @@ MaybeError Model::AddTranspose(const op::Transpose *transpose) {
   DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
   ::dml::Expression input = expressions_.at(input_operand);
   const TransposeOptions* options = transpose->GetOptions();
-  if(options->permutationCount >
-      DML_TENSOR_DIMENSION_COUNT_MAX) {
+  if(options->permutationCount > DML_TENSOR_DIMENSION_COUNT_MAX) {
     return DAWN_INTERNAL_ERROR(
         "The size of permutation is not supported by DML.");
   }
@@ -703,8 +648,36 @@ MaybeError Model::AddTranspose(const op::Transpose *transpose) {
   } else {
     return DAWN_VALIDATION_ERROR("The size of permutation is invalid.");
   }
-  ::dml::Expression output = Transpose(input, permutation);
+
+  // Transpose is implemented by dml::Reinterpret and dml::Identity
+  // See details at: https://github.com/microsoft/DirectML/issues/75
+  ::dml::TensorDimensions input_strides;
+  if (!input.GetOutputDesc().strides) {
+    input_strides.resize(input_rank);
+    uint32_t stride = 1;
+    for (size_t i = input_strides.size(); i-- > 0; ) {
+      input_strides[i] = stride;
+      stride *= input.GetOutputDesc().sizes[i];
+    }
+  } else {
+    input_strides = input.GetOutputDesc().strides.value();
+  }
+
+  ::dml::TensorDimensions transposed_sizes(input_rank);
+  ::dml::TensorDimensions transposed_strides(input_rank);
+
+  // Permute the shape and strides.
+  for (size_t i = 0; i < input_rank; ++i) {
+      size_t dim_permuted = permutation[i];
+      transposed_sizes[i] = input.GetOutputDesc().sizes[dim_permuted];
+      transposed_strides[i] = input_strides[dim_permuted];
+  }
+
+  ::dml::Expression output =
+      ::dml::Identity(
+          ::dml::Reinterpret(input, transposed_sizes, transposed_strides));
   expressions_.insert(std::make_pair(transpose, output));
+
   DAWN_DEBUG() << " permutation: " << DmlTensorDimensionsToString(permutation)
                << ", input: {impl: " << input.Impl()
                << ", type: "
