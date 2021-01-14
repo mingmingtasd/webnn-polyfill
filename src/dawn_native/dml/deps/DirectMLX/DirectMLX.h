@@ -477,8 +477,7 @@ namespace dml
             uint64_t totalTensorSizeInBytesVal,
             uint32_t guaranteedBaseOffsetAlignmentVal)
         {
-            const uint32_t dimensionCount = static_cast<uint32_t>(tensorSizes.size());
-            assert(!tensorStrides || tensorStrides->size() == dimensionCount);
+            assert(!tensorStrides || tensorStrides->size() == static_cast<uint32_t>(tensorSizes.size()));
 
             this->dataType = tensorDataType;
             this->flags = tensorFlags;
