@@ -12,9 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
+#define WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
+
 #include <dawn/webnn.h>
 #include <dawn/webnn_cpp.h>
 #include <vector>
+#include <condition_variable>
+#include <mutex>
 
 #include "common/RefCounted.h"
 
@@ -72,4 +77,19 @@ private:
 
 void Test(WrappedModel *model);
 
+class ComputeSync {
+public:
+  ComputeSync() : done_(false) {}
+  ~ComputeSync() = default;
+  void Wait();
+  void Finish();
+
+private:
+  std::condition_variable cond_var_;
+  std::mutex mutex_;
+  bool done_;
+};
+
 } // namespace utils
+
+#endif WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
