@@ -144,6 +144,15 @@ typedef struct ie_complete_call_back {
 } ie_complete_call_back_t;
 
 /**
+ * @struct dimensions
+ * @brief Represents dimensions for data
+ */
+typedef struct dimensions {
+  size_t ranks;
+  int32_t *dims;
+} ie_dimensions_t;
+
+/**
  * @brief Create model. Use the ie_model_free() method to
  *  free the model memory.
  * @ingroup model
@@ -388,7 +397,7 @@ ie_compilation_compute(ie_compilation_t *compilation,
 /**
  * @brief Get buffer with name.
  * @ingroup compilation
- * @param compliation A pointer to the specified ie_model_t.
+ * @param compliation A pointer to the specified ie_compilation_t.
  * @return Status code of the operation: OK(0) for success.
  */
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
@@ -403,5 +412,24 @@ ie_compilation_get_buffer(const ie_compilation_t *compilation, const char *name,
  */
 BUILD_NETWORK_C_WRAPPER(IEStatusCode)
 ie_compilation_free_buffer(void **buffer);
+
+/**
+ * @brief Get output dimensions with name.
+ * @ingroup compilation
+ * @param compliation A pointer to the specified ie_compilation_t.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_compilation_get_dimensions(const ie_compilation_t *compilation,
+                              const char *name, ie_dimensions_t *dimensions);
+
+/**
+ * @brief free the output dimensions.
+ * @ingroup compilation
+ * @param compliation A pointer to the specified ie_compilation_t.
+ * @return Status code of the operation: OK(0) for success.
+ */
+BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+ie_compilation_free_dimensions(ie_dimensions_t *dimensions);
 
 #endif // IE_NN_C_API_H

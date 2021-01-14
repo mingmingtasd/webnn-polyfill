@@ -228,6 +228,7 @@ IEStatusCode ie_model_add_transpose(ie_model_t *model, ie_operand_t *input,
 
 void ie_operand_free(ie_operand_t *operand) {
   if (operand) {
+    delete[] operand->name;
     delete operand;
     operand = NULL;
   }
@@ -362,8 +363,30 @@ IEStatusCode ie_compilation_get_buffer(const ie_compilation_t *compilation,
 
 IEStatusCode ie_compilation_free_buffer(void **buffer) {
   if (*buffer) {
-    delete[] * buffer;
+    free(*buffer);
     *buffer = NULL;
+  }
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_compilation_get_dimensions(const ie_compilation_t *compilation,
+                                           const char *name,
+                                           ie_dimensions_t *dimensions) {
+  if (compilation == nullptr) {
+    return IEStatusCode::GENERAL_ERROR;
+  }
+
+  BEGINE_TRY
+  compilation->object->GetDimensions(name, dimensions);
+  END_CATCH
+
+  return IEStatusCode::OK;
+}
+
+IEStatusCode ie_compilation_free_dimensions(ie_dimensions_t *dimensions) {
+  if (dimensions) {
+    free(dimensions->dims);
+    dimensions->dims = nullptr;
   }
   return IEStatusCode::OK;
 }
