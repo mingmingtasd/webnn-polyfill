@@ -21,7 +21,7 @@ import("${dawn_root}/scripts/dawn_features.gni")
 group("dawn_tests") {
   testonly = true
   deps = [
-    #":dawn_end2end_tests",
+    ":dawn_end2end_tests",
     #":dawn_perf_tests",
     ":dawn_unittests",
   ]
@@ -135,3 +135,60 @@ test("dawn_unittests") {
   }
 }
 
+###############################################################################
+# Dawn end2end tests targets
+###############################################################################
+
+source_set("dawn_end2end_tests_sources") {
+  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn:dawn_proc",
+    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn_native",
+  ]
+
+  sources = [
+    "DawnTest.h",
+    "end2end/AddTests.cpp",
+  ]
+
+  # Validation tests that need OS windows live in end2end tests.
+  sources += [
+    #"unittests/validation/ValidationTest.cpp",
+    #"unittests/validation/ValidationTest.h",
+  ]
+
+  libs = []
+}
+
+test("dawn_end2end_tests") {
+  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+
+  deps = [
+    ":dawn_end2end_tests_sources",
+    ":gmock_and_gtest",
+    "${dawn_root}/src/common",
+    "${dawn_root}/src/dawn:dawn_proc",
+    "${dawn_root}/src/dawn:dawncpp",
+    "${dawn_root}/src/dawn_native",
+  ]
+
+  sources = [
+    "DawnTest.cpp",
+    "DawnTest.h",
+  ]
+
+  libs = []
+
+  # When building inside Chromium, use their gtest main function because it is
+  # needed to run in swarming correctly.
+  if (build_with_chromium) {
+    deps += [ ":dawn_end2end_tests_main" ]
+  } else {
+    sources += [ "End2EndTestsMain.cpp" ]
+  }
+}
