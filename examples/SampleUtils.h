@@ -92,4 +92,4 @@ private:
 
 } // namespace utils
 
-#endif WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
+#endif // WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
