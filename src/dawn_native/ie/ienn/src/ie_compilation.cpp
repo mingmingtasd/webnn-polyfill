@@ -66,6 +66,15 @@ Compilation::Compilation(std::shared_ptr<Model> model)
   }
 }
 
+Compilation::~Compilation() {
+  if (preference_ != prefer_t::PREFER_ULTRA_LOW_POWER) {
+    // Release in squence to avoid crash.
+    infer_request_.reset(nullptr);
+    execution_.reset(nullptr);
+    ie_core_.reset(nullptr);
+  }
+}
+
 InferRequest *Compilation::GetInferenceRequest() {
   return preference_ == prefer_t::PREFER_ULTRA_LOW_POWER
              ? s_gna_infer_request.get()
