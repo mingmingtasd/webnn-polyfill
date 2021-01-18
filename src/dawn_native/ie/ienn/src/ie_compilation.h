@@ -22,7 +22,7 @@ namespace InferenceEngine {
 class Compilation {
 public:
   explicit Compilation(std::shared_ptr<Model> model);
-  ~Compilation() = default;
+  ~Compilation();
 
   StatusCode SetInput(ie_operand_t *operand, const void *buffer,
                       uint32_t length);
