@@ -15,10 +15,10 @@ public:
               CompilationOptions const *options);
   ~Compilation() override;
 
+private:
   void ComputeImpl(NamedInputsBase *inputs, WNNComputeCallback callback,
                    void *userdata, NamedOutputsBase *outputs) override;
 
-private:
   Ref<Model> model_;
   ie_compilation_t *ie_compilation_;
 

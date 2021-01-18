@@ -20,8 +20,6 @@
 #include <dawn/webnn.h>
 #include <dawn/webnn_cpp.h>
 #include <dawn_native/DawnNative.h>
-#include <condition_variable>
-#include <mutex>
 
 uint32_t product(const std::vector<int32_t> &dims) {
   uint32_t prod = 1;
@@ -102,22 +100,31 @@ wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
   UNREACHABLE();
 }
 
-wnn::NeuralNetworkContext g_context;
+// The Compilation should be released unitl ComputeCallback.
+wnn::Compilation g_compilation;
 WrappedModel *g_wrapped_model;
-std::condition_variable g_cond_var;
-std::mutex g_mutex;
-bool g_compute_done{false};
+ComputeSync g_compute_sync;
+
+void ComputeSync::Wait() {
+  // Wait for async callback.
+  std::unique_lock<std::mutex> lock(mutex_);
+  bool &done = done_;
+  cond_var_.wait(lock, [&done]{ return done; });
+}
+
+void ComputeSync::Finish() {
+  std::lock_guard<std::mutex> lock(mutex_);
+  done_ = true;
+  cond_var_.notify_one();
+  return;
+}
 
 void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
     char const * message, void* userData) {
   if (status != WNNComputeStatus_Success) {
     dawn::InfoLog() << "Test failed.";
     dawn::ErrorLog() << message;
-    {
-      std::lock_guard<std::mutex> lock(g_mutex);
-      g_compute_done = true;
-    }
-    g_cond_var.notify_one();
+    g_compute_sync.Finish();
     return;
   }
   wnn::NamedResults outputs = outputs.Acquire(impl);
@@ -160,12 +167,8 @@ void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
     dawn::InfoLog() << "Test failed.";
   }
   delete g_wrapped_model;
-  g_context = nullptr;
-  {
-    std::lock_guard<std::mutex> lock(g_mutex);
-    g_compute_done = true;
-  }
-  g_cond_var.notify_one();
+  g_compilation = nullptr;
+  g_compute_sync.Finish();
   return;
 }
 
@@ -173,6 +176,7 @@ void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
     char const * message, void* userData) {
   if (status != WNNCompileStatus_Success) {
     dawn::ErrorLog() << message;
+    g_compute_sync.Finish();
     return;
   }
 
@@ -182,12 +186,8 @@ void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
   a.size = input_buffer.size() * sizeof(float);
   wnn::NamedInputs inputs = CreateCppNamedInputs();
   inputs.Set("input", &a);
-  wnn::Compilation compilation = compilation.Acquire(impl);
-  compilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
-
-  // Wait for async callback.
-  std::unique_lock<std::mutex> lock(g_mutex);
-  g_cond_var.wait(lock, []{ return g_compute_done; });
+  g_compilation = g_compilation.Acquire(impl);
+  g_compilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
 }
 
 void ErrorCallback(WNNErrorType type, char const * message, void * userdata) {
@@ -199,18 +199,19 @@ void ErrorCallback(WNNErrorType type, char const * message, void * userdata) {
 // Wrapped Compilation
 void Test(WrappedModel *wrapped_model) {
   g_wrapped_model = wrapped_model;
-  g_context = CreateCppNeuralNetworkContext();
-  g_context.SetUncapturedErrorCallback(ErrorCallback, nullptr);
+  wnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
+  context.SetUncapturedErrorCallback(ErrorCallback, nullptr);
 
-  wnn::ModelBuilder builder = g_context.CreateModelBuilder();
+  wnn::ModelBuilder builder = context.CreateModelBuilder();
   wnn::Operand output_operand = wrapped_model->GenerateOutput(builder);
   wnn::NamedOperands named_operands = CreateCppNamedOperands();
   named_operands.Set("output", output_operand);
   // Use Promise in JS to await callback. 
-  g_context.PushErrorScope(wnn::ErrorFilter::Validation);
+  context.PushErrorScope(wnn::ErrorFilter::Validation);
   wnn::Model model = builder.CreateModel(named_operands);
-  g_context.PopErrorScope(ErrorCallback, nullptr);
+  context.PopErrorScope(ErrorCallback, nullptr);
   model.Compile(CompilationCallback, nullptr);
+  g_compute_sync.Wait();
 }
 
 } // namespace utils

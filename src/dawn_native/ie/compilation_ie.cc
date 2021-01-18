@@ -39,6 +39,8 @@ public:
 Compilation::Compilation(Ref<Model> model, WNNCompileCallback callback,
                          void *userdata, CompilationOptions const *options)
     : model_(model) {
+  // We may leverage https://dawn-review.googlesource.com/c/dawn/+/36360 to
+  // implement async compilation as standle-alone component.
   WNNCompileStatus status = WNNCompileStatus_Error;
   // Create compilation for IE backend.
   IEStatusCode code = IE(ie_create_compilation)(
