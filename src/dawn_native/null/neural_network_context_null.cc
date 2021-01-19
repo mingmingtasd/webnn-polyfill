@@ -34,6 +34,47 @@ void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {
 }
 
+MaybeError Model::AddConstant(const op::Constant *constant) {
+  return {};
+}
+
+MaybeError Model::AddInput(const op::Input *input) {
+  return {};
+}
+
+MaybeError Model::AddOutput(const std::string &name,
+                            const OperandBase *output) {
+  return {};
+}
+
+MaybeError Model::AddBinary(const op::Binary *binary) {
+  return {};
+}
+
+MaybeError Model::AddConv2d(const op::Conv2d *conv2d) {
+  return {};
+}
+
+MaybeError Model::AddPool2d(const op::Pool2d *pool2d) {
+  return {};
+}
+
+MaybeError Model::AddUnary(const op::Unary *unary) {
+  return {};
+}
+
+MaybeError Model::AddReshape(const op::Reshape *reshape) {
+  return {};
+}
+
+MaybeError Model::AddTranspose(const op::Transpose *transpose) {
+  return {};
+}
+
+MaybeError Model::Finish() {
+  return {};
+}
+
 // Compilation
 void Compilation::ComputeImpl(
     NamedInputsBase *inputs, WNNComputeCallback callback,
