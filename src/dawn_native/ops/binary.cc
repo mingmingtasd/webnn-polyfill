@@ -27,8 +27,7 @@ std::string BinaryOpTypeToString(BinaryOpType type) {
   return std::to_string(type);
 }
 
-
-MaybeError Binary::ValidateAndInferTypes() {
+MaybeError Binary::Validate() {
   Ref<OperandBase> a = inputs_[0];
   Ref<OperandBase> b = inputs_[1];
   if (a->Type() != b->Type()) {

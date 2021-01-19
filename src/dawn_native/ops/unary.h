@@ -29,7 +29,7 @@ public:
     return model->AddUnary(this);
   }
 
-  MaybeError ValidateAndInferTypes() override;
+  MaybeError Validate() override;
 
   UnaryOpType OpType() const { return op_type_; }
 

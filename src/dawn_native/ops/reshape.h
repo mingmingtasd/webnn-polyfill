@@ -24,7 +24,7 @@ public:
   MaybeError AddToModel(ModelBase *model) const override {
     return model->AddReshape(this);
   }
-  MaybeError ValidateAndInferTypes() override { return {}; }
+  MaybeError Validate() override { return {}; }
 
   int32_t const *GetNewShape() const { return new_shape_.data(); }
   size_t GetNewShapeCount() const { return new_shape_.size(); }

@@ -25,6 +25,7 @@ TEST_F(PoolValidationTest, CreateByDefaultOptions) {
       wnn::Operand pool = builder_.AveragePool2d(input, &pool2dOptions);
       EXPECT_NE(&pool, nullptr);
     }
+
     {
       wnn::Operand pool = builder_.MaxPool2d(input);
       EXPECT_NE(&pool, nullptr);
@@ -40,7 +41,10 @@ TEST_F(PoolValidationTest, InputDimsError) {
     wnn::Operand input = builder_.Input("input", &inputDesc);
 
     wnn::Pool2dOptions pool2dOptions = {};
-    ASSERT_CONTEXT_ERROR(builder_.MaxPool2d(input, &pool2dOptions));
+    wnn::Operand pool;
+    ASSERT_CONTEXT_ERROR(pool = builder_.MaxPool2d(input, &pool2dOptions));
+    // input variable pool is not valid 
+    ASSERT_CONTEXT_ERROR(wnn::Operand op2 = builder_.MaxPool2d(pool));
 }
 
 TEST_F(PoolValidationTest, windowDimensionsCountError) {

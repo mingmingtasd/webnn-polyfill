@@ -29,7 +29,7 @@ public:
   MaybeError AddToModel(ModelBase *model) const override {
     return model->AddTranspose(this);
   }
-  MaybeError ValidateAndInferTypes() override { return {}; }
+  MaybeError Validate() override { return {}; }
 
   TransposeOptions const *GetOptions() const { return &options_; }
 

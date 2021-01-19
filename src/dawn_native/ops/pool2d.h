@@ -27,7 +27,7 @@ public:
   ~Pool2d() override = default;
 
   MaybeError AddToModel(ModelBase *model) const override;
-  MaybeError ValidateAndInferTypes() override;
+  MaybeError Validate() override;
 
   Pool2dOptions const *GetOptions() const;
   Pool2dType OpType() const { return op_type_; }

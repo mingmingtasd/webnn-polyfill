@@ -19,7 +19,7 @@ public:
   ~Conv2d() override = default;
 
   MaybeError AddToModel(ModelBase *model) const override;
-  MaybeError ValidateAndInferTypes() override;
+  MaybeError Validate() override;
 
   Conv2dOptions const *GetOptions() const;
 

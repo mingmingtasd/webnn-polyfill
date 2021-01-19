@@ -74,8 +74,12 @@ MaybeError Pool2d::AddToModel(ModelBase *model) const {
 
 Pool2dOptions const *Pool2d::GetOptions() const { return &options_; }
 
-MaybeError Pool2d::ValidateAndInferTypes() {
+MaybeError Pool2d::Validate() {
   auto input = inputs_[0];
+  if (input->IsError()) {
+    return DAWN_VALIDATION_ERROR("Argument input is invalid.");
+  }
+
   if (input->Dimensions().size() != 4) {
     return DAWN_VALIDATION_ERROR("Argument input is not a 4D tensor.");
   }
@@ -96,9 +100,6 @@ MaybeError Pool2d::ValidateAndInferTypes() {
     return DAWN_VALIDATION_ERROR("dilationsCount is incorrect.");
   }
 
-  DAWN_DEBUG() << " op: " << PoolOpTypeToString(OpType())
-               << ", input.type: " << OperandTypeToString(input->Type())
-               << ", input.dimensions: " << ShapeToString(input->Dimensions());
   return {};
 }
 

@@ -8,7 +8,7 @@ namespace dawn_native {
 
 namespace op {
 
-MaybeError Constant::ValidateAndInferTypes() {
+MaybeError Constant::Validate() {
   DAWN_DEBUG() << " constant.type: " << OperandTypeToString(type_)
                << ", constant.dimensions: " << ShapeToString(dimensions_);
   return {};

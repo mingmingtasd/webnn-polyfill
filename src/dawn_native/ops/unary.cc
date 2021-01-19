@@ -21,7 +21,7 @@ std::string UnaryOpTypeToString(UnaryOpType type) {
   return std::to_string(type);
 }
 
-MaybeError Unary::ValidateAndInferTypes() {
+MaybeError Unary::Validate() {
   auto input = inputs_[0];
   type_ = input->Type();
   dimensions_ = input->Dimensions();

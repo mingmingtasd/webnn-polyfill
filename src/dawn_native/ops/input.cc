@@ -8,7 +8,7 @@ namespace dawn_native {
 
 namespace op {
 
-MaybeError Input::ValidateAndInferTypes() {
+MaybeError Input::Validate() {
   DAWN_DEBUG() << " input.type: " << OperandTypeToString(type_)
                << ", input.dimensions: " << ShapeToString(dimensions_);
   return {};

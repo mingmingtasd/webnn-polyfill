@@ -23,7 +23,7 @@ public:
   // Add the operand to model for specific backend.
   virtual MaybeError AddToModel(ModelBase *model) const { UNREACHABLE(); }
   // Validate the inputs and infer types and shapes.
-  virtual MaybeError ValidateAndInferTypes() { UNREACHABLE(); }
+  virtual MaybeError Validate() { UNREACHABLE(); }
 
   // It's used for getting inputs when traversaling model tree.
   const std::vector<Ref<OperandBase>> &Inputs() const { return inputs_; }

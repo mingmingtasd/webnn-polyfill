@@ -35,7 +35,7 @@ public:
     return model->AddBinary(this);
   }
 
-  MaybeError ValidateAndInferTypes() override;
+  MaybeError Validate() override;
 
   BinaryOpType OpType() const { return op_type_; }
 

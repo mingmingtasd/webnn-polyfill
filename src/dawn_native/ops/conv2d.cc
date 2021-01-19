@@ -58,7 +58,7 @@ MaybeError Conv2d::AddToModel(ModelBase *model) const { return model->AddConv2d(
 
 Conv2dOptions const *Conv2d::GetOptions() const { return &options_; }
 
-MaybeError Conv2d::ValidateAndInferTypes() {
+MaybeError Conv2d::Validate() {
   auto input = inputs_[0];
   auto filter = inputs_[1];
   if (input->Type() != filter->Type()) {
