@@ -111,6 +111,29 @@ hooks = [
                 '-s', 'build/toolchain/win/rc/win/rc.exe.sha1',
     ],
   },
+  # Pull clang-format binaries using checked-in hashes.
+  {
+    'name': 'clang_format_win',
+    'pattern': '.',
+    'condition': 'host_os == "win"',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--no_auth',
+                '--bucket', 'chromium-clang-format',
+                '-s', 'buildtools/win/clang-format.exe.sha1',
+    ],
+  },
+  {
+    'name': 'clang_format_linux',
+    'pattern': '.',
+    'condition': 'host_os == "linux"',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--no_auth',
+                '--bucket', 'chromium-clang-format',
+                '-s', 'buildtools/linux64/clang-format.sha1',
+    ],
+  },
   # Update build/util/LASTCHANGE.
   {
     'name': 'lastchange',
