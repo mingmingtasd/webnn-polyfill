@@ -222,9 +222,8 @@ MaybeError Model::Finish() {
 
 void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
                         CompilationOptions const *options) {
-  Ref<Compilation> compilation =
-      AcquireRef(new Compilation(this, callback, userdata, options));
-  DAWN_ASSERT(compilation.Detach());
+  Compilation* compilation = new Compilation(this);
+  compilation->Compile(callback, userdata, options);
 }
 
 ie_model_t *Model::GetInferenceEngineModel() { return ie_model_; }

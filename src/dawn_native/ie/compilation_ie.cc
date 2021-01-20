@@ -36,9 +36,13 @@ public:
   }
 };
 
-Compilation::Compilation(Ref<Model> model, WNNCompileCallback callback,
-                         void *userdata, CompilationOptions const *options)
-    : model_(model) {
+Compilation::Compilation(Ref<Model> model)
+    : model_(model) {}
+
+Compilation::~Compilation() { IE(ie_compilation_free)(ie_compilation_); }
+
+void Compilation::Compile(WNNCompileCallback callback,
+                         void *userdata, CompilationOptions const *options) {
   // We may leverage https://dawn-review.googlesource.com/c/dawn/+/36360 to
   // implement async compilation as standle-alone component.
   WNNCompileStatus status = WNNCompileStatus_Error;
@@ -49,8 +53,6 @@ Compilation::Compilation(Ref<Model> model, WNNCompileCallback callback,
   status = WNNCompileStatus_Success;
   callback(status, reinterpret_cast<WNNCompilation>(this), nullptr, userdata);
 }
-
-Compilation::~Compilation() { IE(ie_compilation_free)(ie_compilation_); }
 
 void Compilation::ComputeImpl(NamedInputsBase *inputs,
                               WNNComputeCallback callback, void *userdata,
