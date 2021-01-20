@@ -1,5 +1,5 @@
 {
-  "name": "build_webnn_native",
+  "name": "build_webnn",
   "version": "0.1.0",
   "description": "Build and package Web toolchain.",
   "main": "index.js",
