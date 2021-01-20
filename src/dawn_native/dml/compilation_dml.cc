@@ -89,16 +89,6 @@ void Compilation::ComputeImpl(
       // convert from uint32_t to int32_t.
       dimensions.push_back(static_cast<int32_t>(size));
     }
-    DAWN_DEBUG() << " set output name: " << output_name
-                 << ", buffer: " << output_buffer
-                 << ", buffer size: " << buffer_length
-                 << ", dml type: "
-                 << DmlTensorTypeToString(tensor->data_type_)
-                 << ", dml shape: "
-                 << op::ShapeToString(tensor->dimensions_)
-                 << ", rank: " << rank
-                 << ", dimensions: "
-                 << op::ShapeToString(dimensions);
     Ref<ResultBase> result = AcquireRef(
         new Result::ResultBase(output_buffer, buffer_length, dimensions));
     results->Set(output_name.c_str(), result.Detach());

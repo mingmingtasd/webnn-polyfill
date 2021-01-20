@@ -17,24 +17,19 @@ enum UnaryOpType {
   kSoftmax,
 };
 
-std::string UnaryOpTypeToString(UnaryOpType type);
-
 class Unary final : public OperandBase {
 public:
-  Unary(ModelBuilderBase *builder, UnaryOpType op_type, OperandBase *input)
-      : OperandBase(builder, {input}), op_type_(op_type) {}
+  Unary(UnaryOpType type, OperandBase *input)
+      : OperandBase({input}), type_(type) {}
   ~Unary() override = default;
 
   MaybeError AddToModel(ModelBase *model) const override {
     return model->AddUnary(this);
   }
-
-  MaybeError Validate() override;
-
-  UnaryOpType OpType() const { return op_type_; }
+  UnaryOpType GetType() const { return type_; }
 
 private:
-  UnaryOpType op_type_;
+  UnaryOpType type_;
 };
 
 } // namespace op

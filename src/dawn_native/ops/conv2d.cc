@@ -4,18 +4,15 @@
 
 #include "dawn_native/ops/conv2d.h"
 
-#include "common/Log.h"
-#include "dawn_native/Error.h"
-#include "dawn_native/ops/utils.h"
+#include <memory>
 
 namespace dawn_native {
 
 namespace op {
 
-Conv2d::Conv2d(ModelBuilderBase *builder,
-               OperandBase *input, OperandBase *filter,
+Conv2d::Conv2d(OperandBase *input, OperandBase *filter,
                Conv2dOptions const *options)
-    : OperandBase(builder, {input, filter}) {
+    : OperandBase({input, filter}) {
   if (options == nullptr || options->padding == nullptr) {
     padding_ = std::vector<int32_t>(4, 0);  
   } else {
@@ -41,44 +38,13 @@ Conv2d::Conv2d(ModelBuilderBase *builder,
   options_.dilations = dilations_.data();
   options_.dilationsCount = dilations_.size();
 
-  if (options == nullptr) {
-     options_.groups = 1;
-  } else {
-     options_.groups = options->groups;
-  }
-
-  if (options == nullptr) {
-    options_.layout = wnn::OperandLayout::Nchw;
-  } else {  
-    options_.layout = options->layout;
-  }
+  options_.groups = options->groups;
+  options_.layout = options->layout;
 }
 
 MaybeError Conv2d::AddToModel(ModelBase *model) const { return model->AddConv2d(this); }
 
 Conv2dOptions const *Conv2d::GetOptions() const { return &options_; }
-
-MaybeError Conv2d::Validate() {
-  auto input = inputs_[0];
-  auto filter = inputs_[1];
-  if (input->Type() != filter->Type()) {
-    return DAWN_VALIDATION_ERROR("Argument types are inconsistent.");
-  }
-  if (input->Dimensions().size() != 4) {
-    return DAWN_VALIDATION_ERROR("Argument input is not a 4D tensor.");
-  }
-  if (filter->Dimensions().size() != 4) {
-    return DAWN_VALIDATION_ERROR("Argument filter is not a 4D tensor.");
-  }
-  type_ = input->Type();
-  dimensions_.resize(4);
-
-  DAWN_DEBUG() << " input.type: " << OperandTypeToString(input->Type())
-               << ", input.dimensions: " << ShapeToString(input->Dimensions())
-               << ", output.type: " << OperandTypeToString(type_)
-               << ", output.dimensions: " << ShapeToString(dimensions_);
-  return {};
-}
 
 } // namespace op
 
