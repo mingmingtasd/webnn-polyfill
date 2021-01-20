@@ -11,9 +11,11 @@ namespace ie {
 
 class Compilation : public CompilationBase {
 public:
-  Compilation(Ref<Model> model, WNNCompileCallback callback, void *userdata,
-              CompilationOptions const *options);
+  Compilation(Ref<Model> model);
   ~Compilation() override;
+
+  void Compile(WNNCompileCallback callback,
+                void *userdata, CompilationOptions const *options);
 
 private:
   void ComputeImpl(NamedInputsBase *inputs, WNNComputeCallback callback,

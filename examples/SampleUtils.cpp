@@ -187,11 +187,6 @@ void CompilationCallback(WNNCompileStatus status, WNNCompilation impl,
   inputs.Set("input", &a);
   g_compilation = g_compilation.Acquire(impl);
   g_compilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
-
-  g_compute_sync.Wait();
-  // Release backend resources in main thread.
-  delete g_wrapped_model;
-  g_compilation = nullptr;
 }
 
 void ErrorCallback(WNNErrorType type, char const * message, void * userdata) {
@@ -215,6 +210,11 @@ void Test(WrappedModel *wrapped_model) {
   wnn::Model model = builder.CreateModel(named_operands);
   context.PopErrorScope(ErrorCallback, nullptr);
   model.Compile(CompilationCallback, nullptr);
+
+  g_compute_sync.Wait();
+  // Release backend resources in main thread.
+  delete g_wrapped_model;
+  g_compilation = nullptr;
 }
 
 } // namespace utils

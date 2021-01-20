@@ -43,7 +43,6 @@ void ComputeCallback(WNNComputeStatus status, WNNNamedResults impl,
   if (expected) {
     dawn::InfoLog() << "The output output as expected.";
   }
-  g_compilation = nullptr;
   g_compute_sync.Finish();
 }
 
@@ -206,5 +205,7 @@ int main(int argc, const char* argv[]) {
   g_compute_sync.Wait();
 
   free(dataBuffer);
+  // Release backend resources in main thread.
+  g_compilation = nullptr;
 }
 
