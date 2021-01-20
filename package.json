@@ -1,0 +1,38 @@
+{
+  "name": "build_webnn",
+  "version": "0.1.0",
+  "description": "Build and package Web toolchain.",
+  "main": "index.js",
+  "scripts": {
+    "linter": "node build_script/tools/linter.js"
+  },
+  "pre-commit": [
+    "linter"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/otcshare/webnn-native"
+  },
+  "keywords": [
+    "WebNN"
+  ],
+  "author": "WebNN Team",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/otcshare/webnn-native/issues"
+  },
+  "homepage": "https://github.com/otcshare/webnn-native#readme",
+  "dependencies": {
+    "commander": "^2.15.0",
+    "emailjs": "^2.2.0",
+    "rimraf": "^2.6.2",
+    "winston": "^3.0.0-rc1"
+  },
+  "devDependencies": {
+    "eslint": "^4.18.2",
+    "eslint-config-google": "^0.9.1",
+    "eslint-plugin-header": "^1.2.0",
+    "pre-commit": "^1.2.2",
+    "recursive-readdir": "^2.2.2"
+  }
+}
