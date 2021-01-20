@@ -14,8 +14,9 @@ namespace op {
 
 class Constant final : public OperandBase {
 public:
-  Constant(const OperandDescriptor *desc, void const *value, size_t size)
-      : OperandBase({}), value_(value), size_(size) {
+  Constant(ModelBuilderBase *builder,
+          const OperandDescriptor *desc, void const *value, size_t size)
+      : OperandBase(builder), value_(value), size_(size) {
     descriptor_.type = desc->type;
     dimensions_.assign(desc->dimensions,
                        desc->dimensions + desc->dimensionsCount);
@@ -26,6 +27,7 @@ public:
 
   MaybeError AddToModel(ModelBase *model) const override { return model->AddConstant(this); }
 
+  MaybeError Validate() override;
   const OperandDescriptor *GetOperandDescriptor() const { return &descriptor_; }
   void const *GetValue() const { return value_; }
   size_t GetSize() const { return size_; }
