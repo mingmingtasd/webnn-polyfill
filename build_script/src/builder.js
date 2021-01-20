@@ -12,11 +12,11 @@ const os = require('os');
 const email = require('emailjs');
 
 /**
- * Chrome builder class.
+ * Builder class.
  */
-class ChromeBuilder {
+class Builder {
   /**
-   * @param {ChromeBuilderConf} conf configuration file.
+   * @param {BuilderConf} conf configuration file.
    */
   constructor(conf) {
     this.conf_ = conf;
@@ -210,25 +210,15 @@ class ChromeBuilder {
   async actionPackage() {
     this.conf_.logger.info('Action package');
 
+    // Zip files
     switch (this.conf_.targetOs) {
-      case 'mac':
-        // Zip files
-        await this.childCommand('zip',
-          ['-r', this.conf_.packagedFile, 'Chromium.app', 'pnacl'],
-          this.conf_.outDir);
+      case 'linux':
+        // TODO
         break;
       case 'win':
-        // Extract chrome.7z
-        await this.childCommand(path.join(this.conf_.rootDir,
-          'third_party', 'lzma_sdk', 'Executable', '7za.exe'),
-          ['x', '-y', '-sdel', path.join(this.conf_.outDir, 'chrome.7z')],
-          this.conf_.outDir);
-        // Zip files
-        await this.childCommand(path.join(__dirname, 'make_win32_zip.bat'),
-          [this.conf_.rootDir, __dirname], this.conf_.outDir);
+        // TODO
         break;
       default:
-        // Nothing to do on Linux and Android
         break;
     }
   }
@@ -390,5 +380,5 @@ class ChromeBuilder {
 }
 
 module.exports = {
-  ChromeBuilder,
+  Builder,
 };

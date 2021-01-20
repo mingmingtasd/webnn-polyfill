@@ -6,8 +6,8 @@
 'use strict';
 
 const program = require('commander');
-const {ChromeBuilder} = require('../src/builder');
-const {ChromeBuilderConf} = require('../src/builder_conf');
+const {Builder} = require('../src/builder');
+const {BuilderConf} = require('../src/builder_conf');
 
 program
   .version(require('../package.json').version)
@@ -17,10 +17,10 @@ program
   .parse(process.argv);
 
 try {
-  let conf = new ChromeBuilderConf(program.args[0], program.conf);
+  let conf = new BuilderConf(program.args[0], program.conf);
   conf.init();
 
-  let builder = new ChromeBuilder(conf);
+  let builder = new Builder(conf);
   builder.run(program.action);
 } catch (e) {
   console.log(e);

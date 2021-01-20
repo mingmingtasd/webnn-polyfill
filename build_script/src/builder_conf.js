@@ -9,11 +9,11 @@ const path = require('path');
 const winston = require('winston');
 
 /**
- * Chrome builder configuration class.
+ * BuilderConf class.
  */
-class ChromeBuilderConf {
+class BuilderConf {
   /**
-   * @param {string} rootDir Chromium source code directory.
+   * @param {string} rootDir webnn-native source code directory.
    * @param {string} conf builder configuration file.
    */
   constructor(rootDir, conf) {
@@ -22,11 +22,11 @@ class ChromeBuilderConf {
     this.outDir_ = undefined;
 
     // Get list via "gn help target_os <out_dir>", current support
-    // android|chromeos|linux|nacl|mac|win
+    // linux|win
     this.targetOs_ = undefined;
 
     // Get list via "gn help target_cpu <out_dir>", current support
-    // x86|x64|arm|arm64|mipsel
+    // x86|x64|arm|arm64
     this.targetCpu_ = undefined;
 
     // gn-args
@@ -68,8 +68,6 @@ class ChromeBuilderConf {
    */
   init() {
     fs.accessSync(this.rootDir_);
-    fs.accessSync(path.resolve(this.rootDir_, 'chrome', 'VERSION'));
-
     let conf = JSON.parse(fs.readFileSync(this.conf_, 'utf8'));
 
     /* jshint ignore:start */
@@ -203,14 +201,12 @@ class ChromeBuilderConf {
    */
   get buildTargets() {
     switch (this.targetOs) {
-      case 'android':
-        return ['chrome_public_apk'];
       case 'linux':
-        return ['chrome', 'unstable_deb'];
-      case 'mac':
-        return ['chrome', 'chrome_app'];
+        // TODO
+        return '';
       case 'win':
-        return ['chrome', 'mini_installer'];
+        // TODO
+        return '';
       default:
         return null;
     }
@@ -220,22 +216,13 @@ class ChromeBuilderConf {
    * @return {string} path of package file.
    */
   get packagedFile() {
-    let installer = null;
     switch (this.targetOs) {
-      case 'android':
-        return path.join(this.outDir_, 'apks', 'ChromePublic.apk');
       case 'linux':
-        // TODO(halton): Run gn desc <out_dir> //chrome/installer/linux:unstable_deb outputs
-        // to get below string
-        installer = '//out/linux_x64_release/chromium-browser-unstable_79.0.3917.0-1_amd64.deb';
-        return path.join(this.outDir_, installer.split('/')[4]);
-      case 'mac':
-        // TODO(halton): Run gn desc <out_dir> //chrome:chrome_app outputs
-        installer = 'chromium-mac.zip';
-        return path.join(this.outDir, installer);
+        // TODO
+        return '';
       case 'win':
-        installer = 'chrome-win32.zip';
-        return path.join(this.outDir, installer);
+        // TODO
+        return '';
       default:
         return null;
     }
@@ -287,8 +274,6 @@ class ChromeBuilderConf {
         return 'linux';
       case 'win32':
         return 'win';
-      case 'darwin':
-        return 'mac';
       case 'aix':
       case 'freebsd':
       case 'openbsd':
@@ -326,5 +311,5 @@ class ChromeBuilderConf {
 }
 
 module.exports = {
-  ChromeBuilderConf,
+  BuilderConf,
 };
