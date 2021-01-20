@@ -4,7 +4,6 @@
 #include "common/Log.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/dml/compilation_dml.h"
-#include "dawn_native/ops/utils.h"
 
 namespace dawn_native {
 namespace dml {
@@ -243,16 +242,22 @@ Model::Model(ModelBuilder *model_builder) : ModelBase(model_builder) {
 }
 
 MaybeError Model::AddConstant(const op::Constant *constant) {
-  ::dml::TensorDimensions dml_dims =
-      GetDmlTensorDimensions(constant->Dimensions());
-  ::dml::TensorDesc tensor_desc(
-      GetDmlTensorDataType(constant->Type()),
-      ::DML_TENSOR_FLAGS::DML_TENSOR_FLAG_OWNED_BY_DML,
-      dml_dims,
-      ::dml::TensorPolicy::Default());
-  ::dml::Expression exp =
-      ::dml::InputTensor(*graph_, bindings_.size(), tensor_desc);
-  expressions_.insert(std::make_pair(constant, exp));
+  const OperandDescriptor* desc = constant->GetOperandDescriptor();
+  DML_TENSOR_DATA_TYPE dml_tensor_type;
+  if (!GetDmlTensorDataType(desc->type, dml_tensor_type)) {
+    return DAWN_INTERNAL_ERROR("Failed to get DML tensor type.");
+  }
+  ::dml::TensorDimensions dml_tensor_dims;
+  if (!GetDmlTensorDimensions(
+      desc->dimensions, desc->dimensionsCount, dml_tensor_dims)) {
+    return DAWN_INTERNAL_ERROR("Failed to get DML tensor dimensions.");
+  }
+  ::dml::TensorDesc dml_tensor_desc(
+      dml_tensor_type, ::DML_TENSOR_FLAGS::DML_TENSOR_FLAG_OWNED_BY_DML,
+      dml_tensor_dims, ::dml::TensorPolicy::Default());
+  ::dml::Expression dml_constant =
+      ::dml::InputTensor(*graph_, bindings_.size(), dml_tensor_desc);
+  expressions_.insert(std::make_pair(constant, dml_constant));
   std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(
       dml_constant, const_cast<void*>(constant->GetValue()),
       constant->GetSize()));
@@ -270,15 +275,21 @@ MaybeError Model::AddConstant(const op::Constant *constant) {
 }
 
 MaybeError Model::AddInput(const op::Input *input) {
-  ::dml::TensorDimensions dml_dims =
-      GetDmlTensorDimensions(input->Dimensions());
-  ::dml::TensorDesc tensor_desc(
-      GetDmlTensorDataType(input->Type()),
-      dml_dims,
-      ::dml::TensorPolicy::Default());
-  ::dml::Expression exp =
-      ::dml::InputTensor(*graph_, bindings_.size(), tensor_desc);
-  expressions_.insert(std::make_pair(input, exp));
+  const OperandDescriptor* desc = input->GetOperandDescriptor();
+  DML_TENSOR_DATA_TYPE dml_tensor_type;
+  if (!GetDmlTensorDataType(desc->type, dml_tensor_type)) {
+    return DAWN_INTERNAL_ERROR("Failed to get DML tensor type.");
+  }
+  ::dml::TensorDimensions dml_tensor_dims;
+  if (!GetDmlTensorDimensions(
+      desc->dimensions, desc->dimensionsCount, dml_tensor_dims)) {
+    return DAWN_INTERNAL_ERROR("Failed to get DML tensor dimensions.");
+  }
+  ::dml::TensorDesc dml_tensor_desc(
+      dml_tensor_type, dml_tensor_dims, ::dml::TensorPolicy::Default());
+  ::dml::Expression dml_input =
+      ::dml::InputTensor(*graph_, bindings_.size(), dml_tensor_desc);
+  expressions_.insert(std::make_pair(input, dml_input));
   std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(
       dml_input, nullptr, 0));
   bindings_.push_back(std::move(binding));
@@ -299,6 +310,7 @@ MaybeError Model::AddOutput(const std::string& name, const OperandBase* output) 
   ::dml::Expression dml_output = expressions_.at(output);
   outputs_.insert(std::make_pair(name, dml_output));
   DAWN_DEBUG() << " impl: " << dml_output.Impl()
+               << ", name: " << name;
   return {};
 }
   
@@ -392,7 +404,7 @@ MaybeError Model::AddBinary(const op::Binary *binary) {
     c = ::dml::Gemm(a, b);
   } else if (binary->GetType() == op::BinaryOpType::kAdd) {
     c = ::dml::Add(a, b);
-  } else if (binary->OpType() == op::BinaryOpType::kMul) {
+  } else if (binary->GetType() == op::BinaryOpType::kMul) {
     c = ::dml::Multiply(a, b);
   } else {
     std::string error_message = std::string(" Binary op ") +
@@ -692,9 +704,9 @@ MaybeError Model::AddUnary(const op::Unary *unary) {
   DAWN_ASSERT(expressions_.find(input_operand) != expressions_.end());
   ::dml::Expression input = expressions_.at(input_operand);
   ::dml::Expression output;
-  if (unary->OpType() == op::UnaryOpType::kRelu) {
+  if (unary->GetType() == op::UnaryOpType::kRelu) {
     output = ::dml::ActivationRelu(input);
-  } else if (unary->OpType() == op::UnaryOpType::kSoftmax) {
+  } else if (unary->GetType() == op::UnaryOpType::kSoftmax) {
     output = ::dml::ActivationSoftmax(input);
   } else {
     std::string error_message = std::string(" Unary op ") +

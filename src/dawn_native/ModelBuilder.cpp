@@ -20,15 +20,6 @@
 #include "dawn_native/ops/transpose.h"
 #include "dawn_native/ops/unary.h"
 
-#define DAWN_VALIDATE(ptr)                                     \
-  Ref<OperandBase> op = AcquireRef(ptr);                                       \
-  if (GetContext()->ConsumedError(op->Validate())) {              \
-    return OperandBase::MakeError(this);                                       \
-  }                                                                            \
-  return op.Detach();                                                          \
-  for (;;)                                                                     \
-  break
-
 namespace dawn_native {
 
 ModelBuilderBase::ModelBuilderBase(NeuralNetworkContextBase *context)
@@ -36,67 +27,78 @@ ModelBuilderBase::ModelBuilderBase(NeuralNetworkContextBase *context)
 
 OperandBase *ModelBuilderBase::Constant(OperandDescriptor const *desc,
                                         void const *value, size_t size) {
-  DAWN_VALIDATE(new op::Constant(this, desc, value, size));
+  Ref<OperandBase> context = AcquireRef(new op::Constant(desc, value, size));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::Input(char const *name,
                                      OperandDescriptor const *desc) {
-  DAWN_VALIDATE(new op::Input(this, std::string(name), desc));
+  Ref<OperandBase> context = AcquireRef(new op::Input(std::string(name), desc));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::Matmul(OperandBase *a, OperandBase *b) {
-  DAWN_VALIDATE(
-      new op::Binary(this, op::BinaryOpType::kMatMul, a, b));
+  Ref<OperandBase> context =
+      AcquireRef(new op::Binary(op::BinaryOpType::kMatMul, a, b));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::Add(OperandBase *a, OperandBase *b) {
-  DAWN_VALIDATE(
-      new op::Binary(this, op::BinaryOpType::kAdd, a, b));
+  Ref<OperandBase> context =
+      AcquireRef(new op::Binary(op::BinaryOpType::kAdd, a, b));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::Mul(OperandBase *a, OperandBase *b) {
-  DAWN_VALIDATE(
-      new op::Binary(this, op::BinaryOpType::kMul, a, b));
+  Ref<OperandBase> context =
+      AcquireRef(new op::Binary(op::BinaryOpType::kMul, a, b));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::Conv2d(OperandBase *input, OperandBase *filter,
                                       Conv2dOptions const *options) {
-  DAWN_VALIDATE(
-    new op::Conv2d(this, input, filter, options));
+  Ref<OperandBase> context = AcquireRef(new op::Conv2d(input, filter, options));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::AveragePool2d(OperandBase *input,
                                              Pool2dOptions const *options) {
-  DAWN_VALIDATE(
-      new op::Pool2d(this, op::Pool2dType::kAveragePool2d, input, options));
+  Ref<OperandBase> context = AcquireRef(
+      new op::Pool2d(op::Pool2dType::kAveragePool2d, input, options));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::MaxPool2d(OperandBase *input,
                                          Pool2dOptions const *options) {
-  DAWN_VALIDATE(
-      new op::Pool2d(this, op::Pool2dType::kMaxPool2d, input, options));
+  Ref<OperandBase> context =
+      AcquireRef(new op::Pool2d(op::Pool2dType::kMaxPool2d, input, options));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::Relu(OperandBase *input) {
-  DAWN_VALIDATE(
-      new op::Unary(this, op::UnaryOpType::kRelu, input));
+  Ref<OperandBase> context =
+      AcquireRef(new op::Unary(op::UnaryOpType::kRelu, input));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::Reshape(OperandBase *input,
                                        int32_t const *new_shape,
                                        size_t new_shape_count) {
-  DAWN_VALIDATE(
-      new op::Reshape(this, input, new_shape, new_shape_count));
+  Ref<OperandBase> context =
+      AcquireRef(new op::Reshape(input, new_shape, new_shape_count));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::Softmax(OperandBase *input) {
-  DAWN_VALIDATE(
-      new op::Unary(this, op::UnaryOpType::kSoftmax, input));
+  Ref<OperandBase> context =
+      AcquireRef(new op::Unary(op::UnaryOpType::kSoftmax, input));
+  return context.Detach();
 }
 
 OperandBase *ModelBuilderBase::Transpose(OperandBase *input,
                                          TransposeOptions const *options) {
-  DAWN_VALIDATE(new op::Transpose(this, input, options));
+  Ref<OperandBase> context = AcquireRef(new op::Transpose(input, options));
+  return context.Detach();
 }
 
 ModelBase *ModelBuilderBase::CreateModel(NamedOperandsBase const *named_operands) {

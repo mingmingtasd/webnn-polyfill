@@ -18,19 +18,15 @@ enum Pool2dType {
   kMaxPool2d,
 };
 
-std::string PoolOpTypeToString(Pool2dType type);
-
 class Pool2d final : public OperandBase {
 public:
-  Pool2d(ModelBuilderBase *builder,
-         Pool2dType op_type, OperandBase *input, Pool2dOptions const *options);
+  Pool2d(Pool2dType type, OperandBase *input, Pool2dOptions const *options);
   ~Pool2d() override = default;
 
   MaybeError AddToModel(ModelBase *model) const override;
-  MaybeError Validate() override;
 
   Pool2dOptions const *GetOptions() const;
-  Pool2dType OpType() const { return op_type_; }
+  Pool2dType GetType() const;
 
 private:
   Pool2dOptions options_;
@@ -38,7 +34,7 @@ private:
   std::vector<int32_t> padding_;
   std::vector<int32_t> stride_;
   std::vector<int32_t> dilations_;
-  Pool2dType op_type_;
+  Pool2dType type_;
 };
 
 } // namespace op

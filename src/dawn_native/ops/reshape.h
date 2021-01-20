@@ -14,9 +14,8 @@ namespace op {
 
 class Reshape final : public OperandBase {
 public:
-  Reshape(ModelBuilderBase *builder,
-          OperandBase *input, int32_t const *new_shape, size_t new_shape_count)
-      : OperandBase(builder, {input}) {
+  Reshape(OperandBase *input, int32_t const *new_shape, size_t new_shape_count)
+      : OperandBase({input}) {
     new_shape_.assign(new_shape, new_shape + new_shape_count);
   }
   ~Reshape() override = default;
@@ -24,7 +23,6 @@ public:
   MaybeError AddToModel(ModelBase *model) const override {
     return model->AddReshape(this);
   }
-  MaybeError Validate() override { return {}; }
 
   int32_t const *GetNewShape() const { return new_shape_.data(); }
   size_t GetNewShapeCount() const { return new_shape_.size(); }
