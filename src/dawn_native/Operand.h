@@ -4,16 +4,17 @@
 #include <string>
 #include <vector>
 
-#include "common/RefCounted.h"
 #include "dawn_native/Forward.h"
 #include "dawn_native/Model.h"
 #include "dawn_native/dawn_platform.h"
+#include "dawn_native/ObjectBase.h"
 
 namespace dawn_native {
 
-class OperandBase : public RefCounted {
+class OperandBase : public ObjectBase {
 public:
-  explicit OperandBase(std::vector<Ref<OperandBase>>);
+  explicit OperandBase(ModelBuilderBase *model_builder,
+                       std::vector<Ref<OperandBase>> = {});
   virtual ~OperandBase() = default;
 
   // It's used for getting inputs when traversaling model tree.
@@ -21,8 +22,14 @@ public:
   // Add the operand to model for specific backend.
   virtual MaybeError AddToModel(ModelBase *model) const;
 
+  static OperandBase *MakeError(ModelBuilderBase *model_builder);
+  virtual MaybeError Validate() { UNREACHABLE(); }
+
 private:
-  // the inputs of operand.
+  OperandBase(ModelBuilderBase *model_builder, ObjectBase::ErrorTag tag);
+
+protected:
+  // The inputs of operand.
   std::vector<Ref<OperandBase>> inputs_;
 };
 }

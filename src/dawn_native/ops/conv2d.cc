@@ -4,15 +4,17 @@
 
 #include "dawn_native/ops/conv2d.h"
 
-#include <memory>
+#include "common/Log.h"
+#include "dawn_native/Error.h"
 
 namespace dawn_native {
 
 namespace op {
 
-Conv2d::Conv2d(OperandBase *input, OperandBase *filter,
+Conv2d::Conv2d(ModelBuilderBase *builder,
+               OperandBase *input, OperandBase *filter,
                Conv2dOptions const *options)
-    : OperandBase({input, filter}) {
+    : OperandBase(builder, {input, filter}) {
   if (options == nullptr || options->padding == nullptr) {
     padding_ = std::vector<int32_t>(4, 0);  
   } else {
@@ -45,6 +47,10 @@ Conv2d::Conv2d(OperandBase *input, OperandBase *filter,
 MaybeError Conv2d::AddToModel(ModelBase *model) const { return model->AddConv2d(this); }
 
 Conv2dOptions const *Conv2d::GetOptions() const { return &options_; }
+
+MaybeError Conv2d::Validate() {
+  return {};
+}
 
 } // namespace op
 

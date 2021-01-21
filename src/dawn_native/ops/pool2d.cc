@@ -4,21 +4,22 @@
 
 #include "dawn_native/ops/pool2d.h"
 
-#include <memory>
+#include "common/Log.h"
+#include "dawn_native/Error.h"
 
 namespace dawn_native {
 
 namespace op {
 
-Pool2d::Pool2d(Pool2dType type, OperandBase *input,
+Pool2d::Pool2d(ModelBuilderBase *builder, Pool2dType type, OperandBase *input,
                Pool2dOptions const *options)
-    : OperandBase({input}), type_(type) {
+    : OperandBase(builder, {input}), op_type_(type) {
   if (options == nullptr || options->windowDimensions == nullptr) {
     window_dimensions_ = std::vector<int32_t>(2, 1);
   } else {
     window_dimensions_.assign(options->windowDimensions,
                               options->windowDimensions +
-                                  options->windowDimensionsCount);
+                              options->windowDimensionsCount);
   }
   options_.windowDimensions = window_dimensions_.data();
   options_.windowDimensionsCount = window_dimensions_.size();
@@ -48,7 +49,11 @@ Pool2d::Pool2d(Pool2dType type, OperandBase *input,
   options_.dilations = dilations_.data();
   options_.dilationsCount = dilations_.size();
 
-  options_.layout = options->layout;
+  if (options == nullptr) {
+    options_.layout = wnn::OperandLayout::Nchw;
+  } else {
+    options_.layout = options->layout;
+  }
 }
 
 MaybeError Pool2d::AddToModel(ModelBase *model) const {
@@ -57,7 +62,11 @@ MaybeError Pool2d::AddToModel(ModelBase *model) const {
 
 Pool2dOptions const *Pool2d::GetOptions() const { return &options_; }
 
-Pool2dType Pool2d::GetType() const { return type_; }
+Pool2dType Pool2d::GetType() const { return op_type_; }
+
+MaybeError Pool2d::Validate() {
+  return {};
+}
 
 } // namespace op
 

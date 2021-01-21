@@ -122,6 +122,8 @@ test("dawn_unittests") {
     "unittests/ErrorTests.cpp",
     "unittests/ResultTests.cpp",
     "unittests/ObjectBaseTests.cpp",
+    "unittests/validation/ValidationTest.cpp",
+    "unittests/validation/ValidationTest.h",
   ]
 
   # When building inside Chromium, use their gtest main function because it is
