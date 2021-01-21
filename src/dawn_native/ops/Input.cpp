@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_native/ops/constant.h"
+#include "dawn_native/ops/Input.h"
 
 #include "common/Log.h"
 #include "dawn_native/Error.h"
@@ -19,7 +19,7 @@ namespace dawn_native {
 
 namespace op {
 
-MaybeError Constant::Validate() {
+MaybeError Input::Validate() {
   return {};
 }
 

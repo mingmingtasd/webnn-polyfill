@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn_native/ops/binary.h"
+#include "dawn_native/ops/Unary.h"
 
 #include "common/Log.h"
 #include "dawn_native/Error.h"
@@ -19,10 +19,9 @@ namespace dawn_native {
 
 namespace op {
 
-MaybeError Binary::Validate() {
+MaybeError Unary::Validate() {
   return {};
 }
 
-} // namespace op
-
-} // namespace dawn_native
+}  // namespace op
+}  // namespace dawn_native

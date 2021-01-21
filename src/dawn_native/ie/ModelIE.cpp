@@ -1,5 +1,5 @@
 
-#include "dawn_native/ie/model_ie.h"
+#include "dawn_native/ie/ModelIE.h"
 
 #include <vector>
 
@@ -7,9 +7,9 @@
 #include "common/Log.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/NamedOperands.h"
-#include "dawn_native/ie/compilation_ie.h"
-#include "error_ie.h"
-#include "ienn_symbol_table.h"
+#include "dawn_native/ie/CompilationIE.h"
+#include "dawn_native/ie/ErrorIE.h"
+#include "dawn_native/ie/ienn_symbol_table/ienn_symbol_table.h"
 
 namespace dawn_native {
 

@@ -1,8 +1,8 @@
 
-#include "dawn_native/ie/neural_network_context_ie.h"
+#include "dawn_native/ie/NeuralNetworkContextIE.h"
 
 #include "common/RefCounted.h"
-#include "dawn_native/ie/model_builder_ie.h"
+#include "dawn_native/ie/ModelBuilderIE.h"
 
 namespace dawn_native {
 

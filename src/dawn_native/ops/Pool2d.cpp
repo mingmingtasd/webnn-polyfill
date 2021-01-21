@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "dawn_native/ops/conv2d.h"
+#include "dawn_native/ops/Pool2d.h"
 
 #include "common/Log.h"
 #include "dawn_native/Error.h"
@@ -11,12 +11,21 @@ namespace dawn_native {
 
 namespace op {
 
-Conv2d::Conv2d(ModelBuilderBase *builder,
-               OperandBase *input, OperandBase *filter,
-               Conv2dOptions const *options)
-    : OperandBase(builder, {input, filter}) {
+Pool2d::Pool2d(ModelBuilderBase *builder, Pool2dType type, OperandBase *input,
+               Pool2dOptions const *options)
+    : OperandBase(builder, {input}), op_type_(type) {
+  if (options == nullptr || options->windowDimensions == nullptr) {
+    window_dimensions_ = std::vector<int32_t>(2, 1);
+  } else {
+    window_dimensions_.assign(options->windowDimensions,
+                              options->windowDimensions +
+                              options->windowDimensionsCount);
+  }
+  options_.windowDimensions = window_dimensions_.data();
+  options_.windowDimensionsCount = window_dimensions_.size();
+
   if (options == nullptr || options->padding == nullptr) {
-    padding_ = std::vector<int32_t>(4, 0);  
+    padding_ = std::vector<int32_t>(4, 0);
   } else {
     padding_.assign(options->padding, options->padding + options->paddingCount);
   }
@@ -32,7 +41,7 @@ Conv2d::Conv2d(ModelBuilderBase *builder,
   options_.stridesCount = stride_.size();
 
   if (options == nullptr || options->dilations == nullptr) {
-    dilations_ = std::vector<int32_t>(2, 1);  
+    dilations_ = std::vector<int32_t>(2, 1);
   } else {
     dilations_.assign(options->dilations,
                       options->dilations + options->dilationsCount);
@@ -40,15 +49,22 @@ Conv2d::Conv2d(ModelBuilderBase *builder,
   options_.dilations = dilations_.data();
   options_.dilationsCount = dilations_.size();
 
-  options_.groups = options->groups;
-  options_.layout = options->layout;
+  if (options == nullptr) {
+    options_.layout = wnn::OperandLayout::Nchw;
+  } else {
+    options_.layout = options->layout;
+  }
 }
 
-MaybeError Conv2d::AddToModel(ModelBase *model) const { return model->AddConv2d(this); }
+MaybeError Pool2d::AddToModel(ModelBase *model) const {
+  return model->AddPool2d(this);
+}
 
-Conv2dOptions const *Conv2d::GetOptions() const { return &options_; }
+Pool2dOptions const *Pool2d::GetOptions() const { return &options_; }
 
-MaybeError Conv2d::Validate() {
+Pool2dType Pool2d::GetType() const { return op_type_; }
+
+MaybeError Pool2d::Validate() {
   return {};
 }
 

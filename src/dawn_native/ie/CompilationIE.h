@@ -3,7 +3,7 @@
 
 #include "dawn_native/Compilation.h"
 #include "dawn_native/ie/ienn/src/ie_nn_c_api.h"
-#include "dawn_native/ie/model_ie.h"
+#include "dawn_native/ie/ModelIE.h"
 
 namespace dawn_native {
 

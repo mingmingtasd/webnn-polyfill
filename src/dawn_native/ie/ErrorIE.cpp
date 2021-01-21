@@ -1,5 +1,5 @@
 
-#include "dawn_native/ie/error_ie.h"
+#include "dawn_native/ie/ErrorIE.h"
 
 #include <sstream>
 #include <string>

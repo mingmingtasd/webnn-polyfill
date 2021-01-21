@@ -1,5 +1,5 @@
 
-#include "dawn_native/ie/compilation_ie.h"
+#include "dawn_native/ie/CompilationIE.h"
 
 #include <vector>
 
@@ -9,8 +9,8 @@
 #include "dawn_native/NamedResults.h"
 #include "dawn_native/Operand.h"
 #include "dawn_native/Result.h"
-#include "error_ie.h"
-#include "ienn_symbol_table.h"
+#include "dawn_native/ie/ErrorIE.h"
+#include "dawn_native/ie/ienn_symbol_table/ienn_symbol_table.h"
 
 #define DAWN_CALLBACK_TRY(code, messages)                                      \
   {                                                                            \

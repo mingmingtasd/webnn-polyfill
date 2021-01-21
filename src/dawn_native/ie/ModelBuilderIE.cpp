@@ -1,8 +1,8 @@
 
-#include "dawn_native/ie/model_builder_ie.h"
+#include "dawn_native/ie/ModelBuilderIE.h"
 
 #include "common/Log.h"
-#include "dawn_native/ie/model_ie.h"
+#include "dawn_native/ie/ModelIE.h"
 
 namespace dawn_native {
 
