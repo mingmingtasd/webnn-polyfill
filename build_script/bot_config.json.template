@@ -2,9 +2,10 @@
   "target-os": "",
   "target-cpu": "",
   "gnArgs": {
-    "is-debug": false,
+    "backend": "",
+    "is-clang": false,
     "is-component": false,
-    "extra": ""
+    "is-debug": false
   },
   "logging": {
     "level": "",

@@ -19,7 +19,7 @@ class BuilderConf {
   constructor(rootDir, conf) {
     this.conf_ = conf;
     this.rootDir_ = path.resolve(rootDir);
-    this.outDir_ = undefined;
+    this.outDir_ = path.join(this.rootDir_, 'out', 'Shared');
 
     // Get list via "gn help target_os <out_dir>", current support
     // linux|win
@@ -31,9 +31,10 @@ class BuilderConf {
 
     // gn-args
     this.gnArgs_ = {
-      isDebug: false,
+      backend: undefined,
+      isClang: false,
       isComponent: false,
-      extraGnArgs: undefined,
+      isDebug: false,
     };
 
     // True indicate remove out dir before build
@@ -76,12 +77,12 @@ class BuilderConf {
     this.targetOs_ = this.targetOs_ || this.getHostOs();
     this.targetCpu_ = this.targetCpu_ || this.getHostCpu();
 
-    this.gnArgs_.isDebug = conf['gnArgs']['is-debug'];
+    this.gnArgs_.backend =
+        conf['gnArgs']['backend'] === undefined ? 'null' :
+        conf['gnArgs']['backend'];
+    this.gnArgs_.isClang = conf['gnArgs']['is-clang'];
     this.gnArgs_.isComponent = conf['gnArgs']['is-component'];
-    this.gnArgs_.extra = conf['gnArgs']['extra'];
-    this.outDir_ = path.join(
-        this.rootDir_, 'out', this.targetOs_ + '_' + this.targetCpu_ + '_' +
-        (this.gnArgs_.isDebug ? 'debug' : 'release'));
+    this.gnArgs_.isDebug = conf['gnArgs']['is-debug'];
 
     this.cleanBuild_ = conf['clean-build'];
     this.archiveServer_.host = conf['archive-server']['host'];
@@ -97,7 +98,7 @@ class BuilderConf {
     this.today_ = new Date().toISOString().substring(0, 10);
     this.logFile_ = conf['logging']['file'] ||
         path.join(os.tmpdir(),
-            'chromium_' + this.targetOs_ + '_' + this.targetCpu_ + '_' +
+            'webnn_' + this.targetOs_ + '_' + this.gnArgs_.backend + '_' +
         this.today_ + '.log');
     /* jshint ignore:end */
 
@@ -130,7 +131,6 @@ class BuilderConf {
     this.logger_.debug('email host: ' + this.emailService_.host);
     this.logger_.debug('email from: ' + this.emailService_.from);
     this.logger_.debug('email to: ' + this.emailService_.to);
-
     return true;
   }
 
@@ -170,6 +170,13 @@ class BuilderConf {
   }
 
   /**
+   * @return {string} target backend.
+   */
+  get backend() {
+    return this.gnArgs_.backend;
+  }
+
+  /**
    * @return {string} arguments to run 'gn gen'.
    */
   get gnArgs() {
@@ -177,7 +184,8 @@ class BuilderConf {
     args += ' target_cpu=\"' + this.targetCpu + '\"';
     args += ' is_debug=' + (this.gnArgs_.isDebug).toString();
     args += ' is_component_build=' + (this.gnArgs_.isComponent).toString();
-    if (this.gnArgs_.extra) this.gnArgs_ += ' ' + (this.gnArgs_.extra);
+    args += ' is_clang=' + (this.gnArgs_.isClang).toString();
+    args += ' dawn_enable_' + this.gnArgs_.backend + '=true';
 
     return args;
   }

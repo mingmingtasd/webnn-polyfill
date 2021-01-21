@@ -16,21 +16,31 @@ Sync the dependencies.
 ```sh
 > gclient sync
 ```
-
-## Generate projects
-Build with OpenVINO backend
+## Build manually step by step
+### Setting up the build
+Generate projects with OpenVINO backend
 ```sh
 > gn gen out/Default --args="dawn_enable_ie = true"
 ```
 
-Build with DirectML backend
+Or generate projects with DirectML backend
 ```sh
 > gn gen out/Default --args="dawn_enable_dml = true"
 ```
 
-## Build
+Or generate projects with default null backend
+```sh
+> gn gen out/Default
+```
+### Build by ninja
 ```sh
 > ninja -C out/Default
+```
+
+## Build with Node scripts
+```sh
+> npm install
+> npm run build
 ```
 
 ## Test

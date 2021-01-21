@@ -9,7 +9,7 @@ const rimraf = require('rimraf');
 const {spawn} = require('child_process');
 const crypto = require('crypto');
 const os = require('os');
-const email = require('emailjs');
+// const email = require('emailjs');
 
 /**
  * Builder class.
@@ -39,48 +39,48 @@ class Builder {
 
     this.childResult_ = {};
 
-    // Upload server
-    this.remoteSshHost_ = null;
-    this.remoteDir_ = null;
-    this.remoteSshDir_ = null;
+    // // Upload server
+    // this.remoteSshHost_ = null;
+    // this.remoteDir_ = null;
+    // this.remoteSshDir_ = null;
 
-    if (!this.conf_.archiveServer.host ||
-        !this.conf_.archiveServer.dir ||
-        !this.conf_.archiveServer.sshUser) {
-      this.conf_.logger.info(
-          'Insufficient archive-server given in ' + this.conf_.confFile);
-      return;
-    }
+    // if (!this.conf_.archiveServer.host ||
+    //     !this.conf_.archiveServer.dir ||
+    //     !this.conf_.archiveServer.sshUser) {
+    //   this.conf_.logger.info(
+    //       'Insufficient archive-server given in ' + this.conf_.confFile);
+    //   return;
+    // }
 
-    this.remoteSshHost_ =
-      this.conf_.archiveServer.sshUser + '@' + this.conf_.archiveServer.host;
+    // this.remoteSshHost_ =
+    //   this.conf_.archiveServer.sshUser + '@' + this.conf_.archiveServer.host;
 
-    // Config emial service
-    this.server_ = null;
-    this.message_ = null;
-    this.subject_ =null;
-    this.test_ = null;
+    // // Config emial service
+    // this.server_ = null;
+    // this.message_ = null;
+    // this.subject_ =null;
+    // this.test_ = null;
 
-    if (!this.conf_.emailService.user ||
-        !this.conf_.emailService.host ||
-        !this.conf_.emailService.from ||
-        !this.conf_.emailService.to) {
-      this.conf_.logger.info(
-          'Insufficient email-service given in ' + this.conf_.confFile);
-      return;
-    }
+    // if (!this.conf_.emailService.user ||
+    //     !this.conf_.emailService.host ||
+    //     !this.conf_.emailService.from ||
+    //     !this.conf_.emailService.to) {
+    //   this.conf_.logger.info(
+    //       'Insufficient email-service given in ' + this.conf_.confFile);
+    //   return;
+    // }
 
-    this.server_ = email.server.connect(
-        {
-          user: this.conf_.emailService.user,
-          host: this.conf_.emailService.host,
-        });
-    this.message_ = {
-      from: this.conf_.emailService.from,
-      to: this.conf_.emailService.to,
-      subject: this.subject_,
-      text: this.test_,
-    };
+    // this.server_ = email.server.connect(
+    //     {
+    //       user: this.conf_.emailService.user,
+    //       host: this.conf_.emailService.host,
+    //     });
+    // this.message_ = {
+    //   from: this.conf_.emailService.from,
+    //   to: this.conf_.emailService.to,
+    //   subject: this.subject_,
+    //   text: this.test_,
+    // };
   }
 
   /**
@@ -122,18 +122,19 @@ class Builder {
         break;
       case 'all':
         await this.actionSync();
+        await this.updateChangeset();
         await this.actionBuild();
-        await this.actionPackage();
-        await this.actionUpload();
+        // await this.actionPackage();
+        // await this.actionUpload();
         break;
       default:
         this.conf_.logger.error('Unsupported action %s', action);
         process.exit(1);
     }
 
-    const emailMessage = await this.sendEmail(
-        this.childResult_.success, 'Successful');
-    this.conf_.logger.info(emailMessage);
+    // const emailMessage = await this.sendEmail(
+    //     this.childResult_.success, 'Successful');
+    // this.conf_.logger.info(emailMessage);
   }
 
   /**
@@ -167,9 +168,14 @@ class Builder {
       }
     }
 
-    await this.childCommand(
-        'gn', ['gen', `--args=${this.conf_.gnArgs}`, this.conf_.outDir],
-        this.conf_.rootDir);
+    let genCmd = ['gen', `--args=${this.conf_.gnArgs}`, this.conf_.outDir];
+
+    if (this.conf_.backend === 'wind') {
+      genCmd =
+        ['gen', `--ide=vs --args=${this.conf_.gnArgs}`, this.conf_.outDir];
+    }
+
+    await this.childCommand('gn', genCmd, this.conf_.rootDir);
 
     if (!this.childResult_.success) {
       const emailMessage = await this.sendEmail(
@@ -190,14 +196,14 @@ class Builder {
       }
     }
 
-    const args = ['-C', this.conf_.outDir];
+    const args = ['-C', this.conf_.outDir]; // .concat(this.conf_.buildTargets)
     await this.childCommand(
-        'ninja', args.concat(this.conf_.buildTargets), this.conf_.rootDir);
+        'ninja', args, this.conf_.rootDir);
     if (!this.childResult_.success) {
-      const emailMessage = await this.sendEmail(
-          this.childResult_.success, 'Run \'ninja -C\' command failed');
-      this.conf_.logger.error(emailMessage);
-      await this.uploadLogfile();
+      // const emailMessage = await this.sendEmail(
+      //     this.childResult_.success, 'Run \'ninja -C\' command failed');
+      // this.conf_.logger.error(emailMessage);
+      // await this.uploadLogfile();
       process.exit(1);
     } else {
       fs.writeFileSync(this.lastSucceedChangesetFile_, this.latestChangeset_);

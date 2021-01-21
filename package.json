@@ -4,7 +4,8 @@
   "description": "Build and package Web toolchain.",
   "main": "index.js",
   "scripts": {
-    "linter": "node build_script/tools/linter.js"
+    "linter": "node build_script/tools/linter.js",
+    "build": "node build_script/bin/build"
   },
   "pre-commit": [
     "linter"
@@ -23,7 +24,7 @@
   },
   "homepage": "https://github.com/otcshare/webnn-native#readme",
   "dependencies": {
-    "commander": "^7.0.0",
+    "commander": "^2.15.0",
     "emailjs": "^3.4.0",
     "rimraf": "^3.0.2",
     "winston": "^3.0.0-rc1"
