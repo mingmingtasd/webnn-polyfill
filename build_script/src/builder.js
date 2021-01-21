@@ -29,9 +29,9 @@ class Builder {
     if (!this.conf_.cleanBuild) {
       try {
         this.lastSucceedChangeset_ = fs.readFileSync(
-          this.lastSucceedChangesetFile_, 'utf8');
+            this.lastSucceedChangesetFile_, 'utf8');
         this.conf_.logger.debug(
-          `Last sucessful build changeset is ${this.lastSucceedChangeset_}`);
+            `Last sucessful build changeset is ${this.lastSucceedChangeset_}`);
       } catch (e) {
         this.conf_.logger.info('Not found last sucessful build.');
       }
@@ -48,7 +48,7 @@ class Builder {
         !this.conf_.archiveServer.dir ||
         !this.conf_.archiveServer.sshUser) {
       this.conf_.logger.info(
-        'Insufficient archive-server given in ' + this.conf_.confFile);
+          'Insufficient archive-server given in ' + this.conf_.confFile);
       return;
     }
 
@@ -66,12 +66,15 @@ class Builder {
         !this.conf_.emailService.from ||
         !this.conf_.emailService.to) {
       this.conf_.logger.info(
-        'Insufficient email-service given in ' + this.conf_.confFile);
+          'Insufficient email-service given in ' + this.conf_.confFile);
       return;
     }
 
     this.server_ = email.server.connect(
-      {user: this.conf_.emailService.user, host: this.conf_.emailService.host});
+        {
+          user: this.conf_.emailService.user,
+          host: this.conf_.emailService.host,
+        });
     this.message_ = {
       from: this.conf_.emailService.from,
       to: this.conf_.emailService.to,
@@ -99,7 +102,7 @@ class Builder {
     if ((action !== 'sync' || action !== 'all') &&
         (this.lastSucceedChangeset_ === this.latestChangeset_)) {
       this.conf_.logger.info(
-        'No change since last sucessful build, skip this time.');
+          'No change since last sucessful build, skip this time.');
       return;
     }
 
@@ -128,8 +131,8 @@ class Builder {
         process.exit(1);
     }
 
-    let emailMessage = await this.sendEmail(this.childResult_.success,
-                                            'Successful');
+    const emailMessage = await this.sendEmail(
+        this.childResult_.success, 'Successful');
     this.conf_.logger.info(emailMessage);
   }
 
@@ -142,8 +145,8 @@ class Builder {
     await this.childCommand('gclient', ['sync'], this.conf_.rootDir);
 
     if (!this.childResult_.success) {
-      let emailMessage = await this.sendEmail(
-        this.childResult_.success, 'Run \'gclient sync\' command failed');
+      const emailMessage = await this.sendEmail(
+          this.childResult_.success, 'Run \'gclient sync\' command failed');
       this.conf_.logger.error(emailMessage);
       await this.uploadLogfile();
       process.exit(1);
@@ -164,15 +167,13 @@ class Builder {
       }
     }
 
-    await this.childCommand('gn',
-                            ['gen',
-                             `--args=${this.conf_.gnArgs}`,
-                             this.conf_.outDir],
-                            this.conf_.rootDir);
+    await this.childCommand(
+        'gn', ['gen', `--args=${this.conf_.gnArgs}`, this.conf_.outDir],
+        this.conf_.rootDir);
 
     if (!this.childResult_.success) {
-      let emailMessage = await this.sendEmail(
-        this.childResult_.success, 'Run \'gn gen\' command failed');
+      const emailMessage = await this.sendEmail(
+          this.childResult_.success, 'Run \'gn gen\' command failed');
       this.conf_.logger.error(emailMessage);
       await this.uploadLogfile();
       process.exit(1);
@@ -190,12 +191,11 @@ class Builder {
     }
 
     const args = ['-C', this.conf_.outDir];
-    await this.childCommand('ninja',
-                            args.concat(this.conf_.buildTargets),
-                            this.conf_.rootDir);
+    await this.childCommand(
+        'ninja', args.concat(this.conf_.buildTargets), this.conf_.rootDir);
     if (!this.childResult_.success) {
-      let emailMessage = await this.sendEmail(
-        this.childResult_.success, 'Run \'ninja -C\' command failed');
+      const emailMessage = await this.sendEmail(
+          this.childResult_.success, 'Run \'ninja -C\' command failed');
       this.conf_.logger.error(emailMessage);
       await this.uploadLogfile();
       process.exit(1);
@@ -232,7 +232,7 @@ class Builder {
 
     if (this.lastSucceedChangeset_ === this.latestChangeset_) {
       this.conf_.logger.info(
-        'No change since last sucessful build, skip this time.');
+          'No change since last sucessful build, skip this time.');
       return;
     }
 
@@ -245,20 +245,17 @@ class Builder {
 
     await this.makeRemoteDir();
     await this.childCommand('scp',
-                            [this.conf_.packagedFile, this.remoteSshDir_],
-                            this.conf_.rootDir);
+        [this.conf_.packagedFile, this.remoteSshDir_], this.conf_.rootDir);
 
-    let md5Content = crypto.createHash('md5')
-                    .update(fs.readFileSync(this.conf_.packagedFile))
-                    .digest('hex');
-    let md5File = this.conf_.packagedFile + '.md5';
+    const md5Content = crypto.createHash('md5')
+        .update(fs.readFileSync(this.conf_.packagedFile)).digest('hex');
+    const md5File = this.conf_.packagedFile + '.md5';
 
     fs.writeFile(md5File, md5Content, (err) => {
       if (err) throw err;
 
-      this.childCommand('scp',
-                        [md5File, this.remoteSshDir_],
-                        this.conf_.rootDir);
+      this.childCommand(
+          'scp', [md5File, this.remoteSshDir_], this.conf_.rootDir);
     });
 
     await this.uploadLogfile();
@@ -268,11 +265,10 @@ class Builder {
    * Get latest changeset
    */
   async updateChangeset() {
-    let obj = {};
+    const obj = {};
     await this.childCommand('git', ['pull', '--rebase'], this.conf_.rootDir);
-    await this.childCommand('git',
-                            ['rev-parse', 'HEAD'],
-                            this.conf_.rootDir, obj);
+    await this.childCommand(
+        'git', ['rev-parse', 'HEAD'], this.conf_.rootDir, obj);
     this.latestChangeset_ = obj.changeset;
     this.conf_.logger.info(`HEAD is at ${this.latestChangeset_}`);
   }
@@ -284,9 +280,9 @@ class Builder {
     if (!this.remoteSshHost_) return;
 
     this.remoteDir_ = path.join(
-      this.conf_.archiveServer.dir,
-      this.latestChangeset_.substring(0, 7),
-      this.conf_.targetOs + '_' + this.conf_.targetCpu);
+        this.conf_.archiveServer.dir,
+        this.latestChangeset_.substring(0, 7),
+        this.conf_.targetOs + '_' + this.conf_.targetCpu);
     let success = false;
     try {
       fs.accessSync(this.lastSucceedChangesetFile_);
@@ -302,9 +298,8 @@ class Builder {
     }
     this.conf_.logger.info(`HEAD is at ${dir}`);
 
-    await this.childCommand('ssh',
-                            [this.remoteSshHost_, 'mkdir', '-p', dir],
-                            this.conf_.rootDir);
+    await this.childCommand(
+        'ssh', [this.remoteSshHost_, 'mkdir', '-p', dir], this.conf_.rootDir);
   }
 
   /**
@@ -314,9 +309,8 @@ class Builder {
     if (!this.remoteSshHost_) return;
 
     await this.makeRemoteDir();
-    await this.childCommand('scp',
-                            [this.conf_.logFile, this.remoteSshDir_],
-                            this.conf_.rootDir);
+    await this.childCommand(
+        'scp', [this.conf_.logFile, this.remoteSshDir_], this.conf_.rootDir);
   }
 
   /**
@@ -331,8 +325,8 @@ class Builder {
 
       if (!success) this.message_.subject = 'WebNN nightly build failed';
 
-      this.message_.text = 'Hi all,\n \nThe status of WebNN nightly-build on '
-        + this.conf_.targetOs + '(' + this.conf_.targetCpu + ') is:\n';
+      this.message_.text = 'Hi all,\n \nThe status of WebNN nightly-build on ' +
+        this.conf_.targetOs + '(' + this.conf_.targetCpu + ') is:\n';
       if (!success) {
         this.message_.text += 'Failed(' + cause + ')\n \nThanks';
       } else {

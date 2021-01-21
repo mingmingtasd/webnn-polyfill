@@ -68,7 +68,7 @@ class BuilderConf {
    */
   init() {
     fs.accessSync(this.rootDir_);
-    let conf = JSON.parse(fs.readFileSync(this.conf_, 'utf8'));
+    const conf = JSON.parse(fs.readFileSync(this.conf_, 'utf8'));
 
     /* jshint ignore:start */
     this.targetOs_ = conf['target-os'];
@@ -79,9 +79,9 @@ class BuilderConf {
     this.gnArgs_.isDebug = conf['gnArgs']['is-debug'];
     this.gnArgs_.isComponent = conf['gnArgs']['is-component'];
     this.gnArgs_.extra = conf['gnArgs']['extra'];
-    this.outDir_ = path.join(this.rootDir_, 'out',
-                             this.targetOs_ + '_' + this.targetCpu_ + '_' +
-                             (this.gnArgs_.isDebug ? 'debug' : 'release'));
+    this.outDir_ = path.join(
+        this.rootDir_, 'out', this.targetOs_ + '_' + this.targetCpu_ + '_' +
+        (this.gnArgs_.isDebug ? 'debug' : 'release'));
 
     this.cleanBuild_ = conf['clean-build'];
     this.archiveServer_.host = conf['archive-server']['host'];
@@ -97,7 +97,7 @@ class BuilderConf {
     this.today_ = new Date().toISOString().substring(0, 10);
     this.logFile_ = conf['logging']['file'] ||
         path.join(os.tmpdir(),
-        'chromium_' + this.targetOs_ + '_' + this.targetCpu_ + '_' +
+            'chromium_' + this.targetOs_ + '_' + this.targetCpu_ + '_' +
         this.today_ + '.log');
     /* jshint ignore:end */
 
@@ -110,7 +110,7 @@ class BuilderConf {
         }),
         new winston.transports.File({
           filename: this.logFile_,
-       }),
+        }),
       ],
     });
 
@@ -268,7 +268,7 @@ class BuilderConf {
    * @return {string} hosted OS.
    */
   getHostOs() {
-    let hostOs = os.platform();
+    const hostOs = os.platform();
     switch (hostOs) {
       case 'linux':
         return 'linux';

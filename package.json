@@ -23,15 +23,15 @@
   },
   "homepage": "https://github.com/otcshare/webnn-native#readme",
   "dependencies": {
-    "commander": "^2.15.0",
-    "emailjs": "^2.2.0",
-    "rimraf": "^2.6.2",
+    "commander": "^7.0.0",
+    "emailjs": "^3.4.0",
+    "rimraf": "^3.0.2",
     "winston": "^3.0.0-rc1"
   },
   "devDependencies": {
-    "eslint": "^4.18.2",
-    "eslint-config-google": "^0.9.1",
-    "eslint-plugin-header": "^1.2.0",
+    "eslint": "^7.18.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-header": "^3.1.0",
     "pre-commit": "^1.2.2",
     "recursive-readdir": "^2.2.2"
   }
