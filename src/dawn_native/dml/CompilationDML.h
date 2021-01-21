@@ -2,7 +2,7 @@
 #define WEBNN_NATIVE_DML_COMPILATION_DML_H_
 
 #include "dawn_native/Compilation.h"
-#include "dawn_native/dml/model_dml.h"
+#include "dawn_native/dml/ModelDML.h"
 
 namespace pydml {
 struct CompiledModel;

@@ -1,9 +1,9 @@
-#include "dawn_native/dml/model_dml.h"
+#include "dawn_native/dml/ModelDML.h"
 
 #include "common/Assert.h"
 #include "common/Log.h"
 #include "dawn_native/ErrorData.h"
-#include "dawn_native/dml/compilation_dml.h"
+#include "dawn_native/dml/CompilationDML.h"
 
 namespace dawn_native {
 namespace dml {

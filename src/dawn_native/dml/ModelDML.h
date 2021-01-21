@@ -4,18 +4,18 @@
 #include <map>
 #include <set>
 
-#include "dawn_native/dml/model_builder_dml.h"
+#include "dawn_native/dml/ModelBuilderDML.h"
 #include "dawn_native/dml/deps/src/precomp.h"
 #include "dawn_native/Model.h"
 #include "dawn_native/Operand.h"
-#include "dawn_native/ops/binary.h"
-#include "dawn_native/ops/constant.h"
-#include "dawn_native/ops/conv2d.h"
-#include "dawn_native/ops/input.h"
-#include "dawn_native/ops/pool2d.h"
-#include "dawn_native/ops/reshape.h"
-#include "dawn_native/ops/transpose.h"
-#include "dawn_native/ops/unary.h"
+#include "dawn_native/ops/Binary.h"
+#include "dawn_native/ops/Constant.h"
+#include "dawn_native/ops/Conv2d.h"
+#include "dawn_native/ops/Input.h"
+#include "dawn_native/ops/Pool2d.h"
+#include "dawn_native/ops/Reshape.h"
+#include "dawn_native/ops/Transpose.h"
+#include "dawn_native/ops/Unary.h"
 
 namespace dawn_native {
 

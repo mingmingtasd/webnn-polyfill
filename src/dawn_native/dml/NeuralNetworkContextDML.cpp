@@ -1,8 +1,8 @@
 
-#include "dawn_native/dml/neural_network_context_dml.h"
+#include "dawn_native/dml/NeuralNetworkContextDML.h"
 
 #include "common/RefCounted.h"
-#include "dawn_native/dml/model_builder_dml.h"
+#include "dawn_native/dml/ModelBuilderDML.h"
 
 namespace dawn_native {
 
