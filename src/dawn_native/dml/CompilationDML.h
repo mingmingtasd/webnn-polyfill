@@ -5,29 +5,26 @@
 #include "dawn_native/dml/ModelDML.h"
 
 namespace pydml {
-struct CompiledModel;
+    struct CompiledModel;
 }
 
-namespace dawn_native {
+namespace dawn_native { namespace dml {
 
-namespace dml {
+    class Compilation : public CompilationBase {
+      public:
+        explicit Compilation(const Ref<Model>& model);
+        ~Compilation() override = default;
 
-class Compilation : public CompilationBase {
-public:
-  explicit Compilation(const Ref<Model>& model);
-  ~Compilation() override = default;
+      private:
+        void ComputeImpl(NamedInputsBase* inputs,
+                         WNNComputeCallback callback,
+                         void* userdata,
+                         NamedOutputsBase* outputs = nullptr) override;
 
-private:
-  void ComputeImpl(NamedInputsBase *inputs, WNNComputeCallback callback,
-                   void *userdata,
-                   NamedOutputsBase *outputs = nullptr) override;
+        Ref<Model> model_;
+        std::unique_ptr<pydml::CompiledModel> compiled_model_;
+    };
 
-  Ref<Model> model_;
-  std::unique_ptr<pydml::CompiledModel> compiled_model_;
-};
+}}  // namespace dawn_native::dml
 
-} // namespace dml
-
-} // namespace dawn_native
-
-#endif // WEBNN_NATIVE_DML_COMPILATION_DML_H_
+#endif  // WEBNN_NATIVE_DML_COMPILATION_DML_H_

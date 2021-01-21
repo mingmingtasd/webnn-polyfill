@@ -11,37 +11,35 @@
 
 namespace dawn_native {
 
-class ModelBuilderBase : public ObjectBase {
-public:
-  ModelBuilderBase(NeuralNetworkContextBase *context);
-  virtual ~ModelBuilderBase() = default;
+    class ModelBuilderBase : public ObjectBase {
+      public:
+        ModelBuilderBase(NeuralNetworkContextBase* context);
+        virtual ~ModelBuilderBase() = default;
 
-  // DAWN API
-  OperandBase *Constant(OperandDescriptor const *desc, void const *value,
-                        size_t size);
-  OperandBase *Input(char const *name, OperandDescriptor const *desc);
-  OperandBase *Matmul(OperandBase *a, OperandBase *b);
-  OperandBase *Add(OperandBase *, OperandBase *);
-  OperandBase *Mul(OperandBase *, OperandBase *);
-  OperandBase *Conv2d(OperandBase *, OperandBase *,
-                      Conv2dOptions const *options);
-  OperandBase *AveragePool2d(OperandBase *, Pool2dOptions const *options);
-  OperandBase *MaxPool2d(OperandBase *, Pool2dOptions const *options);
-  OperandBase *Relu(OperandBase *);
-  OperandBase *Reshape(OperandBase *, int32_t const *, size_t);
-  OperandBase *Softmax(OperandBase *);
-  OperandBase *Transpose(OperandBase *, TransposeOptions const *options);
-  ModelBase *CreateModel(NamedOperandsBase const *named_operands);
+        // DAWN API
+        OperandBase* Constant(OperandDescriptor const* desc, void const* value, size_t size);
+        OperandBase* Input(char const* name, OperandDescriptor const* desc);
+        OperandBase* Matmul(OperandBase* a, OperandBase* b);
+        OperandBase* Add(OperandBase*, OperandBase*);
+        OperandBase* Mul(OperandBase*, OperandBase*);
+        OperandBase* Conv2d(OperandBase*, OperandBase*, Conv2dOptions const* options);
+        OperandBase* AveragePool2d(OperandBase*, Pool2dOptions const* options);
+        OperandBase* MaxPool2d(OperandBase*, Pool2dOptions const* options);
+        OperandBase* Relu(OperandBase*);
+        OperandBase* Reshape(OperandBase*, int32_t const*, size_t);
+        OperandBase* Softmax(OperandBase*);
+        OperandBase* Transpose(OperandBase*, TransposeOptions const* options);
+        ModelBase* CreateModel(NamedOperandsBase const* named_operands);
 
-private:
-  // Create concrete model.
-  virtual ModelBase *CreateModelImpl() = 0;
+      private:
+        // Create concrete model.
+        virtual ModelBase* CreateModelImpl() = 0;
 
-  // Topological sort of nodes needed to compute root_nodes
-  std::vector<const OperandBase *>
-  TopologicalSort(std::vector<const OperandBase *> &root_nodes);
-};
+        // Topological sort of nodes needed to compute root_nodes
+        std::vector<const OperandBase*> TopologicalSort(
+            std::vector<const OperandBase*>& root_nodes);
+    };
 
-} // namespace dawn_native
+}  // namespace dawn_native
 
-#endif // WEBNN_NATIVE_MODEL_BUILDER_H_
+#endif  // WEBNN_NATIVE_MODEL_BUILDER_H_

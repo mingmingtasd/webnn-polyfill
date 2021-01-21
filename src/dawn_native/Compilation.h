@@ -10,19 +10,23 @@
 
 namespace dawn_native {
 
-class CompilationBase : public RefCounted {
-public:
-  CompilationBase() = default;
-  virtual ~CompilationBase() = default;
+    class CompilationBase : public RefCounted {
+      public:
+        CompilationBase() = default;
+        virtual ~CompilationBase() = default;
 
-  // Dawn API
-  void Compute(NamedInputsBase *inputs, WNNComputeCallback callback,
-               void *userdata, NamedOutputsBase *outputs = nullptr);
+        // Dawn API
+        void Compute(NamedInputsBase* inputs,
+                     WNNComputeCallback callback,
+                     void* userdata,
+                     NamedOutputsBase* outputs = nullptr);
 
-private:
-  virtual void ComputeImpl(NamedInputsBase *inputs, WNNComputeCallback callback,
-                           void *userdata, NamedOutputsBase *outputs) = 0;
-};
-}
+      private:
+        virtual void ComputeImpl(NamedInputsBase* inputs,
+                                 WNNComputeCallback callback,
+                                 void* userdata,
+                                 NamedOutputsBase* outputs) = 0;
+    };
+}  // namespace dawn_native
 
 #endif  // WEBNN_NATIVE_COMPILATION_H_

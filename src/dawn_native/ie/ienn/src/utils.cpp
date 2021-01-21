@@ -17,7 +17,7 @@ float asfloat(uint32_t v) {
   return converter.f;
 }
 
-} // namespace
+}  // namespace
 
 short f32tof16(float x) {
   static float min16 = asfloat((127 - 14) << 23);
@@ -67,4 +67,4 @@ short f32tof16(float x) {
   return static_cast<short>(v.u | s);
 }
 
-} // namespace InferenceEngine
+}  // namespace InferenceEngine

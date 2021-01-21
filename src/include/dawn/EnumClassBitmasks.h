@@ -19,9 +19,10 @@
 
 namespace wnn {
 
-template <typename T> struct IsDawnBitmask {
-  static constexpr bool enable = false;
-};
+    template <typename T>
+    struct IsDawnBitmask {
+        static constexpr bool enable = false;
+    };
 
     template <typename T, typename Enable = void>
     struct LowerBitmask {
@@ -138,6 +139,6 @@ template <typename T> struct IsDawnBitmask {
         return (static_cast<Integral>(value) & (static_cast<Integral>(value) - 1)) == 0;
     }
 
-    } // namespace wnn
+}  // namespace wnn
 
 #endif  // DAWN_ENUM_CLASS_BITMASKS_H_

@@ -8,38 +8,37 @@
 #include "dawn_native/Model.h"
 #include "dawn_native/Operand.h"
 
-namespace dawn_native {
+namespace dawn_native { namespace op {
 
-namespace op {
+    class Transpose final : public OperandBase {
+      public:
+        Transpose(ModelBuilderBase* builder, OperandBase* input, TransposeOptions const* options)
+            : OperandBase(builder, {input}) {
+            if (options) {
+                permutation_.assign(options->permutation,
+                                    options->permutation + options->permutationCount);
+            }
+            options_.permutation = permutation_.data();
+            options_.permutationCount = permutation_.size();
+        }
+        ~Transpose() override = default;
 
-class Transpose final : public OperandBase {
-public:
-  Transpose(ModelBuilderBase *builder,
-            OperandBase *input, TransposeOptions const *options)
-      : OperandBase(builder, {input}) {
-    if (options) {
-      permutation_.assign(options->permutation,
-                          options->permutation + options->permutationCount);
-    }
-    options_.permutation = permutation_.data();
-    options_.permutationCount = permutation_.size();
-  }
-  ~Transpose() override = default;
+        MaybeError AddToModel(ModelBase* model) const override {
+            return model->AddTranspose(this);
+        }
+        MaybeError Validate() override {
+            return {};
+        }
 
-  MaybeError AddToModel(ModelBase *model) const override {
-    return model->AddTranspose(this);
-  }
-  MaybeError Validate() override { return {}; }
+        TransposeOptions const* GetOptions() const {
+            return &options_;
+        }
 
-  TransposeOptions const *GetOptions() const { return &options_; }
+      private:
+        TransposeOptions options_;
+        std::vector<int32_t> permutation_;
+    };
 
-private:
-  TransposeOptions options_;
-  std::vector<int32_t> permutation_;
-};
+}}  // namespace dawn_native::op
 
-} // namespace op
-
-} // namespace dawn_native
-
-#endif // WEBNN_NATIVE_OPS_TRANSPOSE_H_
+#endif  // WEBNN_NATIVE_OPS_TRANSPOSE_H_

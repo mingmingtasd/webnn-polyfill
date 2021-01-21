@@ -22,11 +22,11 @@
 
 #define ASSERT_CONTEXT_ERROR(statement)                          \
     StartExpectContextError();                                   \
-    statement;                                                  \
+    statement;                                                   \
     if (!EndExpectContextError()) {                              \
         FAIL() << "Expected context error in:\n " << #statement; \
-    }                                                           \
-    do {                                                        \
+    }                                                            \
+    do {                                                         \
     } while (0)
 
 class ValidationTest : public testing::Test {
@@ -41,14 +41,13 @@ class ValidationTest : public testing::Test {
     std::string GetLastErrorMessage() const;
 
   protected:
-     wnn::NeuralNetworkContext context;
+    wnn::NeuralNetworkContext context;
 
   private:
     static void ErrorCallback(WNNErrorType type, const char* message, void* userdata);
     std::string mErrorMessage;
     bool mExpectError = false;
     bool mError = false;
-
 };
 
 #endif  // TESTS_UNITTESTS_VALIDATIONTEST_H_

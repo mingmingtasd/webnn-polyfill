@@ -1,46 +1,42 @@
 #include "dawn_native/null/NeuralNetworkContextNull.h"
 #include "common/RefCounted.h"
 
-namespace dawn_native {
+namespace dawn_native { namespace null {
 
-namespace null {
+    // NeuralNetworkContext
+    NeuralNetworkContextBase* Create() {
+        Ref<NeuralNetworkContextBase> context = AcquireRef(new NeuralNetworkContext());
+        return context.Detach();
+    }
 
-// NeuralNetworkContext
-NeuralNetworkContextBase *Create() {
-  Ref<NeuralNetworkContextBase> context =
-      AcquireRef(new NeuralNetworkContext());
-  return context.Detach();
-}
+    ModelBuilderBase* NeuralNetworkContext::CreateModelBuilderImpl() {
+        Ref<ModelBuilderBase> builder = AcquireRef(new ModelBuilder(this));
+        return builder.Detach();
+    }
 
-ModelBuilderBase *NeuralNetworkContext::CreateModelBuilderImpl() {
-  Ref<ModelBuilderBase> builder = AcquireRef(new ModelBuilder(this));
-  return builder.Detach();
-}
+    // ModelBuilder
+    ModelBuilder::ModelBuilder(NeuralNetworkContextBase* context) : ModelBuilderBase(context) {
+    }
 
-// ModelBuilder
-ModelBuilder::ModelBuilder(NeuralNetworkContextBase *context)
-    : ModelBuilderBase(context) {}
+    ModelBase* ModelBuilder::CreateModelImpl() {
+        Ref<ModelBase> model = AcquireRef(new Model(this));
+        return model.Detach();
+    }
 
-ModelBase *ModelBuilder::CreateModelImpl() {
-  Ref<ModelBase> model = AcquireRef(new Model(this));
-  return model.Detach();
-}
+    // Model
+    Model::Model(ModelBuilder* model_builder) : ModelBase(model_builder) {
+    }
 
-// Model
-Model::Model(ModelBuilder *model_builder) : ModelBase(model_builder) {
-}
+    void Model::CompileImpl(WNNCompileCallback callback,
+                            void* userdata,
+                            CompilationOptions const* options) {
+    }
 
-void Model::CompileImpl(WNNCompileCallback callback, void *userdata,
-                        CompilationOptions const *options) {
-}
+    // Compilation
+    void Compilation::ComputeImpl(NamedInputsBase* inputs,
+                                  WNNComputeCallback callback,
+                                  void* userdata,
+                                  NamedOutputsBase* outputs) {
+    }
 
-// Compilation
-void Compilation::ComputeImpl(
-    NamedInputsBase *inputs, WNNComputeCallback callback,
-    void *userdata,
-    NamedOutputsBase *outputs) {
-}
-
-} // namespace null
-
-} // namespace dawn_native
+}}  // namespace dawn_native::null

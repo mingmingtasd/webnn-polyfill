@@ -17,33 +17,36 @@
 #include <vector>
 
 class Conv2d : public utils::WrappedModel {
-public:
-  Conv2d() {
-    options_.padding = nullptr;
-    options_.strides = nullptr;
-    options_.dilations = nullptr;
-  }
-  wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
-    wnn::Operand input = nn.Input("input", InputDesc());
-    wnn::Operand constant =
-        nn.Constant(ConstantDesc(), ConstantBuffer(), ConstantLength());
-    return nn.Conv2d(input, constant, &options_);
-  }
-  void SetPadding(std::vector<int32_t> padding) {
-    padding_ = std::move(padding);
-    options_.padding = padding_.data();
-  }
-private:
-  wnn::Conv2dOptions options_;
-  std::vector<int32_t> padding_;
+  public:
+    Conv2d() {
+        options_.padding = nullptr;
+        options_.strides = nullptr;
+        options_.dilations = nullptr;
+    }
+    wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
+        wnn::Operand input = nn.Input("input", InputDesc());
+        wnn::Operand constant = nn.Constant(ConstantDesc(), ConstantBuffer(), ConstantLength());
+        return nn.Conv2d(input, constant, &options_);
+    }
+    void SetPadding(std::vector<int32_t> padding) {
+        padding_ = std::move(padding);
+        options_.padding = padding_.data();
+    }
+
+  private:
+    wnn::Conv2dOptions options_;
+    std::vector<int32_t> padding_;
 };
 
 int main(int argc, const char* argv[]) {
-  Conv2d *conv2d = new Conv2d();
-  conv2d->SetInput({1, 1, 5, 5}, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-  conv2d->SetConstant({1, 1, 3, 3}, std::vector<float>(9, 1));
-  conv2d->SetPadding({1, 1, 1, 1});
-  conv2d->SetExpectedBuffer({12., 21., 27., 33., 24., 33., 54., 63., 72., 51., 63., 99., 108., 117., 81., 93., 144., 153., 162., 111., 72., 111., 117., 123., 84.});
-  conv2d->SetExpectedShape({1, 1, 5, 5});
-  utils::Test(conv2d);
+    Conv2d* conv2d = new Conv2d();
+    conv2d->SetInput({1, 1, 5, 5}, {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                    13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
+    conv2d->SetConstant({1, 1, 3, 3}, std::vector<float>(9, 1));
+    conv2d->SetPadding({1, 1, 1, 1});
+    conv2d->SetExpectedBuffer({12.,  21.,  27., 33.,  24.,  33.,  54., 63.,  72.,
+                               51.,  63.,  99., 108., 117., 81.,  93., 144., 153.,
+                               162., 111., 72., 111., 117., 123., 84.});
+    conv2d->SetExpectedShape({1, 1, 5, 5});
+    utils::Test(conv2d);
 }

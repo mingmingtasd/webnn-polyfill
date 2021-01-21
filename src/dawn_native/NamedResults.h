@@ -9,8 +9,8 @@
 
 namespace dawn_native {
 
-class NamedResultsBase : public NamedRecords<ResultBase> {};
+    class NamedResultsBase : public NamedRecords<ResultBase> {};
 
-}
+}  // namespace dawn_native
 
 #endif

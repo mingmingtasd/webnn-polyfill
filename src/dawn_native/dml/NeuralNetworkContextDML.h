@@ -3,22 +3,18 @@
 
 #include "dawn_native/NeuralNetworkContext.h"
 
-namespace dawn_native {
+namespace dawn_native { namespace dml {
 
-namespace dml {
+    class NeuralNetworkContext : public NeuralNetworkContextBase {
+      public:
+        NeuralNetworkContext() = default;
+        ~NeuralNetworkContext() override = default;
 
-class NeuralNetworkContext : public NeuralNetworkContextBase {
-public:
-  NeuralNetworkContext() = default;
-  ~NeuralNetworkContext() override = default;
+        ModelBuilderBase* CreateModelBuilderImpl() override;
 
-  ModelBuilderBase *CreateModelBuilderImpl() override;
+      private:
+    };
 
-private:
-};
+}}  // namespace dawn_native::dml
 
-} // namespace dml
-
-} // namespace dawn_native
-
-#endif // WEBNN_NATIVE_DML_NEURAL_NETWORK_CONTEXT_DML_H_
+#endif  // WEBNN_NATIVE_DML_NEURAL_NETWORK_CONTEXT_DML_H_

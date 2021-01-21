@@ -17,10 +17,10 @@ IE_SYMBOLS_LIST
 #undef X
 LATE_BINDING_SYMBOL_TABLE_DEFINE_END(IESymbolTable)
 
-IESymbolTable *GetIESymbolTable() {
-  static IESymbolTable *ienn_symbol_table = new IESymbolTable();
+IESymbolTable* GetIESymbolTable() {
+  static IESymbolTable* ienn_symbol_table = new IESymbolTable();
   ienn_symbol_table->Load();
   return ienn_symbol_table;
 }
 
-} // namespace dawn_native
+}  // namespace dawn_native

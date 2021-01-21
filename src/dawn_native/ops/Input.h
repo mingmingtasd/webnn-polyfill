@@ -11,36 +11,37 @@
 #include "dawn_native/Model.h"
 #include "dawn_native/Operand.h"
 
-namespace dawn_native {
+namespace dawn_native { namespace op {
 
-namespace op {
+    class Input final : public OperandBase {
+      public:
+        Input(ModelBuilderBase* builder, const std::string& name, const OperandDescriptor* desc)
+            : OperandBase(builder), name_(name) {
+            descriptor_.type = desc->type;
+            dimensions_.assign(desc->dimensions, desc->dimensions + desc->dimensionsCount);
+            descriptor_.dimensions = dimensions_.data();
+            descriptor_.dimensionsCount = dimensions_.size();
+        }
+        ~Input() override = default;
 
-class Input final : public OperandBase {
-public:
-  Input(ModelBuilderBase *builder, const std::string &name, const OperandDescriptor *desc)
-      : OperandBase(builder), name_(name) {
-    descriptor_.type = desc->type;
-    dimensions_.assign(desc->dimensions,
-                       desc->dimensions + desc->dimensionsCount);
-    descriptor_.dimensions = dimensions_.data();
-    descriptor_.dimensionsCount = dimensions_.size();
-  }
-  ~Input() override = default;
+        MaybeError AddToModel(ModelBase* model) const override {
+            return model->AddInput(this);
+        }
+        MaybeError Validate() override;
 
-  MaybeError AddToModel(ModelBase *model) const override { return model->AddInput(this); }
-  MaybeError Validate() override;
+        const std::string& GetName() const {
+            return name_;
+        }
+        const OperandDescriptor* GetOperandDescriptor() const {
+            return &descriptor_;
+        }
 
-  const std::string& GetName() const { return name_; }
-  const OperandDescriptor *GetOperandDescriptor() const { return &descriptor_; }
+      private:
+        std::string name_;
+        OperandDescriptor descriptor_;
+        std::vector<int32_t> dimensions_;
+    };
 
-private:
-  std::string name_;
-  OperandDescriptor descriptor_;
-  std::vector<int32_t> dimensions_;
-};
+}}  // namespace dawn_native::op
 
-} // namespace op
-
-} // namespace dawn_native
-
-#endif // WEBNN_NATIVE_OPS_INPUT_H_
+#endif  // WEBNN_NATIVE_OPS_INPUT_H_

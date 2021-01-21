@@ -8,33 +8,37 @@
 #include "dawn_native/Model.h"
 #include "dawn_native/Operand.h"
 
-namespace dawn_native {
+namespace dawn_native { namespace op {
 
-namespace op {
+    class Reshape final : public OperandBase {
+      public:
+        Reshape(ModelBuilderBase* builder,
+                OperandBase* input,
+                int32_t const* new_shape,
+                size_t new_shape_count)
+            : OperandBase(builder, {input}) {
+            new_shape_.assign(new_shape, new_shape + new_shape_count);
+        }
+        ~Reshape() override = default;
 
-class Reshape final : public OperandBase {
-public:
-  Reshape(ModelBuilderBase *builder,
-	  OperandBase *input, int32_t const *new_shape, size_t new_shape_count)
-       : OperandBase(builder, {input}) {
-    new_shape_.assign(new_shape, new_shape + new_shape_count);
-  }
-  ~Reshape() override = default;
+        MaybeError AddToModel(ModelBase* model) const override {
+            return model->AddReshape(this);
+        }
+        MaybeError Validate() override {
+            return {};
+        }
 
-  MaybeError AddToModel(ModelBase *model) const override {
-    return model->AddReshape(this);
-  }
-  MaybeError Validate() override { return {}; }
+        int32_t const* GetNewShape() const {
+            return new_shape_.data();
+        }
+        size_t GetNewShapeCount() const {
+            return new_shape_.size();
+        }
 
-  int32_t const *GetNewShape() const { return new_shape_.data(); }
-  size_t GetNewShapeCount() const { return new_shape_.size(); }
+      private:
+        std::vector<int32_t> new_shape_;
+    };
 
-private:
-  std::vector<int32_t> new_shape_;
-};
+}}  // namespace dawn_native::op
 
-} // namespace op
-
-} // namespace dawn_native
-
-#endif // WEBNN_NATIVE_OPS_RESHAPE_H_
+#endif  // WEBNN_NATIVE_OPS_RESHAPE_H_

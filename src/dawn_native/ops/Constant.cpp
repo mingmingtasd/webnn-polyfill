@@ -15,13 +15,10 @@
 #include "common/Log.h"
 #include "dawn_native/Error.h"
 
-namespace dawn_native {
+namespace dawn_native { namespace op {
 
-namespace op {
+    MaybeError Constant::Validate() {
+        return {};
+    }
 
-MaybeError Constant::Validate() {
-  return {};
-}
-
-}  // namespace op
-}  // namespace dawn_native
+}}  // namespace dawn_native::op

@@ -26,9 +26,9 @@
 
 namespace dawn_native {
 
-inline static const char *GetDllError() {
+inline static const char* GetDllError() {
 #if defined(__linux__) || defined(__APPLE__)
-  char *err = dlerror();
+  char* err = dlerror();
   if (err) {
     return err;
   }
@@ -79,14 +79,15 @@ void InternalUnloadDll(DllHandle handle) {
 #elif defined(_WIN32) || defined(_WIN64)
   FreeLibrary(static_cast<HMODULE>(handle));
 #endif
-#endif // !defined(ADDRESS_SANITIZER)
+#endif  // !defined(ADDRESS_SANITIZER)
 }
 
-static bool LoadSymbol(DllHandle handle, const char *symbol_name,
-                       void **symbol) {
+static bool LoadSymbol(DllHandle handle,
+                       const char* symbol_name,
+                       void** symbol) {
 #if defined(__linux__) || defined(__APPLE__)
   *symbol = dlsym(handle, symbol_name);
-  char *err = dlerror();
+  char* err = dlerror();
   if (err) {
     dawn::ErrorLog() << "Error loading symbol " << symbol_name << " : " << err;
     return false;
@@ -95,7 +96,7 @@ static bool LoadSymbol(DllHandle handle, const char *symbol_name,
     return false;
   }
 #elif defined(_WIN32) || defined(_WIN64)
-  *symbol = reinterpret_cast<void *>(
+  *symbol = reinterpret_cast<void*>(
       GetProcAddress(static_cast<HMODULE>(handle), symbol_name));
 #endif
   return true;
@@ -104,8 +105,10 @@ static bool LoadSymbol(DllHandle handle, const char *symbol_name,
 // This routine MUST assign SOME value for every symbol, even if that value is
 // NULL, or else some symbols may be left with uninitialized data that the
 // caller may later interpret as a valid address.
-bool InternalLoadSymbols(DllHandle handle, int num_symbols,
-                         const char *const symbol_names[], void *symbols[]) {
+bool InternalLoadSymbols(DllHandle handle,
+                         int num_symbols,
+                         const char* const symbol_names[],
+                         void* symbols[]) {
   // Clear any old errors.
   GetDllError();
   for (int i = 0; i < num_symbols; ++i) {
@@ -116,4 +119,4 @@ bool InternalLoadSymbols(DllHandle handle, int num_symbols,
   return true;
 }
 
-} // namespace dawn_native
+}  // namespace dawn_native

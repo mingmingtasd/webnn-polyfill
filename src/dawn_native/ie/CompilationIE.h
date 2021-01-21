@@ -2,38 +2,37 @@
 #define WEBNN_NATIVE_IE_COMPILATION_IE_H_
 
 #include "dawn_native/Compilation.h"
-#include "dawn_native/ie/ienn/src/ie_nn_c_api.h"
 #include "dawn_native/ie/ModelIE.h"
+#include "dawn_native/ie/ienn/src/ie_nn_c_api.h"
 
-namespace dawn_native {
+namespace dawn_native { namespace ie {
 
-namespace ie {
+    class Compilation : public CompilationBase {
+      public:
+        Compilation(Ref<Model> model);
+        ~Compilation() override;
 
-class Compilation : public CompilationBase {
-public:
-  Compilation(Ref<Model> model);
-  ~Compilation() override;
+        void Compile(WNNCompileCallback callback,
+                     void* userdata,
+                     CompilationOptions const* options);
 
-  void Compile(WNNCompileCallback callback,
-                void *userdata, CompilationOptions const *options);
+      private:
+        void ComputeImpl(NamedInputsBase* inputs,
+                         WNNComputeCallback callback,
+                         void* userdata,
+                         NamedOutputsBase* outputs) override;
 
-private:
-  void ComputeImpl(NamedInputsBase *inputs, WNNComputeCallback callback,
-                   void *userdata, NamedOutputsBase *outputs) override;
+        Ref<Model> model_;
+        ie_compilation_t* ie_compilation_;
 
-  Ref<Model> model_;
-  ie_compilation_t *ie_compilation_;
+        // Hold those variable to async compute.
+        void CompletedCallback();
+        ie_complete_call_back_t ie_callback_;
+        WNNComputeCallback callback_;
+        void* user_data_;
+        NamedOutputsBase* outputs_;
+    };
 
-  // Hold those variable to async compute.
-  void CompletedCallback();
-  ie_complete_call_back_t ie_callback_;
-  WNNComputeCallback callback_;
-  void *user_data_;
-  NamedOutputsBase *outputs_;
-};
+}}  // namespace dawn_native::ie
 
-} // namespace ie
-
-} // namespace dawn_native
-
-#endif // WEBNN_NATIVE_IE_COMPILATION_IE_H_
+#endif  // WEBNN_NATIVE_IE_COMPILATION_IE_H_

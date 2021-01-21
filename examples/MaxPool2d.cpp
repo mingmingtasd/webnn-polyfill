@@ -17,36 +17,37 @@
 #include <vector>
 
 class MaxPool2d : public utils::WrappedModel {
-public:
-  MaxPool2d() {
-    options_.windowDimensions = nullptr;
-    options_.padding = nullptr;
-    options_.strides = nullptr;
-    options_.dilations = nullptr;
-  }
-  wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
-    wnn::Operand input = nn.Input("input", InputDesc());
-    return nn.MaxPool2d(input, &options_);
-  }
-  void SetPadding(std::vector<int32_t> padding) {
-    padding_ = std::move(padding);
-    options_.padding = padding_.data();
-  }
-  void SetWindowDimensions(std::vector<int32_t> dimensions) {
-    window_dimensios_ = std::move(dimensions);
-    options_.windowDimensions = window_dimensios_.data();
-  }
-private:
-  wnn::Pool2dOptions options_;
-  std::vector<int32_t> padding_;
-  std::vector<int32_t> window_dimensios_;
+  public:
+    MaxPool2d() {
+        options_.windowDimensions = nullptr;
+        options_.padding = nullptr;
+        options_.strides = nullptr;
+        options_.dilations = nullptr;
+    }
+    wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
+        wnn::Operand input = nn.Input("input", InputDesc());
+        return nn.MaxPool2d(input, &options_);
+    }
+    void SetPadding(std::vector<int32_t> padding) {
+        padding_ = std::move(padding);
+        options_.padding = padding_.data();
+    }
+    void SetWindowDimensions(std::vector<int32_t> dimensions) {
+        window_dimensios_ = std::move(dimensions);
+        options_.windowDimensions = window_dimensios_.data();
+    }
+
+  private:
+    wnn::Pool2dOptions options_;
+    std::vector<int32_t> padding_;
+    std::vector<int32_t> window_dimensios_;
 };
 
 int main(int argc, const char* argv[]) {
-  MaxPool2d *max_pool2d = new MaxPool2d();
-  max_pool2d->SetInput({1, 1, 4, 4}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
-  max_pool2d->SetWindowDimensions({3, 3});
-  max_pool2d->SetExpectedBuffer({11, 12, 15, 16});
-  max_pool2d->SetExpectedShape({1, 1, 2, 2});
-  utils::Test(max_pool2d);
+    MaxPool2d* max_pool2d = new MaxPool2d();
+    max_pool2d->SetInput({1, 1, 4, 4}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
+    max_pool2d->SetWindowDimensions({3, 3});
+    max_pool2d->SetExpectedBuffer({11, 12, 15, 16});
+    max_pool2d->SetExpectedShape({1, 1, 2, 2});
+    utils::Test(max_pool2d);
 }

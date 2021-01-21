@@ -9,8 +9,8 @@
 
 namespace dawn_native {
 
-class NamedInputsBase : public NamedRecords<Input> {};
+    class NamedInputsBase : public NamedRecords<Input> {};
 
-}
+}  // namespace dawn_native
 
 #endif

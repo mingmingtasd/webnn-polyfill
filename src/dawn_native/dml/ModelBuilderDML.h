@@ -3,21 +3,17 @@
 
 #include "dawn_native/ModelBuilder.h"
 
-namespace dawn_native {
+namespace dawn_native { namespace dml {
 
-namespace dml {
+    class ModelBuilder : public ModelBuilderBase {
+      public:
+        explicit ModelBuilder(NeuralNetworkContextBase* context);
+        ~ModelBuilder() override = default;
 
-class ModelBuilder : public ModelBuilderBase {
-public:
-  explicit ModelBuilder(NeuralNetworkContextBase *context);
-  ~ModelBuilder() override = default;
+      private:
+        ModelBase* CreateModelImpl() override;
+    };
 
-private:
-  ModelBase *CreateModelImpl() override;
-};
+}}  // namespace dawn_native::dml
 
-} // namespace dml
-
-} // namespace dawn_native
-
-#endif // WEBNN_NATIVE_DML_MODEL_BUILDER_DML_H_
+#endif  // WEBNN_NATIVE_DML_MODEL_BUILDER_DML_H_

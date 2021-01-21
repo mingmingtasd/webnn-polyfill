@@ -50,7 +50,7 @@ Compilation::Compilation(std::shared_ptr<Model> model)
     // removed in GNA hardware version 3 and higher.
     // gnaPluginConfig[GNAConfigParams::KEY_GNA_PRECISION] = "I8";
   }
-  execution.reset(new ExecutableNetwork(static_cast<IExecutableNetwork::Ptr &>(
+  execution.reset(new ExecutableNetwork(static_cast<IExecutableNetwork::Ptr&>(
       ie_core->LoadNetwork(*(model->network_), device_name, plugin_Config))));
   infer_request.reset(new InferRequest(
       static_cast<IInferRequest::Ptr>(execution->CreateInferRequest())));
@@ -75,15 +75,16 @@ Compilation::~Compilation() {
   }
 }
 
-InferRequest *Compilation::GetInferenceRequest() {
+InferRequest* Compilation::GetInferenceRequest() {
   return preference_ == prefer_t::PREFER_ULTRA_LOW_POWER
              ? s_gna_infer_request.get()
              : infer_request_.get();
 }
 
-StatusCode Compilation::SetInput(ie_operand_t *operand, const void *buffer,
+StatusCode Compilation::SetInput(ie_operand_t* operand,
+                                 const void* buffer,
                                  uint32_t length) {
-  InferRequest *infer_request = GetInferenceRequest();
+  InferRequest* infer_request = GetInferenceRequest();
   if (!infer_request) {
     return StatusCode::NETWORK_NOT_LOADED;
   }
@@ -94,9 +95,10 @@ StatusCode Compilation::SetInput(ie_operand_t *operand, const void *buffer,
   return StatusCode::OK;
 }
 
-StatusCode Compilation::GetOutput(ie_operand_t *operand, void *buffer,
+StatusCode Compilation::GetOutput(ie_operand_t* operand,
+                                  void* buffer,
                                   uint32_t length) {
-  InferRequest *infer_request = GetInferenceRequest();
+  InferRequest* infer_request = GetInferenceRequest();
   if (!infer_request) {
     return StatusCode::NETWORK_NOT_LOADED;
   }
@@ -107,9 +109,10 @@ StatusCode Compilation::GetOutput(ie_operand_t *operand, void *buffer,
   return StatusCode::OK;
 }
 
-StatusCode Compilation::GetBuffer(const char *name, void **buffer,
-                                  size_t *byte_length) {
-  InferRequest *infer_request = GetInferenceRequest();
+StatusCode Compilation::GetBuffer(const char* name,
+                                  void** buffer,
+                                  size_t* byte_length) {
+  InferRequest* infer_request = GetInferenceRequest();
   if (!infer_request) {
     return StatusCode::NETWORK_NOT_LOADED;
   }
@@ -121,16 +124,16 @@ StatusCode Compilation::GetBuffer(const char *name, void **buffer,
   return StatusCode::OK;
 }
 
-StatusCode Compilation::GetDimensions(const char *name,
-                                      ie_dimensions_t *dimensions) {
-  InferRequest *infer_request = GetInferenceRequest();
+StatusCode Compilation::GetDimensions(const char* name,
+                                      ie_dimensions_t* dimensions) {
+  InferRequest* infer_request = GetInferenceRequest();
   if (!infer_request) {
     return StatusCode::NETWORK_NOT_LOADED;
   }
   Blob::Ptr output_blob = infer_request->GetBlob(name);
   InferenceEngine::SizeVector dims = output_blob->getTensorDesc().getDims();
   dimensions->ranks = dims.size();
-  dimensions->dims = (int32_t *)malloc(dimensions->ranks * sizeof(int32_t));
+  dimensions->dims = (int32_t*)malloc(dimensions->ranks * sizeof(int32_t));
   for (size_t i = 0; i < dimensions->ranks; ++i) {
     dimensions->dims[i] = dims[i];
   }
@@ -138,8 +141,8 @@ StatusCode Compilation::GetDimensions(const char *name,
   return StatusCode::OK;
 }
 
-StatusCode Compilation::Compute(ie_complete_call_back_t *callback) {
-  InferRequest *infer_request = GetInferenceRequest();
+StatusCode Compilation::Compute(ie_complete_call_back_t* callback) {
+  InferRequest* infer_request = GetInferenceRequest();
   if (!infer_request) {
     return StatusCode::NETWORK_NOT_LOADED;
   }
@@ -151,4 +154,4 @@ StatusCode Compilation::Compute(ie_complete_call_back_t *callback) {
   return StatusCode::OK;
 }
 
-} // namespace InferenceEngine
+}  // namespace InferenceEngine

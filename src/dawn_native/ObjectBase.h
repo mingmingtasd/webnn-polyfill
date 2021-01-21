@@ -5,24 +5,24 @@
 
 namespace dawn_native {
 
-class ObjectBase : public RefCounted {
-public:
-  struct ErrorTag {};
-  static constexpr ErrorTag kError = {};
+    class ObjectBase : public RefCounted {
+      public:
+        struct ErrorTag {};
+        static constexpr ErrorTag kError = {};
 
-  explicit ObjectBase(NeuralNetworkContextBase *context);
-  ObjectBase(NeuralNetworkContextBase *context, ErrorTag tag);
+        explicit ObjectBase(NeuralNetworkContextBase* context);
+        ObjectBase(NeuralNetworkContextBase* context, ErrorTag tag);
 
-  NeuralNetworkContextBase *GetContext() const;
-  bool IsError() const;
+        NeuralNetworkContextBase* GetContext() const;
+        bool IsError() const;
 
-protected:
-  ~ObjectBase() override = default;
+      protected:
+        ~ObjectBase() override = default;
 
-private:
-  NeuralNetworkContextBase *context_;
-};
+      private:
+        NeuralNetworkContextBase* context_;
+    };
 
-} // namespace dawn_native
+}  // namespace dawn_native
 
-#endif // WEBNN_NATIVE_OBJECT_BASE_H_
+#endif  // WEBNN_NATIVE_OBJECT_BASE_H_

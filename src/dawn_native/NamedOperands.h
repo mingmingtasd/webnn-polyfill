@@ -8,8 +8,8 @@
 
 namespace dawn_native {
 
-class NamedOperandsBase : public NamedRecords<OperandBase> {};
+    class NamedOperandsBase : public NamedRecords<OperandBase> {};
 
-}
+}  // namespace dawn_native
 
 #endif

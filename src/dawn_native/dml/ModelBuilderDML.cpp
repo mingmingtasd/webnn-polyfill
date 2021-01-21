@@ -4,18 +4,14 @@
 #include "dawn_native/dml/ModelDML.h"
 #include "dawn_native/dml/deps/src/precomp.h"
 
-namespace dawn_native {
+namespace dawn_native { namespace dml {
 
-namespace dml {
+    ModelBuilder::ModelBuilder(NeuralNetworkContextBase* context) : ModelBuilderBase(context) {
+    }
 
-ModelBuilder::ModelBuilder(NeuralNetworkContextBase *context)
-    : ModelBuilderBase(context) {}
+    ModelBase* ModelBuilder::CreateModelImpl() {
+        Ref<ModelBase> model = AcquireRef(new Model(this));
+        return model.Detach();
+    }
 
-ModelBase *ModelBuilder::CreateModelImpl() {
-  Ref<ModelBase> model = AcquireRef(new Model(this));
-  return model.Detach();
-}
-
-} // namespace dml
-
-} // namespace dawn_native
+}}  // namespace dawn_native::dml

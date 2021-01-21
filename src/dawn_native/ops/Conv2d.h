@@ -8,30 +8,28 @@
 #include "dawn_native/Model.h"
 #include "dawn_native/Operand.h"
 
-namespace dawn_native {
+namespace dawn_native { namespace op {
 
-namespace op {
+    class Conv2d final : public OperandBase {
+      public:
+        Conv2d(ModelBuilderBase* builder,
+               OperandBase* input,
+               OperandBase* filter,
+               Conv2dOptions const* options);
+        ~Conv2d() override = default;
 
-class Conv2d final : public OperandBase {
-public:
-  Conv2d(ModelBuilderBase *builder,
-         OperandBase *input, OperandBase *filter, Conv2dOptions const *options);
-  ~Conv2d() override = default;
+        MaybeError AddToModel(ModelBase* model) const override;
+        MaybeError Validate() override;
 
-  MaybeError AddToModel(ModelBase *model) const override;
-  MaybeError Validate() override;
+        Conv2dOptions const* GetOptions() const;
 
-  Conv2dOptions const *GetOptions() const;
+      private:
+        Conv2dOptions options_;
+        std::vector<int32_t> padding_;
+        std::vector<int32_t> stride_;
+        std::vector<int32_t> dilations_;
+    };
 
-private:
-  Conv2dOptions options_;
-  std::vector<int32_t> padding_;
-  std::vector<int32_t> stride_;
-  std::vector<int32_t> dilations_;
-};
+}}  // namespace dawn_native::op
 
-} // namespace op
-
-} // namespace dawn_native
-
-#endif // WEBNN_NATIVE_OPS_CONV2D_H_
+#endif  // WEBNN_NATIVE_OPS_CONV2D_H_

@@ -18,21 +18,19 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/webnn.h"
 
-
 void ValidationTest::SetUp() {
-  DawnProcTable backendProcs = dawn_native::GetProcs();
-  ASSERT_NE(&backendProcs, nullptr);  
-  dawnProcSetProcs(&backendProcs);
-  context = wnn::NeuralNetworkContext::Acquire(
-		  dawn_native::CreateNeuralNetworkContext());
-  context.SetUncapturedErrorCallback(ErrorCallback, this);
+    DawnProcTable backendProcs = dawn_native::GetProcs();
+    ASSERT_NE(&backendProcs, nullptr);
+    dawnProcSetProcs(&backendProcs);
+    context = wnn::NeuralNetworkContext::Acquire(dawn_native::CreateNeuralNetworkContext());
+    context.SetUncapturedErrorCallback(ErrorCallback, this);
 }
 
 ValidationTest::~ValidationTest() {
 }
 
 void ValidationTest::TearDown() {
-  ASSERT_FALSE(mExpectError);
+    ASSERT_FALSE(mExpectError);
 }
 
 void ValidationTest::StartExpectContextError() {
@@ -48,14 +46,12 @@ std::string ValidationTest::GetLastErrorMessage() const {
     return mErrorMessage;
 }
 
-void ValidationTest::ErrorCallback(WNNErrorType type, char const * message, void * userdata) {
-  ASSERT(type != WNNErrorType_NoError);
-  auto self = static_cast<ValidationTest*>(userdata);
-  self->mErrorMessage = message;
+void ValidationTest::ErrorCallback(WNNErrorType type, char const* message, void* userdata) {
+    ASSERT(type != WNNErrorType_NoError);
+    auto self = static_cast<ValidationTest*>(userdata);
+    self->mErrorMessage = message;
 
-  ASSERT_TRUE(self->mExpectError) << "Got unexpected error: " << message;
-  ASSERT_FALSE(self->mError) << "Got two errors in expect block";
-  self->mError = true;
+    ASSERT_TRUE(self->mExpectError) << "Got unexpected error: " << message;
+    ASSERT_FALSE(self->mError) << "Got two errors in expect block";
+    self->mError = true;
 }
-
-

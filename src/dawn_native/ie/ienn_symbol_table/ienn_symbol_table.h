@@ -10,33 +10,33 @@
 namespace dawn_native {
 
 // The ienn symbols we need, as an X-Macro list.
-#define IE_SYMBOLS_LIST                                                        \
-  X(ie_create_model)                                                           \
-  X(ie_model_free)                                                             \
-  X(ie_model_add_constant)                                                     \
-  X(ie_model_add_input)                                                        \
-  X(ie_model_add_output)                                                       \
-  X(ie_model_add_mat_mul)                                                      \
-  X(ie_operand_free)                                                           \
-  X(ie_model_finish)                                                           \
-  X(ie_create_compilation)                                                     \
-  X(ie_compilation_free)                                                       \
-  X(ie_compilation_set_input)                                                  \
-  X(ie_compilation_compute)                                                    \
-  X(ie_compilation_get_output)                                                 \
-  X(ie_model_add_binary)                                                       \
-  X(ie_model_add_conv2d)                                                       \
-  X(ie_model_add_pool2d)                                                       \
-  X(ie_model_add_relu)                                                         \
-  X(ie_model_add_reshape)                                                      \
-  X(ie_model_add_softmax)                                                      \
-  X(ie_model_add_transpose)                                                    \
-  X(ie_model_get_outputs_number)                                               \
-  X(ie_model_get_output_name)                                                  \
-  X(ie_model_free_name)                                                        \
-  X(ie_compilation_get_buffer)                                                 \
-  X(ie_compilation_free_buffer)                                                \
-  X(ie_compilation_get_dimensions)                                             \
+#define IE_SYMBOLS_LIST            \
+  X(ie_create_model)               \
+  X(ie_model_free)                 \
+  X(ie_model_add_constant)         \
+  X(ie_model_add_input)            \
+  X(ie_model_add_output)           \
+  X(ie_model_add_mat_mul)          \
+  X(ie_operand_free)               \
+  X(ie_model_finish)               \
+  X(ie_create_compilation)         \
+  X(ie_compilation_free)           \
+  X(ie_compilation_set_input)      \
+  X(ie_compilation_compute)        \
+  X(ie_compilation_get_output)     \
+  X(ie_model_add_binary)           \
+  X(ie_model_add_conv2d)           \
+  X(ie_model_add_pool2d)           \
+  X(ie_model_add_relu)             \
+  X(ie_model_add_reshape)          \
+  X(ie_model_add_softmax)          \
+  X(ie_model_add_transpose)        \
+  X(ie_model_get_outputs_number)   \
+  X(ie_model_get_output_name)      \
+  X(ie_model_free_name)            \
+  X(ie_compilation_get_buffer)     \
+  X(ie_compilation_free_buffer)    \
+  X(ie_compilation_get_dimensions) \
   X(ie_compilation_free_dimensions)
 
 LATE_BINDING_SYMBOL_TABLE_DECLARE_BEGIN(IESymbolTable)
@@ -45,7 +45,7 @@ IE_SYMBOLS_LIST
 #undef X
 LATE_BINDING_SYMBOL_TABLE_DECLARE_END(IESymbolTable)
 
-IESymbolTable *GetIESymbolTable();
+IESymbolTable* GetIESymbolTable();
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__linux__)
 #define IE(sym) LATESYM_GET(IESymbolTable, GetIESymbolTable(), sym)
@@ -53,6 +53,6 @@ IESymbolTable *GetIESymbolTable();
 #define IE(sym) sym
 #endif
 
-} // namespace dawn_native
+}  // namespace dawn_native
 
-#endif // SERVICES_ML_IENN_SYMBOL_TABLE_H_
+#endif  // SERVICES_ML_IENN_SYMBOL_TABLE_H_
