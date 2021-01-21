@@ -1,4 +1,4 @@
-#include "dawn_native/null/neural_network_context_null.h"
+#include "dawn_native/null/NeuralNetworkContextNull.h"
 #include "common/RefCounted.h"
 
 namespace dawn_native {

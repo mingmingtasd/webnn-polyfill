@@ -137,8 +137,8 @@ source_set("dawn_native_sources") {
 
   if (dawn_enable_null) {
     sources += [
-    "null/neural_network_context_null.cc",
-    "null/neural_network_context_null.h",
+    "null/NeuralNetworkContextNull.cpp",
+    "null/NeuralNetworkContextNull.h",
     ]
   }
 
