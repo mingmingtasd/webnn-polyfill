@@ -61,6 +61,10 @@ namespace utils {
         void SetExpectedShape(std::vector<int32_t> shape);
         std::vector<int32_t> ExpectedShape();
 
+        void SetOutputExpected(bool expected);
+
+        bool GetOutputExpected();
+
       private:
         wnn::ModelBuilder model_builder_;
         std::vector<int32_t> input_shape_;
@@ -72,9 +76,10 @@ namespace utils {
         std::vector<int32_t> output_shape_;
         std::vector<float> expected_buffer_;
         std::vector<int32_t> expected_shape_;
+        bool output_expected_ = true;
     };
 
-    void Test(WrappedModel* model);
+    bool Test(WrappedModel* model);
 
     class ComputeSync {
       public:

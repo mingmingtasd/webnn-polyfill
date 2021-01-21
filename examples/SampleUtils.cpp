@@ -114,6 +114,14 @@ namespace utils {
         UNREACHABLE();
     }
 
+    void WrappedModel::SetOutputExpected(bool expected) {
+        output_expected_ = expected;
+    }
+
+    bool WrappedModel::GetOutputExpected() {
+        return output_expected_;
+    }
+
     // The Compilation should be released unitl ComputeCallback.
     wnn::Compilation g_compilation;
     WrappedModel* g_wrapped_model;
@@ -122,9 +130,9 @@ namespace utils {
     void ComputeSync::Wait() {
         // Wait for async callback.
         std::unique_lock<std::mutex> lock(mutex_);
+        done_ = false;
         bool& done = done_;
         cond_var_.wait(lock, [&done] { return done; });
-        done_ = false;
     }
 
     void ComputeSync::Finish() {
@@ -147,20 +155,19 @@ namespace utils {
         wnn::NamedResults outputs = outputs.Acquire(impl);
         wnn::Result output = outputs.Get("output");
         std::vector<float> expected_data = g_wrapped_model->ExpectedBuffer();
-        bool expected = true;
         for (size_t i = 0; i < output.BufferSize() / sizeof(float); ++i) {
             float output_data = static_cast<const float*>(output.Buffer())[i];
             if (!Expected(output_data, expected_data[i])) {
                 dawn::ErrorLog() << "The output doesn't output as expected for " << output_data
                                  << " != " << expected_data[i] << " index = " << i;
-                expected = false;
+                g_wrapped_model->SetOutputExpected(false);
                 break;
             }
         }
         std::vector<int32_t> expected_shape = g_wrapped_model->ExpectedShape();
         if (!expected_shape.empty()) {
             if (expected_shape.size() != output.DimensionsSize()) {
-                expected = false;
+                g_wrapped_model->SetOutputExpected(false);
                 dawn::ErrorLog() << "The output rank is not as expected for "
                                  << expected_shape.size() << " != " << output.DimensionsSize();
             } else {
@@ -170,13 +177,13 @@ namespace utils {
                         dawn::ErrorLog()
                             << "The output dimension is not as expected for " << dimension
                             << " != " << expected_shape[i] << " index = " << i;
-                        expected = false;
+                        g_wrapped_model->SetOutputExpected(false);
                         break;
                     }
                 }
             }
         }
-        if (expected) {
+        if (g_wrapped_model->GetOutputExpected()) {
             dawn::InfoLog() << "Test succeeded.";
         } else {
             dawn::InfoLog() << "Test failed.";
@@ -212,7 +219,7 @@ namespace utils {
     }
 
     // Wrapped Compilation
-    void Test(WrappedModel* wrapped_model) {
+    bool Test(WrappedModel* wrapped_model) {
         g_wrapped_model = wrapped_model;
         wnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
         context.SetUncapturedErrorCallback(ErrorCallback, nullptr);
@@ -228,9 +235,11 @@ namespace utils {
         model.Compile(CompilationCallback, nullptr);
 
         g_compute_sync.Wait();
+        bool expected = wrapped_model->GetOutputExpected();
         // Release backend resources in main thread.
         delete g_wrapped_model;
         g_compilation = nullptr;
+        return expected;
     }
 
 }  // namespace utils

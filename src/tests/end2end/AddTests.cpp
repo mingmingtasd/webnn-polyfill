@@ -54,7 +54,7 @@ TEST_P(AddTests, OneConstant) {
     add->SetConstant(GetParam().shape, GetParam().constantBuffer);
     add->SetExpectedBuffer(GetParam().expectedBuffer);
     add->SetExpectedShape(GetParam().expectedShape);
-    utils::Test(add);
+    EXPECT_EQ(utils::Test(add),true);
 }
 
 INSTANTIATE_TEST_SUITE_P(Add,
