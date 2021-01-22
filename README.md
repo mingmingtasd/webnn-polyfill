@@ -38,10 +38,44 @@ Or generate projects with default null backend
 ```
 
 ## Build with Node scripts
+### Installation
 ```sh
 > npm install
-> npm run build
 ```
+### Fast build with latest code
+```sh
+> npm run build all
+```
+
+### Only gclient sync to latest code
+```sh
+> npm run build sync
+```
+
+### Only git pull to latest code
+```sh
+> npm run build pull
+```
+
+### Only build with current code
+Defualt
+```sh
+> npm run build build
+```
+or with backen / config options
+```sh
+> npm run build build -- --backend=[ie|dml]
+```
+or
+```sh
+> npm run build build -- ---config=<path>
+```
+or
+```sh
+> npm run build build -- --backend=[ie|dml] --config=<path>
+```
+
+Please refer ./build_script/README.md to find details commands.
 
 ## Test
 For OpenVINO build, please [set the environment variables](https://docs.openvinotoolkit.org/2021.1/openvino_docs_install_guides_installing_openvino_windows.html#set-the-environment-variables) first.

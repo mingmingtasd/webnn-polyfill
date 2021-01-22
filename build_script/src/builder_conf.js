@@ -13,13 +13,12 @@ const winston = require('winston');
  */
 class BuilderConf {
   /**
-   * @param {string} rootDir webnn-native source code directory.
-   * @param {string} conf builder configuration file.
+   * @param {backend} backend Target backend.
+   * @param {string} conf Configuration file for build.
    */
-  constructor(rootDir, conf) {
+  constructor(backend, conf) {
     this.conf_ = conf;
-    this.rootDir_ = path.resolve(rootDir);
-    this.outDir_ = path.join(this.rootDir_, 'out', 'Shared');
+    this.backend_ = backend;
 
     // Get list via "gn help target_os <out_dir>", current support
     // linux|win
@@ -31,7 +30,6 @@ class BuilderConf {
 
     // gn-args
     this.gnArgs_ = {
-      backend: undefined,
       isClang: false,
       isComponent: false,
       isDebug: false,
@@ -44,62 +42,41 @@ class BuilderConf {
     this.logFile_ = undefined;
     this.logLevel_ = undefined;
     this.logger_ = undefined;
-
-    // archive-server
-    this.archiveServer_ = {
-      host: undefined,
-      dir: undefined,
-      sshUser: undefined,
-    };
-
-    // email-service
-    this.emailService_ = {
-      user: undefined,
-      host: undefined,
-      from: undefined,
-      to: undefined,
-      subject: undefined,
-      text: undefined,
-    };
   }
 
   /**
-   * Initialization
-   * @return {boolean} whether the configuration file is valid.
+   * Init following BuilderConf members from parsing this.conf_:
+   *  this.targetOs_
+   *  this.targetCpu_
+   *  this.gnArgs_
+   *  this.cleanBuild_
+   *  this.logFile_
+   *  this.logLevel_
+   *  this.logger_
    */
   init() {
-    fs.accessSync(this.rootDir_);
-    const conf = JSON.parse(fs.readFileSync(this.conf_, 'utf8'));
+    fs.accessSync(this.conf_);
+    const config = JSON.parse(fs.readFileSync(this.conf_, 'utf8'));
 
     /* jshint ignore:start */
-    this.targetOs_ = conf['target-os'];
-    this.targetCpu_ = conf['target-cpu'];
+    this.targetOs_ = config['target-os'];
+    this.targetCpu_ = config['target-cpu'];
     this.targetOs_ = this.targetOs_ || this.getHostOs();
     this.targetCpu_ = this.targetCpu_ || this.getHostCpu();
 
-    this.gnArgs_.backend =
-        conf['gnArgs']['backend'] === undefined ? 'null' :
-        conf['gnArgs']['backend'];
-    this.gnArgs_.isClang = conf['gnArgs']['is-clang'];
-    this.gnArgs_.isComponent = conf['gnArgs']['is-component'];
-    this.gnArgs_.isDebug = conf['gnArgs']['is-debug'];
+    this.gnArgs_.isClang = config['gnArgs']['is-clang'];
+    this.gnArgs_.isComponent = config['gnArgs']['is-component'];
+    this.gnArgs_.isDebug = config['gnArgs']['is-debug'];
 
-    this.cleanBuild_ = conf['clean-build'];
-    this.archiveServer_.host = conf['archive-server']['host'];
-    this.archiveServer_.dir = conf['archive-server']['dir'];
-    this.archiveServer_.sshUser = conf['archive-server']['ssh-user'];
+    this.cleanBuild_ = config['clean-build'];
 
-    this.emailService_.user = conf['email-service']['user'];
-    this.emailService_.host = conf['email-service']['host'];
-    this.emailService_.from = conf['email-service']['from'];
-    this.emailService_.to = conf['email-service']['to'];
     // Handel logger
-    this.logLevel_ = conf['logging']['level'] || 'info';
+    this.logLevel_ = config['logging']['level'] || 'info';
     this.today_ = new Date().toISOString().substring(0, 10);
-    this.logFile_ = conf['logging']['file'] ||
+    this.logFile_ = config['logging']['file'] ||
         path.join(os.tmpdir(),
-            'webnn_' + this.targetOs_ + '_' + this.gnArgs_.backend + '_' +
-        this.today_ + '.log');
+            'webnn_' + this.targetOs_ + '_' + this.targetCpu_ + '_' +
+            this.backend_ + '_' + this.today_ + '.log');
     /* jshint ignore:end */
 
     this.logger_ = winston.createLogger({
@@ -115,44 +92,21 @@ class BuilderConf {
       ],
     });
 
-    // FIXME(halton): create logfile is does not exist
+    // create logfile is does not exist
     fs.writeFileSync(this.logFile_, '', {flag: 'w+'});
-
-    this.logger_.debug('root dir: ' + this.rootDir_);
-    this.logger_.debug('out dir: ' + this.outDir_);
-    this.logger_.debug('target OS: ' + this.targetOs_);
-    this.logger_.debug('target CPU: ' + this.targetCpu_);
-    this.logger_.debug('log level: ' + this.logLevel_);
-    this.logger_.debug('log file: ' + this.logFile_);
-    this.logger_.debug('archive host: ' + this.archiveServer_.host);
-    this.logger_.debug('archive dir: ' + this.archiveServer_.dir);
-    this.logger_.debug('archive ssh user: ' + this.archiveServer_.sshUser);
-    this.logger_.debug('email user: ' + this.emailService_.user);
-    this.logger_.debug('email host: ' + this.emailService_.host);
-    this.logger_.debug('email from: ' + this.emailService_.from);
-    this.logger_.debug('email to: ' + this.emailService_.to);
-    return true;
+    this.logger_.debug('Config settings:');
+    this.logger_.debug(`  backend: ${this.backend_}`);
+    this.logger_.debug(`  target OS: ${this.targetOs_}`);
+    this.logger_.debug(`  target CPU: ${this.targetCpu_}`);
+    this.logger_.debug(`  log level: ${this.logLevel_}`);
+    this.logger_.debug(`  log file: ${this.logFile_}`);
   }
 
   /**
-   * @return {string} configuration file.
+   * @return {string} target backend.
    */
-  get confFile() {
-    return this.conf_;
-  }
-
-  /**
-   * @return {string} root dir.
-   */
-  get rootDir() {
-    return this.rootDir_;
-  }
-
-  /**
-   * @return {string} out dir.
-   */
-  get outDir() {
-    return this.outDir_;
+  get backend() {
+    return this.backend_;
   }
 
   /**
@@ -170,13 +124,6 @@ class BuilderConf {
   }
 
   /**
-   * @return {string} target backend.
-   */
-  get backend() {
-    return this.gnArgs_.backend;
-  }
-
-  /**
    * @return {string} arguments to run 'gn gen'.
    */
   get gnArgs() {
@@ -185,8 +132,7 @@ class BuilderConf {
     args += ' is_debug=' + (this.gnArgs_.isDebug).toString();
     args += ' is_component_build=' + (this.gnArgs_.isComponent).toString();
     args += ' is_clang=' + (this.gnArgs_.isClang).toString();
-    args += ' dawn_enable_' + this.gnArgs_.backend + '=true';
-
+    args += ' dawn_enable_' + this.backend_ + '=true';
     return args;
   }
 
@@ -202,38 +148,6 @@ class BuilderConf {
    */
   get today() {
     return this.today_;
-  }
-
-  /**
-   * @return {array} of build targets.
-   */
-  get buildTargets() {
-    switch (this.targetOs) {
-      case 'linux':
-        // TODO
-        return '';
-      case 'win':
-        // TODO
-        return '';
-      default:
-        return null;
-    }
-  }
-
-  /**
-   * @return {string} path of package file.
-   */
-  get packagedFile() {
-    switch (this.targetOs) {
-      case 'linux':
-        // TODO
-        return '';
-      case 'win':
-        // TODO
-        return '';
-      default:
-        return null;
-    }
   }
 
   /**
@@ -255,20 +169,6 @@ class BuilderConf {
    */
   get logLevel() {
     return this.logLevel_;
-  }
-
-  /**
-   * @return {object} logger.
-   */
-  get archiveServer() {
-    return this.archiveServer_;
-  }
-
-  /**
-   * @return {object} email service.
-   */
-  get emailService() {
-    return this.emailService_;
   }
 
   /**

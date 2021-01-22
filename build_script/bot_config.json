@@ -1,0 +1,14 @@
+{
+  "target-os": "",
+  "target-cpu": "",
+  "gnArgs": {
+    "is-clang": true,
+    "is-component": true,
+    "is-debug": false
+  },
+  "clean-build": true,
+  "logging": {
+    "level": "debug",
+    "file": ""
+  }
+}

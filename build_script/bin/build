@@ -6,28 +6,47 @@
 'use strict';
 
 const path = require('path');
-const program = require('commander');
+const {Command} = require('commander');
 const {Builder} = require('../src/builder');
-const {BuilderConf} = require('../src/builder_conf');
 
-//^7.0.0
+const rootDir = path.join(path.dirname(process.argv[1]), '..', '..');
+const builder = new Builder(rootDir);
+
+const program = new Command();
+program.version(require('../../package.json').version);
+
 program
-  .version(require('../../package.json').version)
-  .usage('[options]')
-  .option('-a, --action <action>', 'Action', /^(sync|build|package|upload|all)$/i, 'all')
-  .option('-c, --conf <config>', 'Configuration file', '../bot_config.json')
-  .parse(process.argv);
+  .command('sync')
+  .action(() => {
+    builder.initConfig();
+    builder.actionSync();
+  });
 
-try {
-  const scriptPath = path.dirname(process.argv[1]);
-  const rootDir = path.join(scriptPath, '..', '..');
-  const configPath = path.join(scriptPath, program.conf)
-  let conf = new BuilderConf(rootDir, configPath, program.backend);
-  conf.init();
+program
+  .command('pull')
+  .action(() => {
+    builder.initConfig();
+    builder.actionPull();
+  });
 
-  let builder = new Builder(conf);
-  builder.run(program.action);
-} catch (e) {
-  console.log(e);
-  process.exit(1);
-}
+program
+  .command('build')
+  .option('-b, --backend <backend>', 'Build with target backend', 'null')
+  .option('-c, --config <config>', 'Configuration file',
+  'build_script/bot_config.json')
+  .action((options) => {
+    builder.initConfig(options.backend, options.config);
+    builder.actionBuild();
+  });
+
+program
+  .command('all')
+  .option('-b, --backend <backend>', 'Build with target backend', 'null')
+  .option('-c, --config <config>', 'Configuration file',
+  'build_script/bot_config.json')
+  .action((options) => {
+    builder.initConfig(options.backend, options.config);
+    builder.actionAll();
+  });
+
+program.parse();
