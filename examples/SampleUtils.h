@@ -17,79 +17,79 @@
 
 #include <dawn/webnn.h>
 #include <dawn/webnn_cpp.h>
-#include <vector>
 #include <condition_variable>
 #include <mutex>
+#include <vector>
 
 #include "common/RefCounted.h"
 
-uint32_t product(const std::vector<int32_t> &dims);
+uint32_t product(const std::vector<int32_t>& dims);
 
 wnn::NeuralNetworkContext CreateCppNeuralNetworkContext();
 
 wnn::NamedInputs CreateCppNamedInputs();
 
-wnn::NamedOperands CreateCppNamedOperands(); 
+wnn::NamedOperands CreateCppNamedOperands();
 
 wnn::NamedOutputs CreateCppNamedOutputs();
-
 
 bool Expected(float output, float expected);
 
 namespace utils {
 
-class WrappedModel : public RefCounted {
-public:
-  WrappedModel() = default;
-  ~WrappedModel() = default;
+    class WrappedModel : public RefCounted {
+      public:
+        WrappedModel() = default;
+        ~WrappedModel() = default;
 
-  void SetInput(std::vector<int32_t> shape, std::vector<float> buffer);
-  wnn::OperandDescriptor *InputDesc();
-  std::vector<float> InputBuffer();
+        void SetInput(std::vector<int32_t> shape, std::vector<float> buffer);
+        wnn::OperandDescriptor* InputDesc();
+        std::vector<float> InputBuffer();
 
-  void SetConstant(std::vector<int32_t> shape, std::vector<float> buffer);
-  wnn::OperandDescriptor *ConstantDesc();
-  void const *ConstantBuffer();
-  size_t ConstantLength();
+        void SetConstant(std::vector<int32_t> shape, std::vector<float> buffer);
+        wnn::OperandDescriptor* ConstantDesc();
+        void const* ConstantBuffer();
+        size_t ConstantLength();
 
-  virtual wnn::Operand GenerateOutput(wnn::ModelBuilder nn);
-  void SetOutputShape(std::vector<int32_t> shape);
-  std::vector<int32_t> OutputShape();
+        virtual wnn::Operand GenerateOutput(wnn::ModelBuilder nn);
+        void SetOutputShape(std::vector<int32_t> shape);
+        std::vector<int32_t> OutputShape();
 
-  void SetExpectedBuffer(std::vector<float> buffer);
-  std::vector<float> ExpectedBuffer();
+        void SetExpectedBuffer(std::vector<float> buffer);
+        std::vector<float> ExpectedBuffer();
 
-  void SetExpectedShape(std::vector<int32_t> shape);
-  std::vector<int32_t> ExpectedShape();
+        void SetExpectedShape(std::vector<int32_t> shape);
+        std::vector<int32_t> ExpectedShape();
 
-private:
-  wnn::ModelBuilder model_builder_;
-  std::vector<int32_t> input_shape_;
-  std::vector<float> input_buffer_;
-  wnn::OperandDescriptor input_desc_;
-  wnn::OperandDescriptor constant_desc_;
-  std::vector<int32_t> constant_shape_;
-  std::vector<float> constant_buffer_;
-  std::vector<int32_t> output_shape_;
-  std::vector<float> expected_buffer_;
-  std::vector<int32_t> expected_shape_;
-};
+      private:
+        wnn::ModelBuilder model_builder_;
+        std::vector<int32_t> input_shape_;
+        std::vector<float> input_buffer_;
+        wnn::OperandDescriptor input_desc_;
+        wnn::OperandDescriptor constant_desc_;
+        std::vector<int32_t> constant_shape_;
+        std::vector<float> constant_buffer_;
+        std::vector<int32_t> output_shape_;
+        std::vector<float> expected_buffer_;
+        std::vector<int32_t> expected_shape_;
+    };
 
-void Test(WrappedModel *model);
+    void Test(WrappedModel* model);
 
-class ComputeSync {
-public:
-  ComputeSync() : done_(false) {}
-  ~ComputeSync() = default;
-  void Wait();
-  void Finish();
+    class ComputeSync {
+      public:
+        ComputeSync() : done_(false) {
+        }
+        ~ComputeSync() = default;
+        void Wait();
+        void Finish();
 
-private:
-  std::condition_variable cond_var_;
-  std::mutex mutex_;
-  bool done_;
-};
+      private:
+        std::condition_variable cond_var_;
+        std::mutex mutex_;
+        bool done_;
+    };
 
-} // namespace utils
+}  // namespace utils
 
-#endif // WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
+#endif  // WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_

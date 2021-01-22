@@ -119,45 +119,48 @@ source_set("dawn_native_sources") {
   ]
 
   sources += [
-    "ops/binary.cc",
-    "ops/binary.h",
-    "ops/constant.cc",
-    "ops/constant.h",
-    "ops/conv2d.cc",
-    "ops/conv2d.h",
-    "ops/input.cc",
-    "ops/input.h",
-    "ops/pool2d.cc",
-    "ops/pool2d.h",
-    "ops/reshape.h",
-    "ops/transpose.h",
-    "ops/unary.cc",
-    "ops/unary.h",
+    "ops/Binary.cpp",
+    "ops/Binary.h",
+    "ops/Constant.cpp",
+    "ops/Constant.h",
+    "ops/Conv2d.cpp",
+    "ops/Conv2d.h",
+    "ops/Input.cpp",
+    "ops/Input.h",
+    "ops/Pool2d.cpp",
+    "ops/Pool2d.h",
+    "ops/Reshape.h",
+    "ops/Transpose.h",
+    "ops/Unary.cpp",
+    "ops/Unary.h",
   ]
 
   if (dawn_enable_null) {
     sources += [
-    "null/neural_network_context_null.cc",
-    "null/neural_network_context_null.h",
+      "null/NeuralNetworkContextNull.cpp",
+      "null/NeuralNetworkContextNull.h",
     ]
   }
 
   if (dawn_enable_ie) {
     sources += [
-      "ie/compilation_ie.cc",
-      "ie/compilation_ie.h",
-      "ie/error_ie.cc",
-      "ie/error_ie.h",
-      "ie/ienn_symbol_table.cc",
-      "ie/ienn_symbol_table.h",
-      "ie/late_binding_symbol_table.cc",
-      "ie/late_binding_symbol_table.h",
-      "ie/model_builder_ie.cc",
-      "ie/model_builder_ie.h",
-      "ie/model_ie.cc",
-      "ie/model_ie.h",
-      "ie/neural_network_context_ie.cc",
-      "ie/neural_network_context_ie.h",
+      "ie/CompilationIE.cpp",
+      "ie/CompilationIE.h",
+      "ie/ErrorIE.cpp",
+      "ie/ErrorIE.h",
+      "ie/ModelBuilderIE.cpp",
+      "ie/ModelBuilderIE.h",
+      "ie/ModelIE.cpp",
+      "ie/ModelIE.h",
+      "ie/NeuralNetworkContextIE.cpp",
+      "ie/NeuralNetworkContextIE.h",
+    ]
+
+    sources += [
+      "ie/ienn_symbol_table/ienn_symbol_table.cc",
+      "ie/ienn_symbol_table/ienn_symbol_table.h",
+      "ie/ienn_symbol_table/late_binding_symbol_table.cc",
+      "ie/ienn_symbol_table/late_binding_symbol_table.h",
     ]
   }
 
@@ -173,14 +176,14 @@ source_set("dawn_native_sources") {
     ]
 
     sources += [
-      "dml/compilation_dml.cc",
-      "dml/compilation_dml.h",
-      "dml/model_builder_dml.cc",
-      "dml/model_builder_dml.h",
-      "dml/model_dml.cc",
-      "dml/model_dml.h",
-      "dml/neural_network_context_dml.cc",
-      "dml/neural_network_context_dml.h",
+      "dml/CompilationDML.cpp",
+      "dml/CompilationDML.h",
+      "dml/ModelBuilderDML.cpp",
+      "dml/ModelBuilderDML.h",
+      "dml/ModelDML.cpp",
+      "dml/ModelDML.h",
+      "dml/NeuralNetworkContextDML.cpp",
+      "dml/NeuralNetworkContextDML.h",
     ]
 
     include_dirs = [ "dml/deps/" ]

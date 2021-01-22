@@ -18,7 +18,7 @@ using namespace ngraph;
 
 namespace {
 
-SizeVector ToVector(int32_t const *value, uint32_t count) {
+SizeVector ToVector(int32_t const* value, uint32_t count) {
   SizeVector data;
   data.reserve(count);
   for (int i = 0; i < count; ++i) {
@@ -27,17 +27,18 @@ SizeVector ToVector(int32_t const *value, uint32_t count) {
   return data;
 }
 
-ie_operand_t *CreateOperand(std::string &name) {
-  ie_operand_t *operand = new ie_operand_t();
+ie_operand_t* CreateOperand(std::string& name) {
+  ie_operand_t* operand = new ie_operand_t();
   std::unique_ptr<char[]> node_name(new char[name.length() + 1]);
   operand->name = node_name.release();
   memcpy(operand->name, name.c_str(), name.length() + 1);
   return operand;
 }
-} // namespace
+}  // namespace
 
-ie_operand_t *Model::AddConstant(ie_operand_descriptor_t const *desc,
-                                 void const *value, size_t length) {
+ie_operand_t* Model::AddConstant(ie_operand_descriptor_t const* desc,
+                                 void const* value,
+                                 size_t length) {
   SizeVector dims = ToVector(desc->dimensions, desc->dimensionsCount);
   // Generally, FP16 is preferable as it is most ubiquitous and performant
   // documented in
@@ -52,15 +53,15 @@ ie_operand_t *Model::AddConstant(ie_operand_descriptor_t const *desc,
     blob = make_shared_blob<int16_t>({Precision::FP16, dims, Layout::ANY});
   }
   blob->allocate();
-  const float *src = reinterpret_cast<const float *>(value);
+  const float* src = reinterpret_cast<const float*>(value);
   std::shared_ptr<op::Constant> node;
   uint32_t result;
   if (fp32_precision) {
-    float *dst = blob->buffer().as<float *>();
+    float* dst = blob->buffer().as<float*>();
     CopyDataToBuffer<float>(dst, src, length);
     node = std::make_shared<op::Constant>(element::f32, Shape(dims), dst);
   } else {
-    int16_t *dst = blob->buffer().as<int16_t *>();
+    int16_t* dst = blob->buffer().as<int16_t*>();
     CopyDataToBuffer<int16_t>(dst, src, length);
     node = std::make_shared<op::Constant>(element::f16, Shape(dims), dst);
   }
@@ -70,7 +71,7 @@ ie_operand_t *Model::AddConstant(ie_operand_descriptor_t const *desc,
   return CreateOperand(node_name);
 }
 
-ie_operand_t *Model::AddInput(ie_operand_descriptor_t const *desc) {
+ie_operand_t* Model::AddInput(ie_operand_descriptor_t const* desc) {
   SizeVector dims = ToVector(desc->dimensions, desc->dimensionsCount);
   auto input_node =
       std::make_shared<op::v0::Parameter>(element::f32, Shape(dims));
@@ -81,7 +82,7 @@ ie_operand_t *Model::AddInput(ie_operand_descriptor_t const *desc) {
   return CreateOperand(node_name);
 }
 
-void Model::AddOutput(ie_operand_t *operand) {
+void Model::AddOutput(ie_operand_t* operand) {
   auto node_name = std::string(operand->name);
   auto output_node = std::make_shared<op::Result>(name_node_map_[node_name]);
   ngraph_outputs_.push_back(output_node);
@@ -89,7 +90,7 @@ void Model::AddOutput(ie_operand_t *operand) {
   return;
 }
 
-ie_operand_t *Model::AddMatMul(ie_operand_t *a, ie_operand_t *b) {
+ie_operand_t* Model::AddMatMul(ie_operand_t* a, ie_operand_t* b) {
   auto primary_node = name_node_map_[a->name];
   auto secondary_node = name_node_map_[b->name];
   auto matmul_node = std::make_shared<op::v0::MatMul>(
@@ -100,21 +101,22 @@ ie_operand_t *Model::AddMatMul(ie_operand_t *a, ie_operand_t *b) {
   return CreateOperand(node_name);
 }
 
-ie_operand_t *Model::AddBinary(ie_binary_type type, ie_operand_t *a,
-                               ie_operand_t *b) {
+ie_operand_t* Model::AddBinary(ie_binary_type type,
+                               ie_operand_t* a,
+                               ie_operand_t* b) {
   auto primary_node = name_node_map_[a->name];
   auto secondary_node = name_node_map_[b->name];
   std::shared_ptr<ngraph::Node> binary_node;
   switch (type) {
-  case ie_binary_type::ADD:
-    binary_node = std::make_shared<op::v1::Add>(primary_node, secondary_node);
-    break;
-  case ie_binary_type::MUL:
-    binary_node =
-        std::make_shared<op::v1::Multiply>(primary_node, secondary_node);
-    break;
-  default:
-    assert(0);
+    case ie_binary_type::ADD:
+      binary_node = std::make_shared<op::v1::Add>(primary_node, secondary_node);
+      break;
+    case ie_binary_type::MUL:
+      binary_node =
+          std::make_shared<op::v1::Multiply>(primary_node, secondary_node);
+      break;
+    default:
+      assert(0);
   }
 
   std::string node_name = binary_node->get_name();
@@ -122,8 +124,9 @@ ie_operand_t *Model::AddBinary(ie_binary_type type, ie_operand_t *a,
   return CreateOperand(node_name);
 }
 
-ie_operand_t *Model::AddConv2d(ie_operand_t *input, ie_operand_t *filter,
-                               ie_conv2d_options_t *options) {
+ie_operand_t* Model::AddConv2d(ie_operand_t* input,
+                               ie_operand_t* filter,
+                               ie_conv2d_options_t* options) {
   CoordinateDiff pad_begin = {options->padding[0], options->padding[2]};
   CoordinateDiff pad_end = {options->padding[1], options->padding[3]};
   Strides strides = {static_cast<size_t>(options->strides[0]),
@@ -141,8 +144,9 @@ ie_operand_t *Model::AddConv2d(ie_operand_t *input, ie_operand_t *filter,
   return CreateOperand(node_name);
 }
 
-ie_operand_t *Model::AddPool2d(ie_pool_type type, ie_operand_t *input,
-                               ie_pool2d_options_t *options) {
+ie_operand_t* Model::AddPool2d(ie_pool_type type,
+                               ie_operand_t* input,
+                               ie_pool2d_options_t* options) {
   Shape window_dimensions = {static_cast<size_t>(options->windowDimensions[0]),
                              static_cast<size_t>(options->windowDimensions[1])};
   Shape pad_begin = {static_cast<size_t>(options->padding[0]),
@@ -157,18 +161,18 @@ ie_operand_t *Model::AddPool2d(ie_pool_type type, ie_operand_t *input,
   auto input_node = name_node_map_[input->name];
   std::shared_ptr<ngraph::Node> pool2d_node;
   switch (type) {
-  case ie_pool_type::AVERAGE_POOL:
-    pool2d_node = std::make_shared<op::v1::AvgPool>(
-        input_node, strides, pad_begin, pad_end, window_dimensions, true,
-        op::RoundingType::FLOOR, op::PadType::EXPLICIT);
-    break;
-  case ie_pool_type::MAX_POOL:
-    pool2d_node = std::make_shared<op::v1::MaxPool>(
-        input_node, strides, pad_begin, pad_end, window_dimensions,
-        op::RoundingType::FLOOR, op::PadType::EXPLICIT);
-    break;
-  default:
-    assert(0);
+    case ie_pool_type::AVERAGE_POOL:
+      pool2d_node = std::make_shared<op::v1::AvgPool>(
+          input_node, strides, pad_begin, pad_end, window_dimensions, true,
+          op::RoundingType::FLOOR, op::PadType::EXPLICIT);
+      break;
+    case ie_pool_type::MAX_POOL:
+      pool2d_node = std::make_shared<op::v1::MaxPool>(
+          input_node, strides, pad_begin, pad_end, window_dimensions,
+          op::RoundingType::FLOOR, op::PadType::EXPLICIT);
+      break;
+    default:
+      assert(0);
   }
 
   std::string node_name = pool2d_node->get_name();
@@ -176,7 +180,7 @@ ie_operand_t *Model::AddPool2d(ie_pool_type type, ie_operand_t *input,
   return CreateOperand(node_name);
 }
 
-ie_operand_t *Model::AddRelu(ie_operand_t *input) {
+ie_operand_t* Model::AddRelu(ie_operand_t* input) {
   auto input_node = name_node_map_[input->name];
   auto relu_node = std::make_shared<op::v0::Relu>(input_node);
 
@@ -185,7 +189,8 @@ ie_operand_t *Model::AddRelu(ie_operand_t *input) {
   return CreateOperand(node_name);
 }
 
-ie_operand_t *Model::AddReshape(ie_operand_t *input, int32_t const *new_shape,
+ie_operand_t* Model::AddReshape(ie_operand_t* input,
+                                int32_t const* new_shape,
                                 uint32_t new_shape_count) {
   auto input_node = name_node_map_[input->name];
   SizeVector shape = ToVector(new_shape, new_shape_count);
@@ -199,7 +204,7 @@ ie_operand_t *Model::AddReshape(ie_operand_t *input, int32_t const *new_shape,
   return CreateOperand(node_name);
 }
 
-ie_operand_t *Model::AddSoftmax(ie_operand_t *input) {
+ie_operand_t* Model::AddSoftmax(ie_operand_t* input) {
   auto input_node = name_node_map_[input->name];
   // new Spec only define 2-D input tensor along axis 1.
   auto softmax_node = std::make_shared<op::v1::Softmax>(input_node, 1);
@@ -209,8 +214,8 @@ ie_operand_t *Model::AddSoftmax(ie_operand_t *input) {
   return CreateOperand(node_name);
 }
 
-ie_operand_t *Model::AddTranspose(ie_operand_t *input,
-                                  ie_transpose_options_t *options) {
+ie_operand_t* Model::AddTranspose(ie_operand_t* input,
+                                  ie_transpose_options_t* options) {
   auto input_node = name_node_map_[input->name];
   auto input_shape = input_node.get_shape();
   SizeVector permutation;
@@ -252,7 +257,7 @@ size_t Model::GetOutputsNumber() {
   return outputs.size();
 }
 
-IEStatusCode Model::GetOutputName(const size_t number, char **name) {
+IEStatusCode Model::GetOutputName(const size_t number, char** name) {
   OutputsDataMap outputs = network_->getOutputsInfo();
   // check if the number is out of bounds.
   if (number < 0 || number >= outputs.size()) {
@@ -267,4 +272,4 @@ IEStatusCode Model::GetOutputName(const size_t number, char **name) {
   return IEStatusCode::OK;
 }
 
-} // namespace InferenceEngine
+}  // namespace InferenceEngine

@@ -23,11 +23,11 @@
 #include <vector>
 
 namespace wnn {
-enum class ErrorType : uint32_t;
+    enum class ErrorType : uint32_t;
 }
 
 namespace dawn {
-using ErrorType = wnn::ErrorType;
+    using ErrorType = wnn::ErrorType;
 }
 
 namespace dawn_native {

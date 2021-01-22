@@ -19,32 +19,37 @@
 namespace InferenceEngine {
 
 class Model {
-public:
+ public:
   Model() = default;
   ~Model() = default;
 
-  ie_operand_t *AddConstant(ie_operand_descriptor_t const *desc,
-                            void const *value, size_t size);
-  ie_operand_t *AddInput(ie_operand_descriptor_t const *desc);
-  void AddOutput(ie_operand_t *operand);
-  ie_operand_t *AddMatMul(ie_operand_t *a, ie_operand_t *b);
-  ie_operand_t *AddBinary(ie_binary_type type, ie_operand_t *a,
-                          ie_operand_t *b);
-  ie_operand_t *AddConv2d(ie_operand_t *input, ie_operand_t *filter,
-                          ie_conv2d_options_t *options);
-  ie_operand_t *AddPool2d(ie_pool_type type, ie_operand_t *input,
-                          ie_pool2d_options_t *options);
-  ie_operand_t *AddRelu(ie_operand_t *input);
-  ie_operand_t *AddReshape(ie_operand_t *input, int32_t const *new_shape,
+  ie_operand_t* AddConstant(ie_operand_descriptor_t const* desc,
+                            void const* value,
+                            size_t size);
+  ie_operand_t* AddInput(ie_operand_descriptor_t const* desc);
+  void AddOutput(ie_operand_t* operand);
+  ie_operand_t* AddMatMul(ie_operand_t* a, ie_operand_t* b);
+  ie_operand_t* AddBinary(ie_binary_type type,
+                          ie_operand_t* a,
+                          ie_operand_t* b);
+  ie_operand_t* AddConv2d(ie_operand_t* input,
+                          ie_operand_t* filter,
+                          ie_conv2d_options_t* options);
+  ie_operand_t* AddPool2d(ie_pool_type type,
+                          ie_operand_t* input,
+                          ie_pool2d_options_t* options);
+  ie_operand_t* AddRelu(ie_operand_t* input);
+  ie_operand_t* AddReshape(ie_operand_t* input,
+                           int32_t const* new_shape,
                            uint32_t new_shape_count);
-  ie_operand_t *AddSoftmax(ie_operand_t *input);
-  ie_operand_t *AddTranspose(ie_operand_t *input,
-                             ie_transpose_options_t *options);
+  ie_operand_t* AddSoftmax(ie_operand_t* input);
+  ie_operand_t* AddTranspose(ie_operand_t* input,
+                             ie_transpose_options_t* options);
   void Finish();
   size_t GetOutputsNumber();
-  IEStatusCode GetOutputName(const size_t number, char **name);
+  IEStatusCode GetOutputName(const size_t number, char** name);
 
-private:
+ private:
   friend class Compilation;
   std::map<std::string, ngraph::Output<ngraph::Node>> name_node_map_;
   std::vector<std::shared_ptr<ngraph::op::v0::Parameter>> ngraph_inputs_;
@@ -54,6 +59,6 @@ private:
   DISALLOW_COPY_AND_ASSIGN(Model);
 };
 
-} // namespace InferenceEngine
+}  // namespace InferenceEngine
 
-#endif // IE_MODEL_H
+#endif  // IE_MODEL_H

@@ -1,3 +1,15 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #ifndef WEBNN_NATIVE_NEURAL_NETWORK_CONTEXT_H_
 #define WEBNN_NATIVE_NEURAL_NETWORK_CONTEXT_H_
 
@@ -8,33 +20,33 @@
 
 namespace dawn_native {
 
-class NeuralNetworkContextBase : public RefCounted {
-public:
-  NeuralNetworkContextBase();
-  virtual ~NeuralNetworkContextBase() = default;
+    class NeuralNetworkContextBase : public RefCounted {
+      public:
+        NeuralNetworkContextBase();
+        virtual ~NeuralNetworkContextBase() = default;
 
-  bool ConsumedError(MaybeError maybeError) {
-    if (DAWN_UNLIKELY(maybeError.IsError())) {
-      HandleError(maybeError.AcquireError());
-      return true;
-    }
-    return false;
-  }
+        bool ConsumedError(MaybeError maybeError) {
+            if (DAWN_UNLIKELY(maybeError.IsError())) {
+                HandleError(maybeError.AcquireError());
+                return true;
+            }
+            return false;
+        }
 
-  // Dawn API
-  ModelBuilderBase *CreateModelBuilder();
-  void PushErrorScope(wnn::ErrorFilter filter);
-  bool PopErrorScope(wnn::ErrorCallback callback, void* userdata);
-  void SetUncapturedErrorCallback(wnn::ErrorCallback callback, void *userdata);
+        // Dawn API
+        ModelBuilderBase* CreateModelBuilder();
+        void PushErrorScope(wnn::ErrorFilter filter);
+        bool PopErrorScope(wnn::ErrorCallback callback, void* userdata);
+        void SetUncapturedErrorCallback(wnn::ErrorCallback callback, void* userdata);
 
-private:
-  void HandleError(std::unique_ptr<ErrorData> error);
-  virtual ModelBuilderBase *CreateModelBuilderImpl();
+      private:
+        void HandleError(std::unique_ptr<ErrorData> error);
+        virtual ModelBuilderBase* CreateModelBuilderImpl();
 
-  Ref<ErrorScope> root_error_scope_;
-  Ref<ErrorScope> current_error_scope_;
-};
+        Ref<ErrorScope> root_error_scope_;
+        Ref<ErrorScope> current_error_scope_;
+    };
 
-} // namespace dawn_native
+}  // namespace dawn_native
 
-#endif // WEBNN_NATIVE_NEURAL_NETWORK_CONTEXT_H_
+#endif  // WEBNN_NATIVE_NEURAL_NETWORK_CONTEXT_H_
