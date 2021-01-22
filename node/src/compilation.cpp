@@ -5,17 +5,51 @@
 #include "DescriptorDecoder.h"
 #include "model.h"
 
-Napi::Object OutputItem(const Napi::Env &env, WNNResult result) {
-  Napi::Object item = Napi::Object::New(env);
-  size_t buffer_size = wnnResultBufferSize(result) / sizeof(float);
-  Napi::Float32Array output_array = Napi::Float32Array::New(env, buffer_size);
-  const float *buffer = static_cast<const float *>(wnnResultBuffer(result));
-  for (size_t i = 0; i < buffer_size; ++i) {
-    output_array[i] = buffer[i];
+// Hold Promise::Deferred with AsyncWorker.
+class ComputeAsyncWorker : public Napi::AsyncWorker {
+public:
+  ComputeAsyncWorker(Napi::Env &env, Napi::Promise::Deferred &deferred,
+                     std::vector<std::string> &output_names,
+                     Napi::Object &output_objects)
+      : Napi::AsyncWorker(env), env_(env), deferred_(deferred),
+        output_names_(output_names), output_objects_(output_objects) {}
+  ~ComputeAsyncWorker() { wnnNamedResultsRelease(named_results_); }
+
+  void Execute() {}
+  void OnOK() {
+    if (output_objects_.IsEmpty()) {
+      Napi::Object obj = Napi::Object::New(env_);
+      for (auto &name : output_names_) {
+        WNNResult result = wnnNamedResultsGet(named_results_, name.data());
+        obj.Set(name, OutputItem(env_, result));
+        wnnResultRelease(result);
+      }
+      deferred_.Resolve(obj);
+    } else {
+      deferred_.Resolve(output_objects_);
+    }
   }
-  item.Set("buffer", output_array);
-  return item;
-}
+  void SetNamedResults(WNNNamedResults named_results) {
+    named_results_ = named_results;
+  }
+
+private:
+  Napi::Object OutputItem(const Napi::Env &env, WNNResult result) {
+    Napi::Object item = Napi::Object::New(env);
+    size_t buffer_size = wnnResultBufferSize(result);
+    Napi::ArrayBuffer buffer = Napi::ArrayBuffer::New(env, 
+        const_cast<void*>(wnnResultBuffer(result)), buffer_size);
+    Napi::Float32Array output_buffer = Napi::Float32Array::New(env,
+        buffer_size / sizeof(float), buffer, 0);
+    item.Set("buffer", output_buffer);
+    return item;
+  }
+  Napi::Env env_;
+  Napi::Promise::Deferred deferred_;
+  std::vector<std::string> &output_names_;
+  WNNNamedResults named_results_;
+  Napi::Object output_objects_;
+};
 
 Napi::FunctionReference Compilation::constructor;
 
@@ -37,9 +71,7 @@ WNNCompilation Compilation::GetCompilation() {
   return compilation_;
 }
 
-void Compilation::SetNamedResults(WNNNamedResults named_results) {
-  named_results_ = named_results;
-}
+ComputeAsyncWorker *Compilation::GetAsyncWorker() { return compute_worker_; }
 
 Napi::Value Compilation::Compute(const Napi::CallbackInfo &info) {
   WNNNamedInputs named_inputs = dawn_native::CreateNamedInputs();
@@ -70,31 +102,24 @@ Napi::Value Compilation::Compute(const Napi::CallbackInfo &info) {
       }
     }
   }
-
   wnnCompilationCompute(
       compilation_, named_inputs,
       [](WNNComputeStatus status, WNNNamedResults results, char const *message,
          void *user_data) {
-        reinterpret_cast<Compilation *>(user_data)->SetNamedResults(results);
+        ComputeAsyncWorker *compute_worker =
+            reinterpret_cast<Compilation *>(user_data)->GetAsyncWorker();
+        compute_worker->SetNamedResults(results);
+        compute_worker->Queue();
       },
       reinterpret_cast<void *>(this), named_outputs);
 
   Napi::Env env = info.Env();
   auto deferred = Napi::Promise::Deferred::New(env);
-  if (info.Length() == 1) {
-    Napi::Object obj = Napi::Object::New(env);
-    Model *model = Napi::ObjectWrap<Model>::Unwrap(model_object_.Value());
-    for (auto &name : model->GetOutputName()) {
-      WNNResult result = wnnNamedResultsGet(named_results_, name.data());
-      obj.Set(name, OutputItem(env, result));
-      wnnResultRelease(result);
-    }
-    // Free native memory.
-    wnnNamedResultsRelease(named_results_);
-    deferred.Resolve(obj);
-  } else {
-    deferred.Resolve(info[1]);
-  }
+  Model *model = Napi::ObjectWrap<Model>::Unwrap(model_object_.Value());
+  compute_worker_ = new ComputeAsyncWorker(
+      env, deferred, model->GetOutputName(),
+      info.Length() == 1 ? Napi::Object::Object() : info[1].ToObject());
+
   return deferred.Promise();
 }
 
