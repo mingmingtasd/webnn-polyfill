@@ -32,10 +32,7 @@ namespace webnn_native { namespace op {
         MaybeError AddToModel(ModelBase* model) const override {
             return model->AddReshape(this);
         }
-        MaybeError Validate() override {
-            return {};
-        }
-
+        MaybeError ValidateAndInferTypes() override;
         int32_t const* GetNewShape() const {
             return new_shape_.data();
         }

@@ -26,6 +26,8 @@ namespace webnn_native { namespace op {
                  size_t size)
             : OperandBase(builder), value_(value), size_(size) {
             descriptor_.type = desc->type;
+            type_ = desc->type;
+            rank_ = desc->dimensionsCount;
             dimensions_.assign(desc->dimensions, desc->dimensions + desc->dimensionsCount);
             descriptor_.dimensions = dimensions_.data();
             descriptor_.dimensionsCount = dimensions_.size();
@@ -36,7 +38,7 @@ namespace webnn_native { namespace op {
             return model->AddConstant(this);
         }
 
-        MaybeError Validate() override;
+        MaybeError ValidateAndInferTypes() override;
         const OperandDescriptor* GetOperandDescriptor() const {
             return &descriptor_;
         }

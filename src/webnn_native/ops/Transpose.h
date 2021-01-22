@@ -22,7 +22,13 @@ namespace webnn_native { namespace op {
       public:
         Transpose(ModelBuilderBase* builder, OperandBase* input, TransposeOptions const* options)
             : OperandBase(builder, {input}) {
-            if (options) {
+            if (options == nullptr || options->permutation == nullptr) {
+                int32_t rank = input->Rank();
+                permutation_.resize(rank);
+                for (auto i = 0; i < rank - 1; i++) {
+                    permutation_[i] = rank - 1 - i;
+                }
+            } else {
                 permutation_.assign(options->permutation,
                                     options->permutation + options->permutationCount);
             }
@@ -34,9 +40,7 @@ namespace webnn_native { namespace op {
         MaybeError AddToModel(ModelBase* model) const override {
             return model->AddTranspose(this);
         }
-        MaybeError Validate() override {
-            return {};
-        }
+        MaybeError ValidateAndInferTypes() override;
 
         TransposeOptions const* GetOptions() const {
             return &options_;

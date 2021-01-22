@@ -58,7 +58,40 @@ namespace webnn_native { namespace op {
         return &options_;
     }
 
-    MaybeError Conv2d::Validate() {
+    MaybeError Conv2d::ValidateAndInferTypes() {
+        auto input = inputs_[0];
+        auto filter = inputs_[1];
+        if (input->IsError() || filter->IsError()) {
+            return DAWN_VALIDATION_ERROR("Argument inputs are invalid.");
+        }
+
+        if (input->Type() != filter->Type()) {
+            return DAWN_VALIDATION_ERROR("Argument types are inconsistent.");
+        }
+        // The input 4-D tensor
+        if (input->Rank() != 4) {
+            return DAWN_VALIDATION_ERROR("Argument input is not a 4D tensor.");
+        }
+        // The filter 4-D tensor
+        if (filter->Rank() != 4) {
+            return DAWN_VALIDATION_ERROR("Argument filter is not a 4D tensor.");
+        }
+        // padding: a sequence of long of length 4
+        if (options_.paddingCount != 4) {
+            return DAWN_VALIDATION_ERROR("PaddingCount is incorrect.");
+        }
+        // strides: a sequence of long of length 2
+        if (options_.stridesCount != 2) {
+            return DAWN_VALIDATION_ERROR("windowDimensionsCount is incorrect.");
+        }
+        // dilations: a sequence of long of length 2
+        if (options_.dilationsCount != 2) {
+            return DAWN_VALIDATION_ERROR("windowDimensionsCount is incorrect.");
+        }
+
+        type_ = input->Type();
+        rank_ = 4;
+
         return {};
     }
 

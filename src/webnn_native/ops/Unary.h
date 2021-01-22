@@ -33,7 +33,7 @@ namespace webnn_native { namespace op {
         MaybeError AddToModel(ModelBase* model) const override {
             return model->AddUnary(this);
         }
-        MaybeError Validate() override;
+        MaybeError ValidateAndInferTypes() override;
         UnaryOpType GetType() const {
             return op_type_;
         }

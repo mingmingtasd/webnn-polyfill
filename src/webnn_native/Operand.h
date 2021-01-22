@@ -33,8 +33,15 @@ namespace webnn_native {
         // Add the operand to model for specific backend.
         virtual MaybeError AddToModel(ModelBase* model) const;
 
+        webnn::OperandType Type() const {
+            return type_;
+        }
+        int32_t Rank() const {
+            return rank_;
+        }
+
         static OperandBase* MakeError(ModelBuilderBase* model_builder);
-        virtual MaybeError Validate() {
+        virtual MaybeError ValidateAndInferTypes() {
             UNREACHABLE();
         }
 
@@ -44,6 +51,10 @@ namespace webnn_native {
       protected:
         // The inputs of operand.
         std::vector<Ref<OperandBase>> inputs_;
+        // The operand type.
+        webnn::OperandType type_;
+        // only set rank for dimensions
+        int32_t rank_;
     };
 }  // namespace webnn_native
 
