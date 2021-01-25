@@ -21,7 +21,7 @@ namespace {
 SizeVector ToVector(int32_t const* value, uint32_t count) {
   SizeVector data;
   data.reserve(count);
-  for (int i = 0; i < count; ++i) {
+  for (uint32_t i = 0; i < count; ++i) {
     data.push_back(value[i]);
   }
   return data;
@@ -33,6 +33,16 @@ ie_operand_t* CreateOperand(std::string& name) {
   operand->name = node_name.release();
   memcpy(operand->name, name.c_str(), name.length() + 1);
   return operand;
+}
+
+ngraph::Output<ngraph::Node> Reshape(
+    const ngraph::Output<ngraph::Node>& input_node,
+    const std::vector<size_t>& new_shape) {
+  auto target_shape_node = std::make_shared<op::Constant>(
+      element::i64, Shape{new_shape.size()}, new_shape);
+  auto reshape_node = std::make_shared<op::v1::Reshape>(
+      input_node, target_shape_node->output(0), true);
+  return reshape_node->output(0);
 }
 }  // namespace
 
@@ -55,7 +65,6 @@ ie_operand_t* Model::AddConstant(ie_operand_descriptor_t const* desc,
   blob->allocate();
   const float* src = reinterpret_cast<const float*>(value);
   std::shared_ptr<op::Constant> node;
-  uint32_t result;
   if (fp32_precision) {
     float* dst = blob->buffer().as<float*>();
     CopyDataToBuffer<float>(dst, src, length);
@@ -92,7 +101,19 @@ void Model::AddOutput(ie_operand_t* operand) {
 
 ie_operand_t* Model::AddMatMul(ie_operand_t* a, ie_operand_t* b) {
   auto primary_node = name_node_map_[a->name];
+  auto primary_shape = primary_node.get_shape();
+  // Unsqueeze to 2D by adding axes with size 1 to the left of the shape if
+  // first input is equal to 1.
+  if (primary_shape.size() == 1) {
+    primary_node = Reshape(primary_node, {1, primary_shape[0]});
+  }
   auto secondary_node = name_node_map_[b->name];
+  auto secondary_shape = secondary_node.get_shape();
+  // Unsqueeze to 2D by adding axes with size 1 to the right of the shape if
+  // second input is equal to 1.
+  if (secondary_shape.size() == 1) {
+    secondary_node = Reshape(secondary_node, {secondary_shape[0], 1});
+  }
   auto matmul_node = std::make_shared<op::v0::MatMul>(
       primary_node, secondary_node, false, false);
 
@@ -194,13 +215,10 @@ ie_operand_t* Model::AddReshape(ie_operand_t* input,
                                 uint32_t new_shape_count) {
   auto input_node = name_node_map_[input->name];
   SizeVector shape = ToVector(new_shape, new_shape_count);
-  auto target_shape_node =
-      std::make_shared<op::Constant>(element::i64, Shape{shape.size()}, shape);
-  auto reshape_node = std::make_shared<op::v1::Reshape>(
-      input_node, target_shape_node->output(0), true);
+  auto reshape_node = Reshape(input_node, shape);
 
-  std::string node_name = reshape_node->get_name();
-  name_node_map_[node_name] = reshape_node->output(0);
+  std::string node_name = reshape_node.get_node()->get_name();
+  name_node_map_[node_name] = reshape_node;
   return CreateOperand(node_name);
 }
 
