@@ -1,5 +1,3 @@
-// Copyright 2017 The Dawn Authors
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -51,6 +49,9 @@ bool Expected(float output, float expected) {
 }
 
 namespace utils {
+
+    WrappedModel::WrappedModel() : output_expected_(true) {
+    }
 
     void WrappedModel::SetInput(std::vector<int32_t> shape, std::vector<float> buffer) {
         input_shape_ = std::move(shape);
@@ -114,11 +115,11 @@ namespace utils {
         UNREACHABLE();
     }
 
-    void WrappedModel::SetOutputExpected(bool expected) {
+    void WrappedModel::SetComputedResult(bool expected) {
         output_expected_ = expected;
     }
 
-    bool WrappedModel::GetOutputExpected() {
+    bool WrappedModel::GetComputedResult() {
         return output_expected_;
     }
 
@@ -130,9 +131,9 @@ namespace utils {
     void ComputeSync::Wait() {
         // Wait for async callback.
         std::unique_lock<std::mutex> lock(mutex_);
-        done_ = false;
         bool& done = done_;
         cond_var_.wait(lock, [&done] { return done; });
+        done_ = false;
     }
 
     void ComputeSync::Finish() {
@@ -155,19 +156,20 @@ namespace utils {
         wnn::NamedResults outputs = outputs.Acquire(impl);
         wnn::Result output = outputs.Get("output");
         std::vector<float> expected_data = g_wrapped_model->ExpectedBuffer();
+        bool expected = true;
         for (size_t i = 0; i < output.BufferSize() / sizeof(float); ++i) {
             float output_data = static_cast<const float*>(output.Buffer())[i];
             if (!Expected(output_data, expected_data[i])) {
                 dawn::ErrorLog() << "The output doesn't output as expected for " << output_data
                                  << " != " << expected_data[i] << " index = " << i;
-                g_wrapped_model->SetOutputExpected(false);
+                expected = false;
                 break;
             }
         }
         std::vector<int32_t> expected_shape = g_wrapped_model->ExpectedShape();
         if (!expected_shape.empty()) {
             if (expected_shape.size() != output.DimensionsSize()) {
-                g_wrapped_model->SetOutputExpected(false);
+                expected = false;
                 dawn::ErrorLog() << "The output rank is not as expected for "
                                  << expected_shape.size() << " != " << output.DimensionsSize();
             } else {
@@ -177,17 +179,19 @@ namespace utils {
                         dawn::ErrorLog()
                             << "The output dimension is not as expected for " << dimension
                             << " != " << expected_shape[i] << " index = " << i;
-                        g_wrapped_model->SetOutputExpected(false);
+                        expected = false;
                         break;
                     }
                 }
             }
         }
-        if (g_wrapped_model->GetOutputExpected()) {
+        // TODO: Remove these log when all end2end tests for ops are ready
+        if (expected) {
             dawn::InfoLog() << "Test succeeded.";
         } else {
             dawn::InfoLog() << "Test failed.";
         }
+        g_wrapped_model->SetComputedResult(expected);
         g_compute_sync.Finish();
         return;
     }
@@ -235,7 +239,7 @@ namespace utils {
         model.Compile(CompilationCallback, nullptr);
 
         g_compute_sync.Wait();
-        bool expected = wrapped_model->GetOutputExpected();
+        bool expected = wrapped_model->GetComputedResult();
         // Release backend resources in main thread.
         delete g_wrapped_model;
         g_compilation = nullptr;

@@ -152,15 +152,10 @@ source_set("dawn_end2end_tests_sources") {
   ]
 
   sources = [
-    "DawnTest.h",
     "end2end/AddTests.cpp",
   ]
 
   # Validation tests that need OS windows live in end2end tests.
-  sources += [
-    #"unittests/validation/ValidationTest.cpp",
-    #"unittests/validation/ValidationTest.h",
-  ]
 
   libs = []
 }
@@ -177,11 +172,6 @@ test("dawn_end2end_tests") {
     "${dawn_root}/src/dawn_native",
   ]
 
-  sources = [
-    "DawnTest.cpp",
-    "DawnTest.h",
-  ]
-
   libs = []
 
   # When building inside Chromium, use their gtest main function because it is
@@ -189,6 +179,6 @@ test("dawn_end2end_tests") {
   if (build_with_chromium) {
     deps += [ ":dawn_end2end_tests_main" ]
   } else {
-    sources += [ "End2EndTestsMain.cpp" ]
+    sources = [ "End2EndTestsMain.cpp" ]
   }
 }

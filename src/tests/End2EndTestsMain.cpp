@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/DawnTest.h"
+#include <gtest/gtest.h>
 
 int main(int argc, char** argv) {
-    InitDawnEnd2EndTestEnvironment(argc, argv);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
