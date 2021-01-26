@@ -122,9 +122,9 @@ namespace utils {
     void ComputeSync::Wait() {
         // Wait for async callback.
         std::unique_lock<std::mutex> lock(mutex_);
-        done_ = false;
         bool& done = done_;
         cond_var_.wait(lock, [&done] { return done; });
+        done_ = false;
     }
 
     void ComputeSync::Finish() {
