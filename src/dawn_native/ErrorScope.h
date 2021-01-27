@@ -23,49 +23,48 @@
 
 namespace dawn_native {
 
-// Errors can be recorded into an ErrorScope by calling |HandleError|.
-// Because an error scope should not resolve until contained
-// commands are complete, calling the callback is deferred until it is
-// destructed. In-flight commands or asynchronous events should hold a reference
-// to the ErrorScope for their duration.
-//
-// Because parent ErrorScopes should not resolve before child ErrorScopes,
-// ErrorScopes hold a reference to their parent.
-//
-// To simplify ErrorHandling, there is a sentinel root error scope which has
-// no parent. All uncaptured errors are handled by the root error scope. Its
-// callback is called immediately once it encounters an error.
-class ErrorScope final : public RefCounted {
-public:
-  ErrorScope(); // Constructor for the root error scope.
-  ErrorScope(wnn::ErrorFilter errorFilter, ErrorScope *parent);
+    // Errors can be recorded into an ErrorScope by calling |HandleError|.
+    // Because an error scope should not resolve until contained
+    // commands are complete, calling the callback is deferred until it is
+    // destructed. In-flight commands or asynchronous events should hold a reference
+    // to the ErrorScope for their duration.
+    //
+    // Because parent ErrorScopes should not resolve before child ErrorScopes,
+    // ErrorScopes hold a reference to their parent.
+    //
+    // To simplify ErrorHandling, there is a sentinel root error scope which has
+    // no parent. All uncaptured errors are handled by the root error scope. Its
+    // callback is called immediately once it encounters an error.
+    class ErrorScope final : public RefCounted {
+      public:
+        ErrorScope();  // Constructor for the root error scope.
+        ErrorScope(wnn::ErrorFilter errorFilter, ErrorScope* parent);
 
-  void SetCallback(wnn::ErrorCallback callback, void *userdata);
-  ErrorScope *GetParent();
+        void SetCallback(wnn::ErrorCallback callback, void* userdata);
+        ErrorScope* GetParent();
 
-  void HandleError(wnn::ErrorType type, const char *message);
-  void UnlinkForShutdown();
+        void HandleError(wnn::ErrorType type, const char* message);
+        void UnlinkForShutdown();
 
-private:
-  ~ErrorScope() override;
-  bool IsRoot() const;
-  void RunNonRootCallback();
+      private:
+        ~ErrorScope() override;
+        bool IsRoot() const;
+        void RunNonRootCallback();
 
-  static void HandleErrorImpl(ErrorScope *scope, wnn::ErrorType type,
-                              const char *message);
-  static void UnlinkForShutdownImpl(ErrorScope *scope);
+        static void HandleErrorImpl(ErrorScope* scope, wnn::ErrorType type, const char* message);
+        static void UnlinkForShutdownImpl(ErrorScope* scope);
 
-  wnn::ErrorFilter mErrorFilter = wnn::ErrorFilter::None;
-  Ref<ErrorScope> mParent = nullptr;
-  bool mIsRoot;
+        wnn::ErrorFilter mErrorFilter = wnn::ErrorFilter::None;
+        Ref<ErrorScope> mParent = nullptr;
+        bool mIsRoot;
 
-  wnn::ErrorCallback mCallback = nullptr;
-  void *mUserdata = nullptr;
+        wnn::ErrorCallback mCallback = nullptr;
+        void* mUserdata = nullptr;
 
-  wnn::ErrorType mErrorType = wnn::ErrorType::NoError;
-  std::string mErrorMessage = "";
-};
+        wnn::ErrorType mErrorType = wnn::ErrorType::NoError;
+        std::string mErrorMessage = "";
+    };
 
-} // namespace dawn_native
+}  // namespace dawn_native
 
-#endif // DAWNNATIVE_ERRORSCOPE_H_
+#endif  // DAWNNATIVE_ERRORSCOPE_H_

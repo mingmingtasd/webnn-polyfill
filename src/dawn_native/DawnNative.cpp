@@ -22,43 +22,45 @@
 
 // Contains the entry-points into dawn_native
 namespace dawn_native {
-DawnProcTable GetProcsAutogen();
+    DawnProcTable GetProcsAutogen();
 
-DawnProcTable GetProcs() { return GetProcsAutogen(); }
+    DawnProcTable GetProcs() {
+        return GetProcsAutogen();
+    }
 
-namespace null {
-NeuralNetworkContextBase *Create();
-}
-namespace ie {
-NeuralNetworkContextBase *Create();
-}
-namespace dml {
-NeuralNetworkContextBase *Create();
-}
+    namespace null {
+        NeuralNetworkContextBase* Create();
+    }
+    namespace ie {
+        NeuralNetworkContextBase* Create();
+    }
+    namespace dml {
+        NeuralNetworkContextBase* Create();
+    }
 
-// Should put the default null backend at the end.
-WNNNeuralNetworkContext CreateNeuralNetworkContext() {
+    // Should put the default null backend at the end.
+    WNNNeuralNetworkContext CreateNeuralNetworkContext() {
 #if defined(DAWN_ENABLE_BACKEND_IE)
-  return reinterpret_cast<WNNNeuralNetworkContext>(ie::Create());
+        return reinterpret_cast<WNNNeuralNetworkContext>(ie::Create());
 #elif defined(DAWN_ENABLE_BACKEND_DML)
-  return reinterpret_cast<WNNNeuralNetworkContext>(dml::Create());
+        return reinterpret_cast<WNNNeuralNetworkContext>(dml::Create());
 #elif defined(DAWN_ENABLE_BACKEND_NULL)
-  return reinterpret_cast<WNNNeuralNetworkContext>(null::Create());
+        return reinterpret_cast<WNNNeuralNetworkContext>(null::Create());
 #else
-  return nullptr;
+        return nullptr;
 #endif
-}
+    }
 
-WNNNamedInputs CreateNamedInputs() {
-  return reinterpret_cast<WNNNamedInputs>(new NamedInputsBase());
-}
+    WNNNamedInputs CreateNamedInputs() {
+        return reinterpret_cast<WNNNamedInputs>(new NamedInputsBase());
+    }
 
-WNNNamedOperands CreateNamedOperands() {
-  return reinterpret_cast<WNNNamedOperands>(new NamedOperandsBase());
-}
+    WNNNamedOperands CreateNamedOperands() {
+        return reinterpret_cast<WNNNamedOperands>(new NamedOperandsBase());
+    }
 
-WNNNamedOutputs CreateNamedOutputs() {
-  return reinterpret_cast<WNNNamedOutputs>(new NamedOutputsBase());
-}
+    WNNNamedOutputs CreateNamedOutputs() {
+        return reinterpret_cast<WNNNamedOutputs>(new NamedOutputsBase());
+    }
 
-} // namespace dawn_native
+}  // namespace dawn_native

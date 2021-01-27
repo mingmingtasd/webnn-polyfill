@@ -1,0 +1,137 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "dawn_native/ie/CompilationIE.h"
+
+#include <vector>
+
+#include "common/Log.h"
+#include "dawn_native/Error.h"
+#include "dawn_native/ErrorData.h"
+#include "dawn_native/NamedResults.h"
+#include "dawn_native/Operand.h"
+#include "dawn_native/Result.h"
+#include "dawn_native/ie/ErrorIE.h"
+#include "dawn_native/ie/ienn_symbol_table/ienn_symbol_table.h"
+
+#define DAWN_CALLBACK_TRY(code, messages)                                     \
+    {                                                                         \
+        MaybeError maybe_error = CheckStatusCode(code, messages);             \
+        if (maybe_error.IsError()) {                                          \
+            std::unique_ptr<ErrorData> error = maybe_error.AcquireError();    \
+            callback(status, nullptr, error->GetMessage().c_str(), userdata); \
+            return;                                                           \
+        }                                                                     \
+    }                                                                         \
+    for (;;)                                                                  \
+    break
+
+namespace dawn_native { namespace ie {
+
+    class Result : public ResultBase {
+      public:
+        using ResultBase::Reference;
+        ~Result() {
+            ie_compilation_free_buffer(&buffer_);
+        }
+    };
+
+    Compilation::Compilation(Ref<Model> model) : model_(model) {
+    }
+
+    Compilation::~Compilation() {
+        IE(ie_compilation_free)(ie_compilation_);
+    }
+
+    void Compilation::Compile(WNNCompileCallback callback,
+                              void* userdata,
+                              CompilationOptions const* options) {
+        // We may leverage https://dawn-review.googlesource.com/c/dawn/+/36360 to
+        // implement async compilation as standle-alone component.
+        WNNCompileStatus status = WNNCompileStatus_Error;
+        // Create compilation for IE backend.
+        IEStatusCode code =
+            IE(ie_create_compilation)(model_->GetInferenceEngineModel(), &ie_compilation_);
+        DAWN_CALLBACK_TRY(code, "IE create compilation");
+        status = WNNCompileStatus_Success;
+        callback(status, reinterpret_cast<WNNCompilation>(this), nullptr, userdata);
+    }
+
+    void Compilation::ComputeImpl(NamedInputsBase* inputs,
+                                  WNNComputeCallback callback,
+                                  void* userdata,
+                                  NamedOutputsBase* outputs) {
+        WNNComputeStatus status = WNNComputeStatus_Error;
+        // Set input data to nGraph.
+        for (auto& input : inputs->GetRecords()) {
+            ie_operand_t ie_operand;
+            ie_operand.name = const_cast<char*>(model_->input_id_map_[input.first].c_str());
+            IEStatusCode code = IE(ie_compilation_set_input)(
+                ie_compilation_, &ie_operand, input.second->buffer, input.second->size);
+            DAWN_CALLBACK_TRY(code, "IE set input");
+        }
+
+        // Compute the compiled model.
+        ie_callback_.args = this;
+        ie_callback_.completeCallBackFunc = [](void* args) {
+            DAWN_ASSERT(args);
+            Compilation* compilation = reinterpret_cast<Compilation*>(args);
+            compilation->CompletedCallback();
+        };
+        IEStatusCode code = IE(ie_compilation_compute)(ie_compilation_, &ie_callback_);
+        DAWN_CALLBACK_TRY(code, "IE compute model");
+        callback_ = callback;
+        user_data_ = userdata;
+        outputs_ = outputs;
+        return;
+    }
+
+    void Compilation::CompletedCallback() {
+        // Get Data from nGraph with output.
+        WNNComputeStatus status = WNNComputeStatus_Error;
+        void* userdata = user_data_;
+        WNNComputeCallback callback = callback_;
+        Ref<NamedResultsBase> results = AcquireRef(new NamedResultsBase());
+        size_t output_number = model_->GetOutputsNumber();
+        for (size_t i = 0; i < output_number; ++i) {
+            std::string output_id = model_->GetOutputId(i);
+            void* output_buffer;
+            size_t buffer_length;
+            IEStatusCode code = IE(ie_compilation_get_buffer)(ie_compilation_, output_id.data(),
+                                                              &output_buffer, &buffer_length);
+            DAWN_CALLBACK_TRY(code, "IE get buffer");
+            ie_dimensions_t ie_dimensions;
+            code = IE(ie_compilation_get_dimensions)(ie_compilation_, output_id.data(),
+                                                     &ie_dimensions);
+            DAWN_CALLBACK_TRY(code, "IE get dimensions");
+            std::vector<int32_t> dimensions(ie_dimensions.dims,
+                                            ie_dimensions.dims + ie_dimensions.ranks);
+            code = IE(ie_compilation_free_dimensions)(&ie_dimensions);
+            Ref<ResultBase> result =
+                AcquireRef(new Result::ResultBase(output_buffer, buffer_length, dimensions));
+            std::string output_name = model_->output_name_map_[output_id];
+            results->Set(output_name.c_str(), result.Detach());
+            if (outputs_ != nullptr) {
+                const Output* output = outputs_->GetRecords().at(output_name);
+                ie_operand_t ie_operand;
+                ie_operand.name = const_cast<char*>(output_id.c_str());
+                IEStatusCode code = IE(ie_compilation_get_output)(ie_compilation_, &ie_operand,
+                                                                  output->buffer, output->size);
+                DAWN_CALLBACK_TRY(code, "IE get output");
+            }
+        }
+        status = WNNComputeStatus_Success;
+        callback(status, reinterpret_cast<WNNNamedResults>(results.Detach()), nullptr, userdata);
+        return;
+    }
+
+}}  // namespace dawn_native::ie

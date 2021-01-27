@@ -23,14 +23,14 @@
 
 namespace dawn_native {
 
-// Backend-agnostic API for dawn_native
-DAWN_NATIVE_EXPORT DawnProcTable GetProcs();
+    // Backend-agnostic API for dawn_native
+    DAWN_NATIVE_EXPORT DawnProcTable GetProcs();
 
-DAWN_NATIVE_EXPORT WNNNeuralNetworkContext CreateNeuralNetworkContext();
-DAWN_NATIVE_EXPORT WNNNamedInputs CreateNamedInputs();
-DAWN_NATIVE_EXPORT WNNNamedOperands CreateNamedOperands();
-DAWN_NATIVE_EXPORT WNNNamedOutputs CreateNamedOutputs();
+    DAWN_NATIVE_EXPORT WNNNeuralNetworkContext CreateNeuralNetworkContext();
+    DAWN_NATIVE_EXPORT WNNNamedInputs CreateNamedInputs();
+    DAWN_NATIVE_EXPORT WNNNamedOperands CreateNamedOperands();
+    DAWN_NATIVE_EXPORT WNNNamedOutputs CreateNamedOutputs();
 
-} // namespace dawn_native
+}  // namespace dawn_native
 
 #endif  // DAWNNATIVE_DAWNNATIVE_H_

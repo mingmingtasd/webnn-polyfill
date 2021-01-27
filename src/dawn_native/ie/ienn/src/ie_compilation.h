@@ -20,19 +20,20 @@
 namespace InferenceEngine {
 
 class Compilation {
-public:
+ public:
   explicit Compilation(std::shared_ptr<Model> model);
   ~Compilation();
 
-  StatusCode SetInput(ie_operand_t *operand, const void *buffer,
+  StatusCode SetInput(ie_operand_t* operand,
+                      const void* buffer,
                       uint32_t length);
-  StatusCode GetOutput(ie_operand_t *operand, void *buffer, uint32_t length);
-  StatusCode Compute(ie_complete_call_back_t *callback);
-  StatusCode GetBuffer(const char *name, void **buffer, size_t *byte_length);
-  StatusCode GetDimensions(const char *name, ie_dimensions_t *dimensions);
+  StatusCode GetOutput(ie_operand_t* operand, void* buffer, uint32_t length);
+  StatusCode Compute(ie_complete_call_back_t* callback);
+  StatusCode GetBuffer(const char* name, void** buffer, size_t* byte_length);
+  StatusCode GetDimensions(const char* name, ie_dimensions_t* dimensions);
 
-private:
-  InferRequest *GetInferenceRequest();
+ private:
+  InferRequest* GetInferenceRequest();
   prefer_t preference_;
 
   std::unique_ptr<InferRequest> infer_request_;
@@ -42,6 +43,6 @@ private:
   DISALLOW_COPY_AND_ASSIGN(Compilation);
 };
 
-} // namespace InferenceEngine
+}  // namespace InferenceEngine
 
-#endif // IE_COMPILATION_H
+#endif  // IE_COMPILATION_H

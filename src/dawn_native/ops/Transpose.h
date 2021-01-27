@@ -1,0 +1,52 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef WEBNN_NATIVE_OPS_TRANSPOSE_H_
+#define WEBNN_NATIVE_OPS_TRANSPOSE_H_
+
+#include "dawn_native/Model.h"
+#include "dawn_native/Operand.h"
+
+namespace dawn_native { namespace op {
+
+    class Transpose final : public OperandBase {
+      public:
+        Transpose(ModelBuilderBase* builder, OperandBase* input, TransposeOptions const* options)
+            : OperandBase(builder, {input}) {
+            if (options) {
+                permutation_.assign(options->permutation,
+                                    options->permutation + options->permutationCount);
+            }
+            options_.permutation = permutation_.data();
+            options_.permutationCount = permutation_.size();
+        }
+        ~Transpose() override = default;
+
+        MaybeError AddToModel(ModelBase* model) const override {
+            return model->AddTranspose(this);
+        }
+        MaybeError Validate() override {
+            return {};
+        }
+
+        TransposeOptions const* GetOptions() const {
+            return &options_;
+        }
+
+      private:
+        TransposeOptions options_;
+        std::vector<int32_t> permutation_;
+    };
+
+}}  // namespace dawn_native::op
+
+#endif  // WEBNN_NATIVE_OPS_TRANSPOSE_H_

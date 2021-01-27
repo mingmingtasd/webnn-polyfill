@@ -1,3 +1,14 @@
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #include "dawn_native/ModelBuilder.h"
 
@@ -11,170 +22,157 @@
 #include "dawn_native/Model.h"
 #include "dawn_native/NeuralNetworkContext.h"
 #include "dawn_native/Operand.h"
-#include "dawn_native/ops/binary.h"
-#include "dawn_native/ops/constant.h"
-#include "dawn_native/ops/conv2d.h"
-#include "dawn_native/ops/input.h"
-#include "dawn_native/ops/pool2d.h"
-#include "dawn_native/ops/reshape.h"
-#include "dawn_native/ops/transpose.h"
-#include "dawn_native/ops/unary.h"
+#include "dawn_native/ops/Binary.h"
+#include "dawn_native/ops/Constant.h"
+#include "dawn_native/ops/Conv2d.h"
+#include "dawn_native/ops/Input.h"
+#include "dawn_native/ops/Pool2d.h"
+#include "dawn_native/ops/Reshape.h"
+#include "dawn_native/ops/Transpose.h"
+#include "dawn_native/ops/Unary.h"
+
+#define DAWN_VALIDATE(ptr)                             \
+    Ref<OperandBase> op = AcquireRef(ptr);             \
+    if (GetContext()->ConsumedError(op->Validate())) { \
+        return OperandBase::MakeError(this);           \
+    }                                                  \
+    return op.Detach();                                \
+    for (;;)                                           \
+    break
 
 namespace dawn_native {
 
-ModelBuilderBase::ModelBuilderBase(NeuralNetworkContextBase *context)
-    : ObjectBase(context) {}
-
-OperandBase *ModelBuilderBase::Constant(OperandDescriptor const *desc,
-                                        void const *value, size_t size) {
-  Ref<OperandBase> context = AcquireRef(new op::Constant(desc, value, size));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::Input(char const *name,
-                                     OperandDescriptor const *desc) {
-  Ref<OperandBase> context = AcquireRef(new op::Input(std::string(name), desc));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::Matmul(OperandBase *a, OperandBase *b) {
-  Ref<OperandBase> context =
-      AcquireRef(new op::Binary(op::BinaryOpType::kMatMul, a, b));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::Add(OperandBase *a, OperandBase *b) {
-  Ref<OperandBase> context =
-      AcquireRef(new op::Binary(op::BinaryOpType::kAdd, a, b));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::Mul(OperandBase *a, OperandBase *b) {
-  Ref<OperandBase> context =
-      AcquireRef(new op::Binary(op::BinaryOpType::kMul, a, b));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::Conv2d(OperandBase *input, OperandBase *filter,
-                                      Conv2dOptions const *options) {
-  Ref<OperandBase> context = AcquireRef(new op::Conv2d(input, filter, options));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::AveragePool2d(OperandBase *input,
-                                             Pool2dOptions const *options) {
-  Ref<OperandBase> context = AcquireRef(
-      new op::Pool2d(op::Pool2dType::kAveragePool2d, input, options));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::MaxPool2d(OperandBase *input,
-                                         Pool2dOptions const *options) {
-  Ref<OperandBase> context =
-      AcquireRef(new op::Pool2d(op::Pool2dType::kMaxPool2d, input, options));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::Relu(OperandBase *input) {
-  Ref<OperandBase> context =
-      AcquireRef(new op::Unary(op::UnaryOpType::kRelu, input));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::Reshape(OperandBase *input,
-                                       int32_t const *new_shape,
-                                       size_t new_shape_count) {
-  Ref<OperandBase> context =
-      AcquireRef(new op::Reshape(input, new_shape, new_shape_count));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::Softmax(OperandBase *input) {
-  Ref<OperandBase> context =
-      AcquireRef(new op::Unary(op::UnaryOpType::kSoftmax, input));
-  return context.Detach();
-}
-
-OperandBase *ModelBuilderBase::Transpose(OperandBase *input,
-                                         TransposeOptions const *options) {
-  Ref<OperandBase> context = AcquireRef(new op::Transpose(input, options));
-  return context.Detach();
-}
-
-ModelBase *ModelBuilderBase::CreateModel(NamedOperandsBase const *named_operands) {
-  ModelBase *model = CreateModelImpl();
-  std::vector<const OperandBase *> outputs;
-  for (auto &named_output : named_operands->GetRecords()) {
-    outputs.push_back(named_output.second);
-  }
-  std::vector<const OperandBase *> sorted_operands = TopologicalSort(outputs);
-  for (auto &op : sorted_operands) {
-    if (GetContext()->ConsumedError(op->AddToModel(model))) {
-      model->Release();
-      return ModelBase::MakeError(this);
+    ModelBuilderBase::ModelBuilderBase(NeuralNetworkContextBase* context) : ObjectBase(context) {
     }
-  }
-  for (auto &named_output : named_operands->GetRecords()) {
-    if (GetContext()->ConsumedError(
-            model->AddOutput(named_output.first, named_output.second))) {
-      model->Release();
-      return ModelBase::MakeError(this);
+
+    OperandBase* ModelBuilderBase::Constant(OperandDescriptor const* desc,
+                                            void const* value,
+                                            size_t size) {
+        DAWN_VALIDATE(new op::Constant(this, desc, value, size));
     }
-  }
-  if (GetContext()->ConsumedError(model->Finish())) {
-    model->Release();
-    return ModelBase::MakeError(this);
-  }
-  return model;
-}
 
-// The implementation derives from nGraph topological_sort in
-// https://github.com/openvinotoolkit/openvino/blob/master/ngraph/core/include/ngraph/graph_util.hpp
-//
-//*****************************************************************************
-// Copyright 2017-2020 Intel Corporation
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//*****************************************************************************
-std::vector<const OperandBase *> ModelBuilderBase::TopologicalSort(
-    std::vector<const OperandBase *> &root_nodes) {
-  std::stack<const OperandBase *> nodes_to_do;
-  std::unordered_set<const OperandBase *> nodes_done;
-  std::vector<const OperandBase *> result;
+    OperandBase* ModelBuilderBase::Input(char const* name, OperandDescriptor const* desc) {
+        DAWN_VALIDATE(new op::Input(this, std::string(name), desc));
+    }
 
-  for (auto &node : root_nodes) {
-    nodes_to_do.push(node);
-  }
-  while (nodes_to_do.size() > 0) {
-    const OperandBase *node = nodes_to_do.top();
-    if (nodes_done.count(node) == 0) {
-      bool can_add = true;
-      for (auto &dep : node->Inputs()) {
-        if (nodes_done.count(dep.Get()) == 0) {
-          can_add = false;
-          nodes_to_do.push(dep.Get());
+    OperandBase* ModelBuilderBase::Matmul(OperandBase* a, OperandBase* b) {
+        DAWN_VALIDATE(new op::Binary(this, op::BinaryOpType::kMatMul, a, b));
+    }
+
+    OperandBase* ModelBuilderBase::Add(OperandBase* a, OperandBase* b) {
+        DAWN_VALIDATE(new op::Binary(this, op::BinaryOpType::kAdd, a, b));
+    }
+
+    OperandBase* ModelBuilderBase::Mul(OperandBase* a, OperandBase* b) {
+        DAWN_VALIDATE(new op::Binary(this, op::BinaryOpType::kMul, a, b));
+    }
+
+    OperandBase* ModelBuilderBase::Conv2d(OperandBase* input,
+                                          OperandBase* filter,
+                                          Conv2dOptions const* options) {
+        DAWN_VALIDATE(new op::Conv2d(this, input, filter, options));
+    }
+
+    OperandBase* ModelBuilderBase::AveragePool2d(OperandBase* input, Pool2dOptions const* options) {
+        DAWN_VALIDATE(new op::Pool2d(this, op::Pool2dType::kAveragePool2d, input, options));
+    }
+
+    OperandBase* ModelBuilderBase::MaxPool2d(OperandBase* input, Pool2dOptions const* options) {
+        DAWN_VALIDATE(new op::Pool2d(this, op::Pool2dType::kMaxPool2d, input, options));
+    }
+
+    OperandBase* ModelBuilderBase::Relu(OperandBase* input) {
+        DAWN_VALIDATE(new op::Unary(this, op::UnaryOpType::kRelu, input));
+    }
+
+    OperandBase* ModelBuilderBase::Reshape(OperandBase* input,
+                                           int32_t const* new_shape,
+                                           size_t new_shape_count) {
+        DAWN_VALIDATE(new op::Reshape(this, input, new_shape, new_shape_count));
+    }
+
+    OperandBase* ModelBuilderBase::Softmax(OperandBase* input) {
+        DAWN_VALIDATE(new op::Unary(this, op::UnaryOpType::kSoftmax, input));
+    }
+
+    OperandBase* ModelBuilderBase::Transpose(OperandBase* input, TransposeOptions const* options) {
+        DAWN_VALIDATE(new op::Transpose(this, input, options));
+    }
+
+    ModelBase* ModelBuilderBase::CreateModel(NamedOperandsBase const* named_operands) {
+        ModelBase* model = CreateModelImpl();
+        std::vector<const OperandBase*> outputs;
+        for (auto& named_output : named_operands->GetRecords()) {
+            outputs.push_back(named_output.second);
         }
-      }
-      if (can_add) {
-        result.push_back(node);
-        nodes_to_do.pop();
-        nodes_done.insert(node);
-      }
-    } else {
-      nodes_to_do.pop();
+        std::vector<const OperandBase*> sorted_operands = TopologicalSort(outputs);
+        for (auto& op : sorted_operands) {
+            if (GetContext()->ConsumedError(op->AddToModel(model))) {
+                model->Release();
+                return ModelBase::MakeError(this);
+            }
+        }
+        for (auto& named_output : named_operands->GetRecords()) {
+            if (GetContext()->ConsumedError(
+                    model->AddOutput(named_output.first, named_output.second))) {
+                model->Release();
+                return ModelBase::MakeError(this);
+            }
+        }
+        if (GetContext()->ConsumedError(model->Finish())) {
+            model->Release();
+            return ModelBase::MakeError(this);
+        }
+        return model;
     }
-  }
-  return result;
-}
 
-} // namespace dawn_native
+    // The implementation derives from nGraph topological_sort in
+    // https://github.com/openvinotoolkit/openvino/blob/master/ngraph/core/include/ngraph/graph_util.hpp
+    //
+    //*****************************************************************************
+    // Copyright 2017-2020 Intel Corporation
+    //
+    // Licensed under the Apache License, Version 2.0 (the "License");
+    // you may not use this file except in compliance with the License.
+    // You may obtain a copy of the License at
+    //
+    //     http://www.apache.org/licenses/LICENSE-2.0
+    //
+    // Unless required by applicable law or agreed to in writing, software
+    // distributed under the License is distributed on an "AS IS" BASIS,
+    // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    // See the License for the specific language governing permissions and
+    // limitations under the License.
+    //*****************************************************************************
+    std::vector<const OperandBase*> ModelBuilderBase::TopologicalSort(
+        std::vector<const OperandBase*>& root_nodes) {
+        std::stack<const OperandBase*> nodes_to_do;
+        std::unordered_set<const OperandBase*> nodes_done;
+        std::vector<const OperandBase*> result;
+
+        for (auto& node : root_nodes) {
+            nodes_to_do.push(node);
+        }
+        while (nodes_to_do.size() > 0) {
+            const OperandBase* node = nodes_to_do.top();
+            if (nodes_done.count(node) == 0) {
+                bool can_add = true;
+                for (auto& dep : node->Inputs()) {
+                    if (nodes_done.count(dep.Get()) == 0) {
+                        can_add = false;
+                        nodes_to_do.push(dep.Get());
+                    }
+                }
+                if (can_add) {
+                    result.push_back(node);
+                    nodes_to_do.pop();
+                    nodes_done.insert(node);
+                }
+            } else {
+                nodes_to_do.pop();
+            }
+        }
+        return result;
+    }
+
+}  // namespace dawn_native
