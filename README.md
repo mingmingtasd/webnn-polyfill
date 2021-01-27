@@ -16,7 +16,7 @@ Sync the dependencies.
 ```sh
 > gclient sync
 ```
-## Build manually step by step
+## Manually build step by step
 ### Setting up the build
 Generate projects with OpenVINO backend
 ```sh
@@ -37,45 +37,62 @@ Or generate projects with default null backend
 > ninja -C out/Default
 ```
 
-## Build with Node scripts
+## Node Commands
 ### Installation
 ```sh
 > npm install
 ```
-### Fast build with latest code
-```sh
-> npm run build all
-```
-
-### Only gclient sync to latest code
+### Build
+##### 1. Only sync dependencies
 ```sh
 > npm run build sync
 ```
 
-### Only git pull to latest code
+##### 2. Only fetch latest code
 ```sh
 > npm run build pull
 ```
 
-### Only build with current code
-Defualt
+**Modify config file for following commands 3 and 4, if you don't want to use default config file:**
+Please refer to "Configure config json file" part of [./build_script/README.md](./build_script/README.md)
+
+##### 3. Only build with current code
+* Build with enabling the compilation of Dawn's Null backend and default arguments from configurations in [./build_script/bot_config.json](./build_script/bot_config.json)
 ```sh
 > npm run build build
 ```
-or with backen / config options
+* Or build with enabling the compilation of OpenVINO Inference Engine backend (ie) or DirectML backend (dml) and default arguments from configurations in ./build_script/bot_config.json
 ```sh
 > npm run build build -- --backend=[ie|dml]
 ```
-or
+* Or build with enabling the compilation of Dawn's Null backend and default arguments from configurations in given config json file
 ```sh
 > npm run build build -- ---config=<path>
 ```
-or
+* Or build with enabling the compilation of OpenVINO Inference Engine backend (ie) or DirectML backend (dml) and arguments from configurations in given config json file
 ```sh
 > npm run build build -- --backend=[ie|dml] --config=<path>
 ```
 
-Please refer ./build_script/README.md to find details commands.
+##### 4. All in one command to sync dependencies, fetch and build with latest code
+Commands like above 3.
+```sh
+> npm run build all
+```
+```sh
+> npm run build all -- --backend=[ie|dml]
+```
+```sh
+> npm run build all -- ---config=<path>
+```
+```sh
+> npm run build all -- --backend=[ie|dml] --config=<path>
+```
+
+### Lint
+```sh
+> npm run linter
+```
 
 ## Test
 For OpenVINO build, please [set the environment variables](https://docs.openvinotoolkit.org/2021.1/openvino_docs_install_guides_installing_openvino_windows.html#set-the-environment-variables) first.

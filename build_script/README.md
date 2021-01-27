@@ -1,73 +1,86 @@
-# Build Chromium
+# Description
 
-This command line interface enables you to build [Chromium](https://www.chromium.org/Home) from source easily.
+Node script [bin/build](./bin/build) enables you to build [webnn-native](https://github.com/otcshare/webnn-native) easily.
 
-## Installation
+### Configure config json file
+Here's [bot_config.json](./bot_config.json) config file, its content is
 
-```sh
-npm install -g build_chromium
-```
-
-After installing it, run `build_chromium --help` without arguments to see list of options.
-
-### Run
-1. Follow offical [Chromium Get the code](https://www.chromium.org/developers/how-tos/get-the-code)
-2. Create a bot config file
-For example to build an Android arm debug build, show debug info.
 ```
 {
-  "target-os": "android",
-  "target-cpu": "arm",
+  "target-os": "",
+  "target-cpu": "",
   "gnArgs": {
-    "is-debug": false,
-    "is-component": false,
-    "extra": ""
+    "is-clang": true,
+    "is-component": true,
+    "is-debug": false
   },
+  "clean-build": true,
   "logging": {
     "level": "debug",
     "file": ""
-  },
-  "archive-server": {
-    "host": "",
-    "dir": "",
-    "ssh-user": ""
-  },
-  "email-service":{
-    "user": "",
-    "host": "",
-    "from": "",
-    "to": ""
   }
 }
 ```
-3. Execute below command to run
-```
-build_chromium -c .bot_config.json <path_to_src>
-```
+- target-os: The desired operating system for the build. Defualt "", use current system OS for build. Values
+  - ""
+  - "linux"
+  - "win"
+
+- target-cpu: The desired cpu architecture for the build. Defualt "", use current system CPU architecture for build. values
+  - ""
+  - "x86"
+  - "x64"
+  - "arm"
+  - "arm64"
+
+- clean-build: Whether remove output directory. Default true, remove output directory before build.
+
+Seetings in **"gnArgs"**: Specifies build arguments overrides, will save in args.gn file under output directory after running *gn gen --args="args"* command.
+- is-clang: Set to true when compiling with the Clang compiler. Please set false and install [Visual Studio 2019 IDE](https://visualstudio.microsoft.com/downloads/) to build Node Addon on Windows platform.
+- is-component: Component build. Setting to true compiles targets declared as "components" as shared libraries loaded dynamically. This speeds up development time. Default true for compilation of libc++ library. When false, components will be linked statically.
+- is-debug: Debug build. Enabling official builds automatically sets is_debug to false.
+
+Seetings in **"logging"**: Specifies directory for storing output packages on a dedicated server.
+- level: Logging level. Default "debug". Values
+  - "info"
+  - "warn"
+  - "error"
+  - "debug"
+- file: Save logging message into given file. Default "", save logging message into /tmp/webnn_\<target-os\>_\<target-cpu\>_\<backend\>_\<YYYY-MM-DD\>.log
 
 ### Help
 ```sh
-$ ./bin/build_chromium --help
+$ ./bin/build --help
 
-  Usage: build_chromium [options] <dir>
+Usage: build [options] [command]
 
-  Options:
+Options:
+  -V, --version    output the version number
+  -h, --help       display help for command
 
-    -V, --version         output the version number
-    -a, --action <action>  Action (default: all)
-    -c, --conf <conf>     Configuration file (default: .bot_config.json)
-    -h, --help            output usage information
+Commands:
+  sync
+  pull
+  build [options]
+  all [options]
+  help [command]   display help for command
 ```
 
-##BKMs
+Options for *./bin/build build* or *./bin/build all* commands are same, likes:
+```
+$ ./bin/build build --help
+Usage: build build [options]
+
+Options:
+  -b, --backend <backend>  Build with target backend (default: "null")
+  -c, --conf <config>      Configuration file (default: "build_script/bot_config.json")
+  -h, --help               display help for command
+```
+
+## BKMs
 ### To support to upload via SSH
 1. On your client, follow [Github SSH page](https://help.github.com/articles/connecting-to-github-with-ssh/) to generate SSH keys and add to ssh-agent. (If you've done that, ignore)
 2. On upload server, config [Authorized keys](https://www.ssh.com/ssh/authorized_keys/) with above client public keys.
 
-## Contributing
-
-Welcome all kinds of contributions including reporting issues, submit pull requests. Just follow [pull request](https://help.github.com/articles/creating-a-pull-request/).
-
 ### Coding style
-
 We're following the [Google JavaScript coding style](https://google.github.io/styleguide/jsguide.html) in general. And there is pre-commit checking `tools/linter.js` to ensure styling before commit code.
