@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "DescriptorDecoder.h"
 #include "model.h"
 
 // Hold Promise::Deferred with AsyncWorker.

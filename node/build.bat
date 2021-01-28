@@ -30,4 +30,4 @@ if not exist "node_modules" (
   npm install
 )
 
-npm run all --dawnversion=0.0.1
+npm run build

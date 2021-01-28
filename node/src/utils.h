@@ -3,6 +3,7 @@
 
 #define NAPI_EXPERIMENTAL
 #include <napi.h>
+#include <unordered_map>
 
 inline char* getNAPIStringCopy(const Napi::Value& value) {
   std::string utf8 = value.ToString().Utf8Value();
@@ -10,12 +11,6 @@ inline char* getNAPIStringCopy(const Napi::Value& value) {
   char *str = new char[len];
   strncpy(str, utf8.c_str(), len);
   return str;
-};
-
-inline void nextJSProcessTick(Napi::Env& env) {
-  Napi::Object process = env.Global().Get("process").As<Napi::Object>();
-  Napi::Function nextTick = process.Get("nextTick").As<Napi::Function>();
-  nextTick.Call(env.Global(), {});
 };
 
 template<typename T> inline T* getTypedArrayData(const Napi::Value& value, size_t* len = nullptr) {
@@ -31,6 +26,22 @@ template<typename T> inline T* getTypedArrayData(const Napi::Value& value, size_
   if (len) *len = arr.ByteLength();
   data = reinterpret_cast<T*>(reinterpret_cast<uint64_t>(buffer.Data()) + arr.ByteOffset());
   return data;
+};
+
+static std::unordered_map<std::string, WNNOperandType> s_operand_type_map = {
+  { "float32", WNNOperandType_Float32 },
+  { "float16", WNNOperandType_Float16 },
+  { "int32", WNNOperandType_Int32 },
+  { "uint32", WNNOperandType_Uint32 },
+};
+
+inline WNNOperandType getOperandType(const Napi::Value& value) {
+  if (!value.IsString()) {
+    Napi::Env env = value.Env();
+    Napi::Error::New(env, "Argument must be a 'String'").ThrowAsJavaScriptException();
+    return WNNOperandType_Force32;
+  }
+  return s_operand_type_map[value.As<Napi::String>().Utf8Value()];
 };
 
 #endif // __UTILS_H__

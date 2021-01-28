@@ -4,15 +4,12 @@
 
 #include "constant.h"
 
-#include "../DescriptorDecoder.h"
-
 namespace op {
 
 Constant::Constant(const Napi::CallbackInfo &info) : Node(info) {
   Napi::Object obj = info[0].As<Napi::Object>();
   // type
-  descriptor_.type = static_cast<WNNOperandType>(
-      DescriptorDecoder::OperandType(obj.Get("type").As<Napi::String>().Utf8Value()));
+  descriptor_.type = getOperandType(obj.Get("type"));
   // dimensions
   Napi::Array array = obj.Get("dimensions").As<Napi::Array>();
   uint32_t len = array.Length();

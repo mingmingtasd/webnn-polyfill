@@ -4,7 +4,7 @@
 
 #include "input.h"
 
-#include "../DescriptorDecoder.h"
+#include <unordered_map>
 
 namespace op {
 
@@ -14,8 +14,7 @@ Input::Input(const Napi::CallbackInfo &info) : Node(info) {
   
   // type
   Napi::Object obj = info[1].As<Napi::Object>();
-  descriptor_.type = static_cast<WNNOperandType>(
-      DescriptorDecoder::OperandType(obj.Get("type").As<Napi::String>().Utf8Value()));
+  descriptor_.type = getOperandType(obj.Get("type"));
   // dimensions
   Napi::Array array = obj.Get("dimensions").As<Napi::Array>();
   uint32_t len = array.Length();
