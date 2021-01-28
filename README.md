@@ -38,6 +38,12 @@ Or generate projects with default null backend
 ```
 
 ## Build with ./build_webnn script on Linux platform
+Precondition: 
+* Go to build_script directory to run installation by these commands
+```sh
+> cd build_script; npm install; cd ..
+```
+
 ### Sync dependencies
 ```sh
 > ./build_webnn sync
