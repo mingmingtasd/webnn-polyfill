@@ -37,58 +37,34 @@ Or generate projects with default null backend
 > ninja -C out/Default
 ```
 
-## Node Commands
-### Installation
+## Build with ./build_webnn script on Linux platform
+### Sync dependencies
 ```sh
-> npm install
+> ./build_webnn sync
 ```
+
 ### Build
-##### 1. (Optional) Sync dependencies
+*Modify config file if you don't want to use default config file:Please refer to "Configure config json file" part of [./build_script/README.md](./build_script/README.md)*
+
+##### Build with enabling the compilation of Dawn's Null backend and default arguments from configurations in [./build_script/bot_config.json](./build_script/bot_config.json)
 ```sh
-> npm run build sync
+> ./build_webnn
 ```
 
-**Modify config file for following commands 2 and 3, if you don't want to use default config file:**
-Please refer to "Configure config json file" part of [./build_script/README.md](./build_script/README.md)
-
-##### 2. Only build with current code
-* Build with enabling the compilation of Dawn's Null backend and default arguments from configurations in [./build_script/bot_config.json](./build_script/bot_config.json)
+##### Or build with enabling the compilation of OpenVINO Inference Engine backend (ie) or DirectML backend (dml) and default arguments from configurations in ./build_script/bot_config.json
 ```sh
-> npm run build
-```
-* Or build with enabling the compilation of OpenVINO Inference Engine backend (ie) or DirectML backend (dml) and default arguments from configurations in ./build_script/bot_config.json
-```sh
-> npm run build -- --backend=[ie|dml]
-```
-* Or build with enabling the compilation of Dawn's Null backend and default arguments from configurations in given config json file
-```sh
-> npm run build -- ---config=<path>
-```
-* Or build with enabling the compilation of OpenVINO Inference Engine backend (ie) or DirectML backend (dml) and arguments from configurations in given config json file
-```sh
-> npm run build -- --backend=[ie|dml] --config=<path>
+> ./build_webnn --backend=[ie|dml]
 ```
 
-##### 3. All in one command to sync dependencies, fetch and build with latest code
-Commands like above 3.
+##### Or build with enabling the compilation of Dawn's Null backend and default arguments from configurations in given config json file
 ```sh
-> npm run all
-```
-```sh
-> npm run all -- --backend=[ie|dml]
-```
-```sh
-> npm run all -- ---config=<path>
-```
-```sh
-> npm run all -- --backend=[ie|dml] --config=<path>
+> ./build_webnn ---config=<path>
 ```
 
-### Lint
+##### Or build with enabling the compilation of OpenVINO Inference Engine backend (ie) or DirectML backend (dml) and arguments from configurations in given config json file
 ```sh
-> npm run linter
+> ./build_webnn --backend=[ie|dml] --config=<path>
 ```
-Currnet this command only runs ESLint checking node scripts under [./build_script](./build_script) folder, will enchance later.  
 
 ## Test
 For OpenVINO build, please [set the environment variables](https://docs.openvinotoolkit.org/2021.1/openvino_docs_install_guides_installing_openvino_windows.html#set-the-environment-variables) first.
