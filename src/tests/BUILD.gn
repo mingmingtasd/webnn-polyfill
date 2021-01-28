@@ -152,7 +152,18 @@ source_set("dawn_end2end_tests_sources") {
   ]
 
   sources = [
+    "${dawn_root}/examples/SampleUtils.cpp",
+    "${dawn_root}/examples/SampleUtils.h",
     "end2end/AddTests.cpp",
+    "end2end/MulTests.cpp",
+    "end2end/AveragePool2dTests.cpp",
+    "end2end/MaxPool2dTests.cpp",
+    "end2end/ReluTests.cpp",
+    "end2end/ReshapeTests.cpp",
+    "end2end/SoftmaxTests.cpp",
+    "end2end/TransposeTests.cpp",
+    "end2end/Conv2dTests.cpp",
+    "end2end/MatMulTests.cpp",
   ]
 
   # Validation tests that need OS windows live in end2end tests.
