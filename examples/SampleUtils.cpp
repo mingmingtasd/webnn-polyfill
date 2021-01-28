@@ -1,5 +1,3 @@
-// Copyright 2017 The Dawn Authors
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -51,6 +49,9 @@ bool Expected(float output, float expected) {
 }
 
 namespace utils {
+
+    WrappedModel::WrappedModel() : output_expected_(true) {
+    }
 
     void WrappedModel::SetInput(std::vector<int32_t> shape, std::vector<float> buffer) {
         input_shape_ = std::move(shape);
@@ -112,6 +113,14 @@ namespace utils {
 
     wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
         UNREACHABLE();
+    }
+
+    void WrappedModel::SetComputedResult(bool expected) {
+        output_expected_ = expected;
+    }
+
+    bool WrappedModel::GetComputedResult() {
+        return output_expected_;
     }
 
     // The Compilation should be released unitl ComputeCallback.
@@ -176,11 +185,13 @@ namespace utils {
                 }
             }
         }
+        // TODO: Remove these log when all end2end tests for ops are ready
         if (expected) {
             dawn::InfoLog() << "Test succeeded.";
         } else {
             dawn::InfoLog() << "Test failed.";
         }
+        g_wrapped_model->SetComputedResult(expected);
         g_compute_sync.Finish();
         return;
     }
@@ -212,7 +223,7 @@ namespace utils {
     }
 
     // Wrapped Compilation
-    void Test(WrappedModel* wrapped_model) {
+    bool Test(WrappedModel* wrapped_model) {
         g_wrapped_model = wrapped_model;
         wnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
         context.SetUncapturedErrorCallback(ErrorCallback, nullptr);
@@ -228,9 +239,11 @@ namespace utils {
         model.Compile(CompilationCallback, nullptr);
 
         g_compute_sync.Wait();
+        bool expected = wrapped_model->GetComputedResult();
         // Release backend resources in main thread.
         delete g_wrapped_model;
         g_compilation = nullptr;
+        return expected;
     }
 
 }  // namespace utils

@@ -1,5 +1,3 @@
-// Copyright 2017 The Dawn Authors
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -39,7 +37,7 @@ namespace utils {
 
     class WrappedModel : public RefCounted {
       public:
-        WrappedModel() = default;
+        WrappedModel();
         ~WrappedModel() = default;
 
         void SetInput(std::vector<int32_t> shape, std::vector<float> buffer);
@@ -61,6 +59,10 @@ namespace utils {
         void SetExpectedShape(std::vector<int32_t> shape);
         std::vector<int32_t> ExpectedShape();
 
+        void SetComputedResult(bool expected);
+
+        bool GetComputedResult();
+
       private:
         wnn::ModelBuilder model_builder_;
         std::vector<int32_t> input_shape_;
@@ -72,9 +74,10 @@ namespace utils {
         std::vector<int32_t> output_shape_;
         std::vector<float> expected_buffer_;
         std::vector<int32_t> expected_shape_;
+        bool output_expected_;
     };
 
-    void Test(WrappedModel* model);
+    bool Test(WrappedModel* model);
 
     class ComputeSync {
       public:
