@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../scripts/dawn_overrides_with_defaults.gni")
+import("//third_party/dawn/scripts/dawn_overrides_with_defaults.gni")
 
-import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_component.gni")
+import("${webnn_root}/generator/webnn_generator.gni")
 
 ###############################################################################
 # Dawn headers
 ###############################################################################
 
-dawn_json_generator("dawn_headers_gen") {
+webnn_json_generator("dawn_headers_gen") {
   target = "dawn_headers"
   outputs = [
     "src/include/dawn/dawn_proc_table.h",
@@ -29,7 +29,7 @@ dawn_json_generator("dawn_headers_gen") {
   ]
 }
 
-dawn_json_generator("emscripten_bits_gen") {
+webnn_json_generator("emscripten_bits_gen") {
   target = "emscripten_bits"
   outputs = [
     "src/dawn/webnn_struct_info.json",
@@ -38,18 +38,19 @@ dawn_json_generator("emscripten_bits_gen") {
 }
 
 source_set("dawn_headers") {
-  all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
+  all_dependent_configs =
+      [ "${webnn_root}/src/common:dawn_public_include_dirs" ]
   public_deps = [ ":dawn_headers_gen" ]
 
   sources = get_target_outputs(":dawn_headers_gen")
-  sources += [ "${dawn_root}/src/include/dawn/dawn_wsi.h" ]
+  sources += [ "${webnn_root}/src/include/dawn/dawn_wsi.h" ]
 }
 
 ###############################################################################
 # Dawn C++ headers
 ###############################################################################
 
-dawn_json_generator("dawncpp_headers_gen") {
+webnn_json_generator("dawncpp_headers_gen") {
   target = "dawncpp_headers"
   outputs = [ "src/include/dawn/webnn_cpp.h" ]
 }
@@ -61,14 +62,14 @@ source_set("dawncpp_headers") {
   ]
 
   sources = get_target_outputs(":dawncpp_headers_gen")
-  sources += [ "${dawn_root}/src/include/dawn/EnumClassBitmasks.h" ]
+  sources += [ "${webnn_root}/src/include/dawn/EnumClassBitmasks.h" ]
 }
 
 ###############################################################################
 # Dawn C++ wrapper
 ###############################################################################
 
-dawn_json_generator("dawncpp_gen") {
+webnn_json_generator("dawncpp_gen") {
   target = "dawncpp"
   outputs = [ "src/dawn/webnn_cpp.cpp" ]
 }
@@ -85,7 +86,7 @@ source_set("dawncpp") {
 # dawn_proc
 ###############################################################################
 
-dawn_json_generator("dawn_proc_gen") {
+webnn_json_generator("dawn_proc_gen") {
   target = "dawn_proc"
   outputs = [ "src/dawn/dawn_proc.c" ]
 }
@@ -96,5 +97,5 @@ dawn_component("dawn_proc") {
   public_deps = [ ":dawn_headers" ]
   deps = [ ":dawn_proc_gen" ]
   sources = get_target_outputs(":dawn_proc_gen")
-  sources += [ "${dawn_root}/src/include/dawn/dawn_proc.h" ]
+  sources += [ "${webnn_root}/src/include/dawn/dawn_proc.h" ]
 }

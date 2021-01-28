@@ -1,0 +1,7 @@
+declare_args() {
+  # Enables the compilation of OpenVINO Inference Engine backend
+  dawn_enable_ie = false
+
+  # Enables the compilation of DirectML backend
+  dawn_enable_dml = false
+}

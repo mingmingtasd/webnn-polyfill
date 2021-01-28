@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("scripts/dawn_overrides_with_defaults.gni")
+import("//third_party/dawn/scripts/dawn_overrides_with_defaults.gni")
 
 group("all") {
   testonly = true
-  deps = [
-    "src/tests:dawn_tests",
-  ]
+  deps = [ "src/tests:dawn_tests" ]
   if (dawn_standalone) {
     deps += [ "examples:dawn_samples" ]
   }
