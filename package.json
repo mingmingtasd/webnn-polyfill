@@ -4,7 +4,8 @@
   "description": "Build webnn-native.",
   "main": "index.js",
   "scripts": {
-    "build": "node build_script/bin/build",
+    "sync": "node build_script/bin/build sync",
+    "build": "node build_script/bin/build build",
     "linter": "node build_script/tools/linter.js"
   },
   "repository": {
