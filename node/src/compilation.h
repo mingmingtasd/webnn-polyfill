@@ -15,6 +15,7 @@ T ParseOperand(Napi::Object item, const std::string &name) {
   return operand;
 }
 
+class ComputeAsyncWorker;
 class Compilation : public Napi::ObjectWrap<Compilation> {
 public:
   static Napi::Object Initialize(Napi::Env env, Napi::Object exports);
@@ -26,12 +27,15 @@ public:
   WNNCompilation GetCompilation();
 
   Napi::Value Compute(const Napi::CallbackInfo &info);
-  void SetNamedResults(WNNNamedResults named_results);
+  ComputeAsyncWorker *GetAsyncWorker();
 
 private:
   WNNCompilation compilation_;
   Napi::ObjectReference model_object_;
-  WNNNamedResults named_results_;
+
+  // Support async compute with AsyncWorker.
+  // TODO(junwei): support multipe compute with different promise.
+  ComputeAsyncWorker *compute_worker_;
 };
 
 #endif // __Compilation_H__
