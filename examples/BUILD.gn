@@ -16,17 +16,7 @@ import("../scripts/dawn_overrides_with_defaults.gni")
 
 group("dawn_samples") {
   deps = [
-    ":Add",
-    ":AveragePool2d",
-    ":Conv2d",
     ":LeNet",
-    ":MatMul",
-    ":MaxPool2d",
-    ":Mul",
-    ":Relu",
-    ":Reshape",
-    ":Softmax",
-    ":Transpose",
   ]
 }
 
@@ -59,46 +49,6 @@ template("dawn_sample") {
   }
 }
 
-dawn_sample("MatMul") {
-  sources = [ "MatMul.cpp" ]
-}
-
 dawn_sample("LeNet") {
   sources = [ "LeNet.cpp" ]
-}
-
-dawn_sample("Add") {
-  sources = [ "Add.cpp" ]
-}
-
-dawn_sample("Mul") {
-  sources = [ "Mul.cpp" ]
-}
-
-dawn_sample("Conv2d") {
-  sources = [ "Conv2d.cpp" ]
-}
-
-dawn_sample("AveragePool2d") {
-  sources = [ "AveragePool2d.cpp" ]
-}
-
-dawn_sample("MaxPool2d") {
-  sources = [ "MaxPool2d.cpp" ]
-}
-
-dawn_sample("Relu") {
-  sources = [ "Relu.cpp" ]
-}
-
-dawn_sample("Reshape") {
-  sources = [ "Reshape.cpp" ]
-}
-
-dawn_sample("Softmax") {
-  sources = [ "Softmax.cpp" ]
-}
-
-dawn_sample("Transpose") {
-  sources = [ "Transpose.cpp" ]
 }
