@@ -185,12 +185,6 @@ namespace utils {
                 }
             }
         }
-        // TODO: Remove these log when all end2end tests for ops are ready
-        if (expected) {
-            dawn::InfoLog() << "Test succeeded.";
-        } else {
-            dawn::InfoLog() << "Test failed.";
-        }
         g_wrapped_model->SetComputedResult(expected);
         g_compute_sync.Finish();
         return;
