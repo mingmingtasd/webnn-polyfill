@@ -1,6 +1,6 @@
 # Description
 
-Node script [bin/build](./bin/build) enables you to build [webnn-native](https://github.com/otcshare/webnn-native) easily.
+Node script [bin/build_webnn](./bin/build_webnn) enables you to build [webnn-native](https://github.com/otcshare/webnn-native) easily.
 
 ### Configure config json file
 Here's [bot_config.json](./bot_config.json) config file, its content is
@@ -46,13 +46,13 @@ Seetings in **"logging"**: Specifies directory for storing output packages on a 
   - "warn"
   - "error"
   - "debug"
-- file: Save logging message into given file. Default "", save logging message into /tmp/webnn_\<target-os\>_\<target-cpu\>_\<backend\>_\<YYYY-MM-DD\>.log
+- file: Save logging message into given file. Default "", save logging message into /tmp/webnn_\<target-os\>\_\<target-cpu\>\_\<backend\>\_\<YYYY-MM-DD\>.log on Linux platform or C:\Users\\<username\>\AppData\Local\Temp\\<target-os\>\_\<target-cpu\>\_\<backend\>\_\<YYYY-MM-DD\>.log on Windows platform.
 
 ### Help
 ```sh
-$ ./bin/build --help
+$ ./bin/build_webnn --help
 
-Usage: build [options] [command]
+Usage: build_webnn [options] [command]
 
 Options:
   -V, --version    output the version number
@@ -66,10 +66,10 @@ Commands:
   help [command]   display help for command
 ```
 
-Options for *./bin/build build* or *./bin/build all* commands are same, likes:
+Options for *./bin/build_webnn build* or *./bin/build_webnn all* commands are same, likes:
 ```
-$ ./bin/build build --help
-Usage: build build [options]
+$ ./bin/build_webnn build --help
+Usage: build_webnn build [options]
 
 Options:
   -b, --backend <backend>  Build with target backend (default: "null")

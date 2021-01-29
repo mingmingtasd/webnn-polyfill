@@ -18,15 +18,13 @@ program.version(require('../package.json').version);
 program
   .command('sync')
   .action(() => {
-    builder.initConfig();
-    builder.actionSync();
+    builder.run('sync');
   });
 
 program
   .command('pull')
   .action(() => {
-    builder.initConfig();
-    builder.actionPull();
+    builder.run('pull');
   });
 
 program
@@ -35,8 +33,25 @@ program
   .option('-c, --config <config>', 'Configuration file',
   'build_script/bot_config.json')
   .action((options) => {
-    builder.initConfig(options.backend, options.config);
-    builder.actionBuild();
+    builder.run('build', options);
+  });
+
+program
+  .command('package')
+  .action(() => {
+    builder.run('package');
+  });
+
+program
+  .command('upload')
+  .action(() => {
+    builder.run('upload');
+  });
+
+program
+  .command('notify')
+  .action(() => {
+    builder.run('notify');
   });
 
 program
@@ -45,8 +60,7 @@ program
   .option('-c, --config <config>', 'Configuration file',
   'build_script/bot_config.json')
   .action((options) => {
-    builder.initConfig(options.backend, options.config);
-    builder.actionAll();
+    builder.run('all', options);
   });
 
 program.parse();

@@ -26,11 +26,17 @@ class Builder {
 
   /**
    * Init config_ member.
-   * @param {string} [backend='null'] Target backend.
-   * @param {string} [configFile='build_script/bot_config.json'] Configuration
-   *    file for build.
+   * @param {object} options An object containing options as key-value pairs.
    */
-  initConfig(backend='null', configFile='build_script/bot_config.json') {
+  initConfig(options) {
+    let backend = 'null';
+    let configFile = 'build_script/bot_config.json';
+
+    if (options !== undefined) {
+      backend = options.backend;
+      configFile = options.config;
+    }
+
     if (!path.isAbsolute(configFile)) {
       configFile = path.join(this.rootDir_, configFile);
     }
@@ -106,12 +112,66 @@ class Builder {
   }
 
   /**
-   * Run all commands
+   * Run Package command
    */
-  async actionAll() {
-    await this.actionSync();
-    await this.actionPull();
-    await this.actionBuild();
+  async actionPackage() {
+    this.config_.logger.info('Action package');
+    // TODO
+  }
+
+  /**
+   * Run upload command
+   */
+  async actionUpload() {
+    this.config_.logger.info('Action upload');
+    // TODO
+  }
+
+  /**
+   * Run upload command
+   */
+  async actionNotify() {
+    this.config_.logger.info('Action notfy');
+    // TODO
+  }
+
+  /**
+   * Run
+   */
+  async run(cmd, options) {
+    this.initConfig(options);
+
+    switch (cmd) {
+      case 'sync':
+        await this.actionSync();
+        break;
+      case 'pull':
+        await this.actionPull();
+        break;
+      case 'build':
+        await this.actionBuild();
+        break;
+      case 'package':
+        await this.actionPackage();
+        break;
+      case 'upload':
+        await this.actionUpload();
+        break;
+      case 'notify':
+        await this.actionNotify();
+        break;
+      case 'all':
+        await this.actionSync();
+        await this.actionPull();
+        await this.actionBuild();
+        await this.actionPackage();
+        await this.actionUpload();
+        await this.actionNotify();
+        break;
+      default:
+        this.config_.logger.error(`Unsupported command: ${cmd}`);
+        process.exit(1);
+    }
   }
 
   /**
