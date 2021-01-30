@@ -8,7 +8,18 @@
   },
   "clean-build": true,
   "logging": {
-    "level": "debug",
+    "level": "",
     "file": ""
+  },
+  "archive-server": {
+    "host": "",
+    "dir": "",
+    "ssh-user": ""
+  },
+  "email-service":{
+    "user": "",
+    "host": "",
+    "from": "",
+    "to": ""
   }
 }

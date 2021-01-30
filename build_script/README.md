@@ -16,8 +16,19 @@ Here's [bot_config.json](./bot_config.json) config file, its content is
   },
   "clean-build": true,
   "logging": {
-    "level": "debug",
+    "level": "",
     "file": ""
+  },
+  "archive-server": {
+    "host": "",
+    "dir": "",
+    "ssh-user": ""
+  },
+  "email-service":{
+    "user": "",
+    "host": "",
+    "from": "",
+    "to": ""
   }
 }
 ```
@@ -48,6 +59,17 @@ Seetings in **"logging"**: Specifies directory for storing output packages on a 
   - "debug"
 - file: Save logging message into given file. Default "", save logging message into /tmp/webnn_\<target-os\>\_\<target-cpu\>\_\<backend\>\_\<YYYY-MM-DD\>.log on Linux platform or C:\Users\\<username\>\AppData\Local\Temp\\<target-os\>\_\<target-cpu\>\_\<backend\>\_\<YYYY-MM-DD\>.log on Windows platform.
 
+Seetings in **"archive-server"**: Specifies directory for storing output packages and logging files on a dedicated server.
+- host: IP or domain name.
+- dir: Path of directory for storing output packages, likes /path .
+- ssh-user: A account you want to access to host.
+
+Seetings in **"email-service"**: Specifies directory for storing output packages and logging files on a dedicated server.
+- user: User name for logging into SMTP Serve.
+- host: SMTP host.
+- from: Sender of the format (address or name \<address\> or "name" \<address\>).
+- to: Recipients (same format as above), multiple recipients are separated by a comma.
+
 ### Help
 ```sh
 $ ./bin/build_webnn --help
@@ -62,6 +84,9 @@ Commands:
   sync
   pull
   build [options]
+  package
+  upload
+  notify
   all [options]
   help [command]   display help for command
 ```
