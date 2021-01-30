@@ -26,7 +26,8 @@ class Builder {
 
   /**
    * Init config_ member.
-   * @param {object} options An object containing options as key-value pairs.
+   * @param {object} options An object containing options as key-value pairs
+   *    {backend:"", config:"",}.
    */
   initConfig(options) {
     let backend = 'null';
@@ -112,7 +113,7 @@ class Builder {
   }
 
   /**
-   * Run Package command
+   * Run package command
    */
   async actionPackage() {
     this.config_.logger.info('Action package');
@@ -131,12 +132,15 @@ class Builder {
    * Run upload command
    */
   async actionNotify() {
-    this.config_.logger.info('Action notfy');
+    this.config_.logger.info('Action notify');
     // TODO
   }
 
   /**
-   * Run
+   * Run specified command with optional options.
+   * @param {string} cmd Command string.
+   * @param {object} options An object containing options as key-value pairs
+   *    {backend:"", config:"",}.
    */
   async run(cmd, options) {
     this.initConfig(options);
