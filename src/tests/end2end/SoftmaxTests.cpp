@@ -24,7 +24,7 @@ class SoftmaxModel : public utils::WrappedModel {
     }
 };
 
-TEST_F(SoftmaxTests, softmax) {
+TEST_F(SoftmaxTests, Softmax) {
     SoftmaxModel* softmax = new SoftmaxModel();
     softmax->SetInput(
         {3, 4}, {0.4301911, 0.54719144, -1.1637765, 0.18390046, 0.58390397, 0.1735679, 0.539724,

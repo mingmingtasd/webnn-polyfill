@@ -17,32 +17,32 @@ class MaxPool2dTests : public testing::Test {};
 
 class MaxPool2d : public utils::WrappedModel {
   public:
-    MaxPool2d() : options_({}) {
+    MaxPool2d() : mOptions({}) {
     }
     wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
         wnn::Operand input = nn.Input("input", InputDesc());
-        return nn.MaxPool2d(input, &options_);
+        return nn.MaxPool2d(input, &mOptions);
     }
     void SetPadding(std::vector<int32_t> padding) {
-        padding_ = std::move(padding);
-        options_.padding = padding_.data();
+        mPadding = std::move(padding);
+        mOptions.padding = mPadding.data();
     }
     void SetWindowDimensions(std::vector<int32_t> dimensions) {
-        window_dimensios_ = std::move(dimensions);
-        options_.windowDimensions = window_dimensios_.data();
+        mWindowDimensions = std::move(dimensions);
+        mOptions.windowDimensions = mWindowDimensions.data();
     }
 
   private:
-    wnn::Pool2dOptions options_;
-    std::vector<int32_t> padding_;
-    std::vector<int32_t> window_dimensios_;
+    wnn::Pool2dOptions mOptions;
+    std::vector<int32_t> mPadding;
+    std::vector<int32_t> mWindowDimensions;
 };
 
-TEST_F(MaxPool2dTests, max_pool2d) {
-    MaxPool2d* max_pool2d = new MaxPool2d();
-    max_pool2d->SetInput({1, 1, 4, 4}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
-    max_pool2d->SetWindowDimensions({3, 3});
-    max_pool2d->SetExpectedBuffer({11, 12, 15, 16});
-    max_pool2d->SetExpectedShape({1, 1, 2, 2});
-    EXPECT_TRUE(utils::Test(max_pool2d));
+TEST_F(MaxPool2dTests, MaxPool2d) {
+    MaxPool2d* maxPool2d = new MaxPool2d();
+    maxPool2d->SetInput({1, 1, 4, 4}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
+    maxPool2d->SetWindowDimensions({3, 3});
+    maxPool2d->SetExpectedBuffer({11, 12, 15, 16});
+    maxPool2d->SetExpectedShape({1, 1, 2, 2});
+    EXPECT_TRUE(utils::Test(maxPool2d));
 }

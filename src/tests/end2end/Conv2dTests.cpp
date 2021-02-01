@@ -17,24 +17,24 @@ class Conv2dTests : public testing::Test {};
 
 class Conv2d : public utils::WrappedModel {
   public:
-    Conv2d() : options_({}) {
+    Conv2d() : mOptions({}) {
     }
     wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
         wnn::Operand input = nn.Input("input", InputDesc());
         wnn::Operand constant = nn.Constant(ConstantDesc(), ConstantBuffer(), ConstantLength());
-        return nn.Conv2d(input, constant, &options_);
+        return nn.Conv2d(input, constant, &mOptions);
     }
     void SetPadding(std::vector<int32_t> padding) {
-        padding_ = std::move(padding);
-        options_.padding = padding_.data();
+        mPadding = std::move(padding);
+        mOptions.padding = mPadding.data();
     }
 
   private:
-    wnn::Conv2dOptions options_;
-    std::vector<int32_t> padding_;
+    wnn::Conv2dOptions mOptions;
+    std::vector<int32_t> mPadding;
 };
 
-TEST_F(Conv2dTests, conv2d) {
+TEST_F(Conv2dTests, Conv2d) {
     Conv2d* conv2d = new Conv2d();
     conv2d->SetInput({1, 1, 5, 5}, {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
                                     13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
