@@ -20,12 +20,12 @@ Sync the dependencies.
 ### Setting up the build
 Generate projects with OpenVINO backend
 ```sh
-> gn gen out/Default --args="dawn_enable_ie = true"
+> gn gen out/Default --args="webnn_enable_ie = true"
 ```
 
 Or generate projects with DirectML backend
 ```sh
-> gn gen out/Default --args="dawn_enable_dml = true"
+> gn gen out/Default --args="webnn_enable_dml = true"
 ```
 
 Or generate projects with default null backend
@@ -134,9 +134,9 @@ The usage of backend and config arguments are same with above **Build** command
 ## Test
 For OpenVINO build, please [set the environment variables](https://docs.openvinotoolkit.org/2021.1/openvino_docs_install_guides_installing_openvino_windows.html#set-the-environment-variables) first.
 ```sh
-> <out_dir>/add
+> <out_dir>/webnn_end2end_tests
 ```
 or
 ```sh
-> <out_dir>\Add.exe
+> <out_dir>\webnn_end2end_tests.exe
 ```

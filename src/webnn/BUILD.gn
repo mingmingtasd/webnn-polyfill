@@ -43,7 +43,6 @@ source_set("webnn_headers") {
   public_deps = [ ":webnn_headers_gen" ]
 
   sources = get_target_outputs(":webnn_headers_gen")
-  sources += [ "${webnn_root}/src/include/webnn/dawn_wsi.h" ]
 }
 
 ###############################################################################

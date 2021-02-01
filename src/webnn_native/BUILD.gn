@@ -47,12 +47,6 @@ config("webnn_native_internal") {
   }
 }
 
-config("webnn_native_weak_framework") {
-  if (is_mac && dawn_enable_metal) {
-    weak_frameworks = [ "Metal.framework" ]
-  }
-}
-
 webnn_json_generator("webnn_native_utils_gen") {
   target = "webnn_native_utils"
   outputs = [
@@ -137,14 +131,14 @@ source_set("webnn_native_sources") {
     "ops/Unary.h",
   ]
 
-  if (dawn_enable_null) {
+  if (webnn_enable_null) {
     sources += [
       "null/NeuralNetworkContextNull.cpp",
       "null/NeuralNetworkContextNull.h",
     ]
   }
 
-  if (dawn_enable_ie) {
+  if (webnn_enable_ie) {
     sources += [
       "ie/CompilationIE.cpp",
       "ie/CompilationIE.h",
@@ -166,7 +160,7 @@ source_set("webnn_native_sources") {
     ]
   }
 
-  if (dawn_enable_dml) {
+  if (webnn_enable_dml) {
     sources += [
       "dml/deps/src/device.cpp",
       "dml/deps/src/device.h",
@@ -224,14 +218,13 @@ dawn_component("webnn_native") {
   ]
   sources = [ "WebnnNative.cpp" ]
   configs = [ ":webnn_native_internal" ]
-  public_configs = [ ":webnn_native_weak_framework" ]
   defines = [
     "DAWN_NATIVE_SHARED_LIBRARY",
     "DAWN_NATIVE_IMPLEMENTATION",
   ]
 }
 
-if (dawn_enable_ie) {
+if (webnn_enable_ie) {
   if (is_win) {
     ie_nn_dll = "ie_nn_c_api.dll"
     os_folder = "Windows64"
@@ -248,7 +241,7 @@ if (dawn_enable_ie) {
   }
 }
 
-if (dawn_enable_dml) {
+if (webnn_enable_dml) {
   dml_dll = "DirectML.dll"
   os_folder = "x64-win"
   dml_dll_path =
