@@ -30,9 +30,9 @@ static_library("dawn_sample_utils") {
   # Export all of these as public deps so that `gn check` allows includes
   public_deps = [
     "${webnn_root}/src/common",
-    "${webnn_root}/src/dawn:dawn_proc",
-    "${webnn_root}/src/dawn:dawncpp",
-    "${webnn_root}/src/dawn_native",
+    "${webnn_root}/src/webnn:webnn_proc",
+    "${webnn_root}/src/webnn:webnncpp",
+    "${webnn_root}/src/webnn_native",
   ]
   public_configs = [ "${webnn_root}/src/common:dawn_internal" ]
 }

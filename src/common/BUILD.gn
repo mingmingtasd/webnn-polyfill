@@ -154,7 +154,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
     ]
 
     public_configs = [ ":dawn_internal" ]
-    deps = [ "${webnn_root}/src/dawn:dawn_headers" ]
+    deps = [ "${webnn_root}/src/webnn:webnn_headers" ]
     if (is_android) {
       libs = [ "log" ]
     }

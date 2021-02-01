@@ -16,8 +16,8 @@
 #define TESTS_UNITTESTS_VALIDATIONTEST_H_
 
 #include "common/Log.h"
-#include "dawn/webnn_cpp.h"
-#include "dawn_native/DawnNative.h"
+#include "webnn/webnn_cpp.h"
+#include "webnn_native/WebnnNative.h"
 #include "gtest/gtest.h"
 
 #define ASSERT_CONTEXT_ERROR(statement)                          \

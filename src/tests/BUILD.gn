@@ -97,8 +97,8 @@ if (!build_with_chromium) {
 webnn_json_generator("mock_webnn_gen") {
   target = "mock_webnn"
   outputs = [
-    "src/dawn/mock_webnn.h",
-    "src/dawn/mock_webnn.cpp",
+    "src/webnn/mock_webnn.h",
+    "src/webnn/mock_webnn.cpp",
   ]
 }
 
@@ -109,14 +109,14 @@ test("dawn_unittests") {
     ":gmock_and_gtest",
     ":mock_webnn_gen",
     "${webnn_root}/src/common",
-    "${webnn_root}/src/dawn:dawn_proc",
-    "${webnn_root}/src/dawn:dawncpp",
-    "${webnn_root}/src/dawn_native",
-    "${webnn_root}/src/dawn_native:dawn_native_sources",
+    "${webnn_root}/src/webnn:webnn_proc",
+    "${webnn_root}/src/webnn:webnncpp",
+    "${webnn_root}/src/webnn_native",
+    "${webnn_root}/src/webnn_native:webnn_native_sources",
   ]
 
-  # Add internal dawn_native config for internal unittests.
-  configs += [ "${webnn_root}/src/dawn_native:dawn_native_internal" ]
+  # Add internal webnn_native config for internal unittests.
+  configs += [ "${webnn_root}/src/webnn_native:webnn_native_internal" ]
 
   sources = get_target_outputs(":mock_webnn_gen")
   sources += [
@@ -147,9 +147,9 @@ source_set("dawn_end2end_tests_sources") {
   deps = [
     ":gmock_and_gtest",
     "${webnn_root}/src/common",
-    "${webnn_root}/src/dawn:dawn_proc",
-    "${webnn_root}/src/dawn:dawncpp",
-    "${webnn_root}/src/dawn_native",
+    "${webnn_root}/src/webnn:webnn_proc",
+    "${webnn_root}/src/webnn:webnncpp",
+    "${webnn_root}/src/webnn_native",
   ]
 
   sources = [
@@ -179,9 +179,9 @@ test("dawn_end2end_tests") {
     ":dawn_end2end_tests_sources",
     ":gmock_and_gtest",
     "${webnn_root}/src/common",
-    "${webnn_root}/src/dawn:dawn_proc",
-    "${webnn_root}/src/dawn:dawncpp",
-    "${webnn_root}/src/dawn_native",
+    "${webnn_root}/src/webnn:webnn_proc",
+    "${webnn_root}/src/webnn:webnncpp",
+    "${webnn_root}/src/webnn_native",
   ]
 
   libs = []

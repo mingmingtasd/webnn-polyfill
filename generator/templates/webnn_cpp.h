@@ -14,8 +14,8 @@
 #ifndef WEBNN_CPP_H_
 #define WEBNN_CPP_H_
 
-#include "dawn/webnn.h"
-#include "dawn/EnumClassBitmasks.h"
+#include "webnn/webnn.h"
+#include "webnn/EnumClassBitmasks.h"
 
 namespace wnn {
 

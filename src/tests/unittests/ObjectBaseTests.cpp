@@ -14,7 +14,7 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn/webnn_cpp.h"
+#include "webnn/webnn_cpp.h"
 
 class Object : public wnn::ObjectBase<Object, int*> {
   public:

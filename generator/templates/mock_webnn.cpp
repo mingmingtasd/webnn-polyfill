@@ -74,7 +74,7 @@ void ProcTableAsClass::NeuralNetworkContextSetUncapturedErrorCallback(
 }
 
 
-void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table) {
+void ProcTableAsClass::GetProcTableAndDevice(WebnnProcTable* table) {
     // *device = GetNewDevice();
 
     {% for type in by_category["object"] %}

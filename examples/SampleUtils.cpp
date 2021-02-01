@@ -12,10 +12,10 @@
 
 #include "SampleUtils.h"
 
-#include <dawn/dawn_proc.h>
-#include <dawn/webnn.h>
-#include <dawn/webnn_cpp.h>
-#include <dawn_native/DawnNative.h>
+#include <webnn/webnn_proc.h>
+#include <webnn/webnn.h>
+#include <webnn/webnn_cpp.h>
+#include <webnn_native/WebnnNative.h>
 #include "common/Assert.h"
 #include "common/Log.h"
 
@@ -27,21 +27,21 @@ uint32_t product(const std::vector<int32_t>& dims) {
 }
 
 wnn::NeuralNetworkContext CreateCppNeuralNetworkContext() {
-    DawnProcTable backendProcs = dawn_native::GetProcs();
-    dawnProcSetProcs(&backendProcs);
-    return wnn::NeuralNetworkContext::Acquire(dawn_native::CreateNeuralNetworkContext());
+    WebnnProcTable backendProcs = webnn_native::GetProcs();
+    webnnProcSetProcs(&backendProcs);
+    return wnn::NeuralNetworkContext::Acquire(webnn_native::CreateNeuralNetworkContext());
 }
 
 wnn::NamedInputs CreateCppNamedInputs() {
-    return wnn::NamedInputs::Acquire(dawn_native::CreateNamedInputs());
+    return wnn::NamedInputs::Acquire(webnn_native::CreateNamedInputs());
 }
 
 wnn::NamedOperands CreateCppNamedOperands() {
-    return wnn::NamedOperands::Acquire(dawn_native::CreateNamedOperands());
+    return wnn::NamedOperands::Acquire(webnn_native::CreateNamedOperands());
 }
 
 wnn::NamedOutputs CreateCppNamedOutputs() {
-    return wnn::NamedOutputs::Acquire(dawn_native::CreateNamedOutputs());
+    return wnn::NamedOutputs::Acquire(webnn_native::CreateNamedOutputs());
 }
 
 bool Expected(float output, float expected) {

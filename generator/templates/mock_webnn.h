@@ -15,8 +15,8 @@
 #ifndef MOCK_WEBNN_H
 #define MOCK_WEBNN_H
 
-#include <dawn/dawn_proc_table.h>
-#include <dawn/webnn.h>
+#include <webnn/webnn_proc_table.h>
+#include <webnn/webnn.h>
 #include <gmock/gmock.h>
 
 #include <memory>
@@ -28,7 +28,7 @@ class ProcTableAsClass {
     public:
         virtual ~ProcTableAsClass();
 
-        void GetProcTableAndDevice(DawnProcTable* table);
+        void GetProcTableAndDevice(WebnnProcTable* table);
 
         // Creates an object that can be returned by a mocked call as in WillOnce(Return(foo)).
         // It returns an object of the write type that isn't equal to any previously returned object.

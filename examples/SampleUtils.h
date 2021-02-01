@@ -13,8 +13,8 @@
 #ifndef WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
 #define WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
 
-#include <dawn/webnn.h>
-#include <dawn/webnn_cpp.h>
+#include <webnn/webnn.h>
+#include <webnn/webnn_cpp.h>
 #include <condition_variable>
 #include <mutex>
 #include <vector>

@@ -15,14 +15,14 @@
 #include "tests/unittests/validation/ValidationTest.h"
 
 #include "common/Assert.h"
-#include "dawn/dawn_proc.h"
-#include "dawn/webnn.h"
+#include "webnn/webnn_proc.h"
+#include "webnn/webnn.h"
 
 void ValidationTest::SetUp() {
-    DawnProcTable backendProcs = dawn_native::GetProcs();
+    WebnnProcTable backendProcs = webnn_native::GetProcs();
     ASSERT_NE(&backendProcs, nullptr);
-    dawnProcSetProcs(&backendProcs);
-    context = wnn::NeuralNetworkContext::Acquire(dawn_native::CreateNeuralNetworkContext());
+    webnnProcSetProcs(&backendProcs);
+    context = wnn::NeuralNetworkContext::Acquire(webnn_native::CreateNeuralNetworkContext());
     context.SetUncapturedErrorCallback(ErrorCallback, this);
 }
 
