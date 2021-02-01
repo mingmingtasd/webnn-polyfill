@@ -64,33 +64,33 @@ namespace utils {
         bool GetComputedResult();
 
       private:
-        wnn::ModelBuilder model_builder_;
-        std::vector<int32_t> input_shape_;
-        std::vector<float> input_buffer_;
-        wnn::OperandDescriptor input_desc_;
-        wnn::OperandDescriptor constant_desc_;
-        std::vector<int32_t> constant_shape_;
-        std::vector<float> constant_buffer_;
-        std::vector<int32_t> output_shape_;
-        std::vector<float> expected_buffer_;
-        std::vector<int32_t> expected_shape_;
-        bool output_expected_;
+        wnn::ModelBuilder mModelBuilder;
+        std::vector<int32_t> mInputShape;
+        std::vector<float> mInputBuffer;
+        wnn::OperandDescriptor mInputDesc;
+        wnn::OperandDescriptor mConstantDesc;
+        std::vector<int32_t> mConstantShape;
+        std::vector<float> mConstantBuffer;
+        std::vector<int32_t> mOutputShape;
+        std::vector<float> mExpectedBuffer;
+        std::vector<int32_t> mExpectedShape;
+        bool mOutputExpected;
     };
 
     bool Test(WrappedModel* model);
 
     class ComputeSync {
       public:
-        ComputeSync() : done_(false) {
+        ComputeSync() : mDone(false) {
         }
         ~ComputeSync() = default;
         void Wait();
         void Finish();
 
       private:
-        std::condition_variable cond_var_;
-        std::mutex mutex_;
-        bool done_;
+        std::condition_variable mCondVar;
+        std::mutex mMutex;
+        bool mDone;
     };
 
 }  // namespace utils
