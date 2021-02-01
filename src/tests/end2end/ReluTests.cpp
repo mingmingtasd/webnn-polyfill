@@ -24,7 +24,7 @@ class ReluModel : public utils::WrappedModel {
     }
 };
 
-TEST_F(ReluTests, relu) {
+TEST_F(ReluTests, Relu) {
     ReluModel* relu = new ReluModel();
     relu->SetInput(
         {3, 4, 5},

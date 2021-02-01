@@ -25,7 +25,7 @@ class MulModel : public utils::WrappedModel {
     }
 };
 
-TEST_F(MulTests, mul) {
+TEST_F(MulTests, Mul) {
     MulModel* mul = new MulModel();
     mul->SetInput({3, 4, 5},
                   {5.6232101e-01,  1.3117781e-01,  -1.4161869e+00, 2.0386910e-02,  9.1077393e-01,
@@ -68,9 +68,9 @@ TEST_F(MulTests, mul) {
     EXPECT_TRUE(utils::Test(mul));
 }
 
-TEST_F(MulTests, mul_broadcast) {
-    MulModel* mul_broadcast = new MulModel();
-    mul_broadcast->SetInput(
+TEST_F(MulTests, MulBroadcast) {
+    MulModel* mulBroadcast = new MulModel();
+    mulBroadcast->SetInput(
         {3, 4, 5}, {
                        -0.08539673, 0.11800674,  -1.2358714,  0.30089188,  -0.73443925, 1.4894297,
                        0.16823359,  -2.2034893,  1.0740992,   -0.35457978, 0.61524934,  0.462153,
@@ -83,14 +83,14 @@ TEST_F(MulTests, mul_broadcast) {
                        -1.1924151,  -1.8408557,  -0.85080767, -1.3341717,  0.54687303,  -0.14426671,
                        -0.15728855, 0.323939,    1.167636,    0.03020451,  0.91373825,  1.0675793,
                    });
-    mul_broadcast->SetConstant({5}, {
-                                        0.6338172,
-                                        1.630534,
-                                        -1.3819867,
-                                        -1.0427561,
-                                        1.058136,
-                                    });
-    mul_broadcast->SetExpectedBuffer({
+    mulBroadcast->SetConstant({5}, {
+                                       0.6338172,
+                                       1.630534,
+                                       -1.3819867,
+                                       -1.0427561,
+                                       1.058136,
+                                   });
+    mulBroadcast->SetExpectedBuffer({
         -0.05412592, 0.192414,    1.707958,    -0.31375682, -0.7771366,  0.9440262,   0.2743106,
         3.045193,    -1.1200235,  -0.37519363, 0.3899556,   0.7535562,   -0.82808685, 0.8451324,
         -2.4080884,  -0.13843685, 1.8997072,   0.7867256,   -2.0814168,  0.6565565,   0.06709924,
@@ -101,6 +101,6 @@ TEST_F(MulTests, mul_broadcast) {
         -1.9478757,  -0.5392565,  -2.1754124,  -0.7557713,  0.15043499,  -0.16643268, 0.20531811,
         1.9038703,   -0.04174223, -0.9528061,  1.129644,
     });
-    mul_broadcast->SetExpectedShape({3, 4, 5});
-    EXPECT_TRUE(utils::Test(mul_broadcast));
+    mulBroadcast->SetExpectedShape({3, 4, 5});
+    EXPECT_TRUE(utils::Test(mulBroadcast));
 }

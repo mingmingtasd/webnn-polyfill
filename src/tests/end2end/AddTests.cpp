@@ -25,7 +25,7 @@ class AddModel : public utils::WrappedModel {
     }
 };
 
-TEST_F(AddTests, add) {
+TEST_F(AddTests, Add) {
     AddModel* add = new AddModel();
     add->SetInput(
         {3, 4, 5},
@@ -63,9 +63,9 @@ TEST_F(AddTests, add) {
     EXPECT_TRUE(utils::Test(add));
 }
 
-TEST_F(AddTests, add_broadcast) {
-    AddModel* add_broadcast = new AddModel();
-    add_broadcast->SetInput(
+TEST_F(AddTests, AddBroadcast) {
+    AddModel* addBroadcast = new AddModel();
+    addBroadcast->SetInput(
         {3, 4, 5}, {
                        -0.08539673, 0.11800674,  -1.2358714,  0.30089188,  -0.73443925, 1.4894297,
                        0.16823359,  -2.2034893,  1.0740992,   -0.35457978, 0.61524934,  0.462153,
@@ -78,14 +78,14 @@ TEST_F(AddTests, add_broadcast) {
                        -1.1924151,  -1.8408557,  -0.85080767, -1.3341717,  0.54687303,  -0.14426671,
                        -0.15728855, 0.323939,    1.167636,    0.03020451,  0.91373825,  1.0675793,
                    });
-    add_broadcast->SetConstant({5}, {
-                                        0.6338172,
-                                        1.630534,
-                                        -1.3819867,
-                                        -1.0427561,
-                                        1.058136,
-                                    });
-    add_broadcast->SetExpectedBuffer({
+    addBroadcast->SetConstant({5}, {
+                                       0.6338172,
+                                       1.630534,
+                                       -1.3819867,
+                                       -1.0427561,
+                                       1.058136,
+                                   });
+    addBroadcast->SetExpectedBuffer({
         0.5484205,   1.7485408,   -2.6178582,  -0.7418642,  0.32369673,  2.123247,    1.7987677,
         -3.585476,   0.0313431,   0.7035562,   1.2490666,   2.0926871,   -0.7827864,  -1.8532355,
         -1.2176476,  0.41539955,  2.7956169,   -1.9512582,  0.95331657,  1.6786201,   0.7396825,
@@ -96,6 +96,6 @@ TEST_F(AddTests, add_broadcast) {
         -0.78271973, -0.21699047, 0.2963624,   -0.8351137,  -1.1870228,  0.90084743,  0.95775616,
         2.79817,     -1.3517822,  -0.12901783, 2.1257153,
     });
-    add_broadcast->SetExpectedShape({3, 4, 5});
-    EXPECT_TRUE(utils::Test(add_broadcast));
+    addBroadcast->SetExpectedShape({3, 4, 5});
+    EXPECT_TRUE(utils::Test(addBroadcast));
 }

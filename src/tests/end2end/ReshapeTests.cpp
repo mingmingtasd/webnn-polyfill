@@ -20,91 +20,89 @@ class ReshapeModel : public utils::WrappedModel {
     ReshapeModel() = default;
     wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
         wnn::Operand input = nn.Input("input", InputDesc());
-        return nn.Reshape(input, new_shape_.data(), new_shape_.size());
+        return nn.Reshape(input, mNewShape.data(), mNewShape.size());
     }
-    void SetNewShape(std::vector<int32_t> new_shape) {
-        new_shape_ = std::move(new_shape);
+    void SetNewShape(std::vector<int32_t> newshape) {
+        mNewShape = std::move(newshape);
     }
 
   private:
-    std::vector<int32_t> new_shape_;
+    std::vector<int32_t> mNewShape;
 };
 
-TEST_F(ReshapeTests, reshape_reordered_all_dims) {
-    ReshapeModel* reshape_reordered_all_dims = new ReshapeModel();
-    reshape_reordered_all_dims->SetInput(
-        {2, 3, 4},
+TEST_F(ReshapeTests, ReshapeReorderedAllDims) {
+    ReshapeModel* reshapeReorderedAllDims = new ReshapeModel();
+    reshapeReorderedAllDims->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                                  13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
+    reshapeReorderedAllDims->SetNewShape({4, 2, 3});
+    reshapeReorderedAllDims->SetExpectedBuffer(
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_reordered_all_dims->SetNewShape({4, 2, 3});
-    reshape_reordered_all_dims->SetExpectedBuffer(
-        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_reordered_all_dims->SetExpectedShape({4, 2, 3});
-    EXPECT_TRUE(utils::Test(reshape_reordered_all_dims));
+    reshapeReorderedAllDims->SetExpectedShape({4, 2, 3});
+    EXPECT_TRUE(utils::Test(reshapeReorderedAllDims));
 }
 
-TEST_F(ReshapeTests, reshape_reordered_last_dims) {
-    ReshapeModel* reshape_reordered_last_dims = new ReshapeModel();
-    reshape_reordered_last_dims->SetInput(
-        {2, 3, 4},
+TEST_F(ReshapeTests, ReshapeReorderedLastDims) {
+    ReshapeModel* reshapeReorderedLastDims = new ReshapeModel();
+    reshapeReorderedLastDims->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                                   13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
+    reshapeReorderedLastDims->SetNewShape({2, 4, 3});
+    reshapeReorderedLastDims->SetExpectedBuffer(
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_reordered_last_dims->SetNewShape({2, 4, 3});
-    reshape_reordered_last_dims->SetExpectedBuffer(
-        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_reordered_last_dims->SetExpectedShape({2, 4, 3});
-    EXPECT_TRUE(utils::Test(reshape_reordered_last_dims));
+    reshapeReorderedLastDims->SetExpectedShape({2, 4, 3});
+    EXPECT_TRUE(utils::Test(reshapeReorderedLastDims));
 }
 
-TEST_F(ReshapeTests, reshape_reduced_dims) {
-    ReshapeModel* reshape_reduced_dims = new ReshapeModel();
-    reshape_reduced_dims->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
-                                               13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_reduced_dims->SetNewShape({2, 12});
-    reshape_reduced_dims->SetExpectedBuffer(
+TEST_F(ReshapeTests, ReshapeReducedDims) {
+    ReshapeModel* reshapeReducedDims = new ReshapeModel();
+    reshapeReducedDims->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                             13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
+    reshapeReducedDims->SetNewShape({2, 12});
+    reshapeReducedDims->SetExpectedBuffer(
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_reduced_dims->SetExpectedShape({2, 12});
-    EXPECT_TRUE(utils::Test(reshape_reduced_dims));
+    reshapeReducedDims->SetExpectedShape({2, 12});
+    EXPECT_TRUE(utils::Test(reshapeReducedDims));
 }
 
-TEST_F(ReshapeTests, reshape_extended_dims) {
-    ReshapeModel* reshape_extended_dims = new ReshapeModel();
-    reshape_extended_dims->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
-                                                13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_extended_dims->SetNewShape({2, 3, 2, 2});
-    reshape_extended_dims->SetExpectedBuffer(
+TEST_F(ReshapeTests, ReshapeExtendedDims) {
+    ReshapeModel* reshapeExtendedDims = new ReshapeModel();
+    reshapeExtendedDims->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                              13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
+    reshapeExtendedDims->SetNewShape({2, 3, 2, 2});
+    reshapeExtendedDims->SetExpectedBuffer(
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_extended_dims->SetExpectedShape({2, 3, 2, 2});
-    EXPECT_TRUE(utils::Test(reshape_extended_dims));
+    reshapeExtendedDims->SetExpectedShape({2, 3, 2, 2});
+    EXPECT_TRUE(utils::Test(reshapeExtendedDims));
 }
 
-TEST_F(ReshapeTests, reshape_one_dim) {
-    ReshapeModel* reshape_one_dim = new ReshapeModel();
-    reshape_one_dim->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
-                                          13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_one_dim->SetNewShape({24});
-    reshape_one_dim->SetExpectedBuffer(
+TEST_F(ReshapeTests, ReshapeOneDim) {
+    ReshapeModel* reshapeOneDim = new ReshapeModel();
+    reshapeOneDim->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                        13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
+    reshapeOneDim->SetNewShape({24});
+    reshapeOneDim->SetExpectedBuffer(
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_one_dim->SetExpectedShape({24});
-    EXPECT_TRUE(utils::Test(reshape_one_dim));
+    reshapeOneDim->SetExpectedShape({24});
+    EXPECT_TRUE(utils::Test(reshapeOneDim));
 }
 
-TEST_F(ReshapeTests, reshape_negative_dim) {
-    ReshapeModel* reshape_negative_dim = new ReshapeModel();
-    reshape_negative_dim->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
-                                               13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_negative_dim->SetNewShape({2, -1, 2});
-    reshape_negative_dim->SetExpectedBuffer(
+TEST_F(ReshapeTests, ReshapeNegativeDim) {
+    ReshapeModel* reshapeNegativeDim = new ReshapeModel();
+    reshapeNegativeDim->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                             13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
+    reshapeNegativeDim->SetNewShape({2, -1, 2});
+    reshapeNegativeDim->SetExpectedBuffer(
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_negative_dim->SetExpectedShape({2, 6, 2});
-    EXPECT_TRUE(utils::Test(reshape_negative_dim));
+    reshapeNegativeDim->SetExpectedShape({2, 6, 2});
+    EXPECT_TRUE(utils::Test(reshapeNegativeDim));
 }
 
-TEST_F(ReshapeTests, reshape_negative_dim_1) {
-    ReshapeModel* reshape_negative_dim_1 = new ReshapeModel();
-    reshape_negative_dim_1->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
-                                                 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_negative_dim_1->SetNewShape({-1, 2, 3, 4});
-    reshape_negative_dim_1->SetExpectedBuffer(
+TEST_F(ReshapeTests, ReshapeNegativeDim1) {
+    ReshapeModel* reshapeNegativeDim1 = new ReshapeModel();
+    reshapeNegativeDim1->SetInput({2, 3, 4}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                              13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
+    reshapeNegativeDim1->SetNewShape({-1, 2, 3, 4});
+    reshapeNegativeDim1->SetExpectedBuffer(
         {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
-    reshape_negative_dim_1->SetExpectedShape({1, 2, 3, 4});
-    EXPECT_TRUE(utils::Test(reshape_negative_dim_1));
+    reshapeNegativeDim1->SetExpectedShape({1, 2, 3, 4});
+    EXPECT_TRUE(utils::Test(reshapeNegativeDim1));
 }
