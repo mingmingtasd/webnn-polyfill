@@ -19,8 +19,8 @@
 #include "common/Log.h"
 
 // The Compilation should be released unitl ComputeCallback.
-wnn::Compilation g_compilation;
-utils::ComputeSync g_compute_sync;
+wnn::Compilation gCompilation;
+utils::ComputeSync gComputeSync;
 std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 void ComputeCallback(WNNComputeStatus status,
                      WNNNamedResults impl,
@@ -28,23 +28,23 @@ void ComputeCallback(WNNComputeStatus status,
                      void* userData) {
     if (status != WNNComputeStatus_Success) {
         dawn::ErrorLog() << message;
-        g_compute_sync.Finish();
+        gComputeSync.Finish();
         return;
     }
     end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> elapsed_time = end - start;
-    dawn::InfoLog() << "inference time: " << elapsed_time.count() << " ms";
+    std::chrono::duration<double, std::milli> elapsedTime = end - start;
+    dawn::InfoLog() << "inference time: " << elapsedTime.count() << " ms";
 
     wnn::NamedResults outputs = outputs.Acquire(impl);
     wnn::Result output = outputs.Get("output");
 
-    std::vector<float> expected_data = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0};
+    std::vector<float> expectedData = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0};
     bool expected = true;
     for (size_t i = 0; i < output.BufferSize() / sizeof(float); ++i) {
-        float output_data = static_cast<const float*>(output.Buffer())[i];
-        if (!Expected(output_data, expected_data[i])) {
-            dawn::ErrorLog() << "The output doesn't output as expected for " << output_data
-                             << " != " << expected_data[i] << " index = " << i;
+        float outputData = static_cast<const float*>(output.Buffer())[i];
+        if (!Expected(outputData, expectedData[i])) {
+            dawn::ErrorLog() << "The output doesn't output as expected for " << outputData
+                             << " != " << expectedData[i] << " index = " << i;
             expected = false;
             break;
         }
@@ -52,7 +52,7 @@ void ComputeCallback(WNNComputeStatus status,
     if (expected) {
         dawn::InfoLog() << "The output output as expected.";
     }
-    g_compute_sync.Finish();
+    gComputeSync.Finish();
 }
 
 void CompilationCallback(WNNCompileStatus status,
@@ -61,12 +61,12 @@ void CompilationCallback(WNNCompileStatus status,
                          void* userData) {
     if (status != WNNCompileStatus_Success) {
         dawn::ErrorLog() << message;
-        g_compute_sync.Finish();
+        gComputeSync.Finish();
         return;
     }
-    g_compilation = g_compilation.Acquire(impl);
+    gCompilation = gCompilation.Acquire(impl);
 
-    std::vector<float> input_buffer = {
+    std::vector<float> inputBuffer = {
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -113,13 +113,13 @@ void CompilationCallback(WNNCompileStatus status,
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0};
 
     wnn::Input a;
-    a.buffer = input_buffer.data();
-    a.size = input_buffer.size() * sizeof(float);
+    a.buffer = inputBuffer.data();
+    a.size = inputBuffer.size() * sizeof(float);
     wnn::NamedInputs inputs = CreateCppNamedInputs();
     inputs.Set("input", &a);
 
     start = std::chrono::high_resolution_clock::now();
-    g_compilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
+    gCompilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
 }
 
 int main(int argc, const char* argv[]) {
@@ -257,14 +257,14 @@ int main(int argc, const char* argv[]) {
 
     wnn::Operand softmax = builder.Softmax(add4);
 
-    wnn::NamedOperands named_operands = CreateCppNamedOperands();
-    named_operands.Set("output", softmax);
-    wnn::Model model = builder.CreateModel(named_operands);
+    wnn::NamedOperands namedOperands = CreateCppNamedOperands();
+    namedOperands.Set("output", softmax);
+    wnn::Model model = builder.CreateModel(namedOperands);
     model.Compile(CompilationCallback, nullptr);
 
-    g_compute_sync.Wait();
+    gComputeSync.Wait();
 
     free(dataBuffer);
     // Release backend resources in main thread.
-    g_compilation = nullptr;
+    gCompilation = nullptr;
 }

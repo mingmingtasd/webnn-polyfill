@@ -50,65 +50,64 @@ bool Expected(float output, float expected) {
 
 namespace utils {
 
-    WrappedModel::WrappedModel() : output_expected_(true) {
+    WrappedModel::WrappedModel() : mOutputExpected(true) {
     }
 
     void WrappedModel::SetInput(std::vector<int32_t> shape, std::vector<float> buffer) {
-        input_shape_ = std::move(shape);
-        input_buffer_ = std::move(buffer);
-        input_desc_ = {wnn::OperandType::Float32, input_shape_.data(),
-                       (uint32_t)input_shape_.size()};
+        mInputShape = std::move(shape);
+        mInputBuffer = std::move(buffer);
+        mInputDesc = {wnn::OperandType::Float32, mInputShape.data(), (uint32_t)mInputShape.size()};
     }
 
     wnn::OperandDescriptor* WrappedModel::InputDesc() {
-        return &input_desc_;
+        return &mInputDesc;
     }
 
     std::vector<float> WrappedModel::InputBuffer() {
-        return input_buffer_;
+        return mInputBuffer;
     }
 
     void WrappedModel::SetConstant(std::vector<int32_t> shape, std::vector<float> buffer) {
-        constant_shape_ = std::move(shape);
-        constant_buffer_ = std::move(buffer);
-        constant_desc_ = {wnn::OperandType::Float32, constant_shape_.data(),
-                          (uint32_t)constant_shape_.size()};
+        mConstantShape = std::move(shape);
+        mConstantBuffer = std::move(buffer);
+        mConstantDesc = {wnn::OperandType::Float32, mConstantShape.data(),
+                         (uint32_t)mConstantShape.size()};
     }
 
     wnn::OperandDescriptor* WrappedModel::ConstantDesc() {
-        return &constant_desc_;
+        return &mConstantDesc;
     }
 
     void const* WrappedModel::ConstantBuffer() {
-        return constant_buffer_.data();
+        return mConstantBuffer.data();
     }
 
     size_t WrappedModel::ConstantLength() {
-        return constant_buffer_.size() * sizeof(float);
+        return mConstantBuffer.size() * sizeof(float);
     }
 
     void WrappedModel::SetOutputShape(std::vector<int32_t> shape) {
-        output_shape_ = std::move(shape);
+        mOutputShape = std::move(shape);
     }
 
     std::vector<int32_t> WrappedModel::OutputShape() {
-        return output_shape_;
+        return mOutputShape;
     }
 
     void WrappedModel::SetExpectedShape(std::vector<int32_t> shape) {
-        expected_shape_ = std::move(shape);
+        mExpectedShape = std::move(shape);
     }
 
     std::vector<int32_t> WrappedModel::ExpectedShape() {
-        return expected_shape_;
+        return mExpectedShape;
     }
 
     void WrappedModel::SetExpectedBuffer(std::vector<float> buffer) {
-        expected_buffer_ = std::move(buffer);
+        mExpectedBuffer = std::move(buffer);
     }
 
     std::vector<float> WrappedModel::ExpectedBuffer() {
-        return expected_buffer_;
+        return mExpectedBuffer;
     }
 
     wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
@@ -116,30 +115,30 @@ namespace utils {
     }
 
     void WrappedModel::SetComputedResult(bool expected) {
-        output_expected_ = expected;
+        mOutputExpected = expected;
     }
 
     bool WrappedModel::GetComputedResult() {
-        return output_expected_;
+        return mOutputExpected;
     }
 
     // The Compilation should be released unitl ComputeCallback.
-    wnn::Compilation g_compilation;
-    WrappedModel* g_wrapped_model;
-    ComputeSync g_compute_sync;
+    wnn::Compilation gCompilation;
+    WrappedModel* gWrappedModel;
+    ComputeSync gComputeSync;
 
     void ComputeSync::Wait() {
         // Wait for async callback.
-        std::unique_lock<std::mutex> lock(mutex_);
-        bool& done = done_;
-        cond_var_.wait(lock, [&done] { return done; });
-        done_ = false;
+        std::unique_lock<std::mutex> lock(mMutex);
+        bool& done = mDone;
+        mCondVar.wait(lock, [&done] { return done; });
+        mDone = false;
     }
 
     void ComputeSync::Finish() {
-        std::lock_guard<std::mutex> lock(mutex_);
-        done_ = true;
-        cond_var_.notify_one();
+        std::lock_guard<std::mutex> lock(mMutex);
+        mDone = true;
+        mCondVar.notify_one();
         return;
     }
 
@@ -150,43 +149,43 @@ namespace utils {
         if (status != WNNComputeStatus_Success) {
             dawn::InfoLog() << "Test failed.";
             dawn::ErrorLog() << message;
-            g_compute_sync.Finish();
+            gComputeSync.Finish();
             return;
         }
         wnn::NamedResults outputs = outputs.Acquire(impl);
         wnn::Result output = outputs.Get("output");
-        std::vector<float> expected_data = g_wrapped_model->ExpectedBuffer();
+        std::vector<float> expectedData = gWrappedModel->ExpectedBuffer();
         bool expected = true;
         for (size_t i = 0; i < output.BufferSize() / sizeof(float); ++i) {
-            float output_data = static_cast<const float*>(output.Buffer())[i];
-            if (!Expected(output_data, expected_data[i])) {
-                dawn::ErrorLog() << "The output doesn't output as expected for " << output_data
-                                 << " != " << expected_data[i] << " index = " << i;
+            float outputData = static_cast<const float*>(output.Buffer())[i];
+            if (!Expected(outputData, expectedData[i])) {
+                dawn::ErrorLog() << "The output doesn't output as expected for " << outputData
+                                 << " != " << expectedData[i] << " index = " << i;
                 expected = false;
                 break;
             }
         }
-        std::vector<int32_t> expected_shape = g_wrapped_model->ExpectedShape();
-        if (!expected_shape.empty()) {
-            if (expected_shape.size() != output.DimensionsSize()) {
+        std::vector<int32_t> expectedShape = gWrappedModel->ExpectedShape();
+        if (!expectedShape.empty()) {
+            if (expectedShape.size() != output.DimensionsSize()) {
                 expected = false;
                 dawn::ErrorLog() << "The output rank is not as expected for "
-                                 << expected_shape.size() << " != " << output.DimensionsSize();
+                                 << expectedShape.size() << " != " << output.DimensionsSize();
             } else {
                 for (size_t i = 0; i < output.DimensionsSize(); ++i) {
                     int32_t dimension = output.Dimensions()[i];
-                    if (!Expected(expected_shape[i], dimension)) {
+                    if (!Expected(expectedShape[i], dimension)) {
                         dawn::ErrorLog()
                             << "The output dimension is not as expected for " << dimension
-                            << " != " << expected_shape[i] << " index = " << i;
+                            << " != " << expectedShape[i] << " index = " << i;
                         expected = false;
                         break;
                     }
                 }
             }
         }
-        g_wrapped_model->SetComputedResult(expected);
-        g_compute_sync.Finish();
+        gWrappedModel->SetComputedResult(expected);
+        gComputeSync.Finish();
         return;
     }
 
@@ -196,18 +195,18 @@ namespace utils {
                              void* userData) {
         if (status != WNNCompileStatus_Success) {
             dawn::ErrorLog() << message;
-            g_compute_sync.Finish();
+            gComputeSync.Finish();
             return;
         }
 
-        std::vector<float> input_buffer = g_wrapped_model->InputBuffer();
+        std::vector<float> inputBuffer = gWrappedModel->InputBuffer();
         wnn::Input a;
-        a.buffer = input_buffer.data();
-        a.size = input_buffer.size() * sizeof(float);
+        a.buffer = inputBuffer.data();
+        a.size = inputBuffer.size() * sizeof(float);
         wnn::NamedInputs inputs = CreateCppNamedInputs();
         inputs.Set("input", &a);
-        g_compilation = g_compilation.Acquire(impl);
-        g_compilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
+        gCompilation = gCompilation.Acquire(impl);
+        gCompilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
     }
 
     void ErrorCallback(WNNErrorType type, char const* message, void* userdata) {
@@ -217,26 +216,26 @@ namespace utils {
     }
 
     // Wrapped Compilation
-    bool Test(WrappedModel* wrapped_model) {
-        g_wrapped_model = wrapped_model;
+    bool Test(WrappedModel* wrappedModel) {
+        gWrappedModel = wrappedModel;
         wnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
         context.SetUncapturedErrorCallback(ErrorCallback, nullptr);
 
         wnn::ModelBuilder builder = context.CreateModelBuilder();
-        wnn::Operand output_operand = wrapped_model->GenerateOutput(builder);
-        wnn::NamedOperands named_operands = CreateCppNamedOperands();
-        named_operands.Set("output", output_operand);
+        wnn::Operand outputOperand = wrappedModel->GenerateOutput(builder);
+        wnn::NamedOperands namedOperands = CreateCppNamedOperands();
+        namedOperands.Set("output", outputOperand);
         // Use Promise in JS to await callback.
         context.PushErrorScope(wnn::ErrorFilter::Validation);
-        wnn::Model model = builder.CreateModel(named_operands);
+        wnn::Model model = builder.CreateModel(namedOperands);
         context.PopErrorScope(ErrorCallback, nullptr);
         model.Compile(CompilationCallback, nullptr);
 
-        g_compute_sync.Wait();
-        bool expected = wrapped_model->GetComputedResult();
+        gComputeSync.Wait();
+        bool expected = wrappedModel->GetComputedResult();
         // Release backend resources in main thread.
-        delete g_wrapped_model;
-        g_compilation = nullptr;
+        delete gWrappedModel;
+        gCompilation = nullptr;
         return expected;
     }
 
