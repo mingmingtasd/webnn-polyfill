@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../scripts/dawn_overrides_with_defaults.gni")
+import("//third_party/dawn/scripts/dawn_overrides_with_defaults.gni")
 
 import("//testing/test.gni")
-import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
+import("${webnn_root}/generator/webnn_generator.gni")
 
 group("dawn_tests") {
   testonly = true
   deps = [
     ":dawn_end2end_tests",
+
     #":dawn_perf_tests",
     ":dawn_unittests",
   ]
@@ -93,7 +94,7 @@ if (!build_with_chromium) {
 # Dawn unittests
 ###############################################################################
 
-dawn_json_generator("mock_webnn_gen") {
+webnn_json_generator("mock_webnn_gen") {
   target = "mock_webnn"
   outputs = [
     "src/dawn/mock_webnn.h",
@@ -102,26 +103,26 @@ dawn_json_generator("mock_webnn_gen") {
 }
 
 test("dawn_unittests") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  configs += [ "${webnn_root}/src/common:dawn_internal" ]
 
   deps = [
     ":gmock_and_gtest",
     ":mock_webnn_gen",
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:dawn_proc",
-    "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn_native",
-    "${dawn_root}/src/dawn_native:dawn_native_sources",
+    "${webnn_root}/src/common",
+    "${webnn_root}/src/dawn:dawn_proc",
+    "${webnn_root}/src/dawn:dawncpp",
+    "${webnn_root}/src/dawn_native",
+    "${webnn_root}/src/dawn_native:dawn_native_sources",
   ]
 
   # Add internal dawn_native config for internal unittests.
-  configs += [ "${dawn_root}/src/dawn_native:dawn_native_internal" ]
+  configs += [ "${webnn_root}/src/dawn_native:dawn_native_internal" ]
 
   sources = get_target_outputs(":mock_webnn_gen")
   sources += [
     "unittests/ErrorTests.cpp",
-    "unittests/ResultTests.cpp",
     "unittests/ObjectBaseTests.cpp",
+    "unittests/ResultTests.cpp",
     "unittests/validation/ValidationTest.cpp",
     "unittests/validation/ValidationTest.h",
   ]
@@ -140,20 +141,20 @@ test("dawn_unittests") {
 ###############################################################################
 
 source_set("dawn_end2end_tests_sources") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  configs += [ "${webnn_root}/src/common:dawn_internal" ]
   testonly = true
 
   deps = [
     ":gmock_and_gtest",
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:dawn_proc",
-    "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn_native",
+    "${webnn_root}/src/common",
+    "${webnn_root}/src/dawn:dawn_proc",
+    "${webnn_root}/src/dawn:dawncpp",
+    "${webnn_root}/src/dawn_native",
   ]
 
   sources = [
-    "${dawn_root}/examples/SampleUtils.cpp",
-    "${dawn_root}/examples/SampleUtils.h",
+    "${webnn_root}/examples/SampleUtils.cpp",
+    "${webnn_root}/examples/SampleUtils.h",
     "end2end/AddTests.cpp",
     "end2end/MulTests.cpp",
     "end2end/AveragePool2dTests.cpp",
@@ -172,15 +173,15 @@ source_set("dawn_end2end_tests_sources") {
 }
 
 test("dawn_end2end_tests") {
-  configs += [ "${dawn_root}/src/common:dawn_internal" ]
+  configs += [ "${webnn_root}/src/common:dawn_internal" ]
 
   deps = [
     ":dawn_end2end_tests_sources",
     ":gmock_and_gtest",
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:dawn_proc",
-    "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn_native",
+    "${webnn_root}/src/common",
+    "${webnn_root}/src/dawn:dawn_proc",
+    "${webnn_root}/src/dawn:dawncpp",
+    "${webnn_root}/src/dawn_native",
   ]
 
   libs = []

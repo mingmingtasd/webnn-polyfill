@@ -1,40 +1,31 @@
 use_relative_paths = True
 
 gclient_gn_args_file = 'build/config/gclient_args.gni'
-gclient_gn_args = [
-  'mac_xcode_version',
-]
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'dawn_git': 'https://dawn.googlesource.com',
   'github_git': 'https://github.com',
-  'swiftshader_git': 'https://swiftshader.googlesource.com',
 
   'dawn_standalone': True,
-
-  # This can be overridden, e.g. with custom_vars, to download a nonstandard
-  # Xcode version in build/mac_toolchain.py instead of downloading the
-  # prebuilt pinned revision.
-  'mac_xcode_version': 'default',
 }
 
 deps = {
+  'third_party/dawn': {
+    'url': '{dawn_git}/dawn.git@bf1c0cf52377b4db2bf3a433dc5056620aad7cdd'
+  },
+
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@896323eeda1bd1b01156b70625d5e14de225ebc3',
+    'url': '{chromium_git}/chromium/src/build@3769c3b43c3804f9f7f14c6e37f545639fda2852',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@2c41dfb19abe40908834803b6fed797b0f341fe1',
+    'url': '{chromium_git}/chromium/src/buildtools@235cfe435ca5a9826569ee4ef603e226216bd768',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@698732d5db36040c07d5cc5f9137fcc943494c11',
-    'condition': 'dawn_standalone',
-  },
-  'third_party/binutils': {
-    'url': '{chromium_git}/chromium/src/third_party/binutils@f9ce777698a819dff4d6a033b31122d91a49b62e',
+    'url': '{chromium_git}/chromium/src/tools/clang@b12d1c836e2bb21b966bf86f7245bab9d257bb6b',
     'condition': 'dawn_standalone',
   },
   'tools/clang/dsymutil': {
@@ -50,23 +41,24 @@ deps = {
 
   # Testing, GTest and GMock
   'testing': {
-    'url': '{chromium_git}/chromium/src/testing@e5ced5141379ee8ae28b4f93d3c02df039d2b052',
+    'url': '{chromium_git}/chromium/src/testing@3e2640a325dc34ec3d9cb2802b8da874aecaf52d',
     'condition': 'dawn_standalone',
   },
   'third_party/googletest': {
-    'url': '{chromium_git}/external/github.com/google/googletest@a09ea700d32bab83325aff9ff34d0582e50e3997',
+    'url': '{chromium_git}/external/github.com/google/googletest@2828773179fa425ee406df61890a150577178ea2',
     'condition': 'dawn_standalone',
   },
 
   # Jinja2 and MarkupSafe for the code generator
   'third_party/jinja2': {
-    'url': '{chromium_git}/chromium/src/third_party/jinja2@b41863e42637544c2941b574c7877d3e1f663e25',
+    'url': '{chromium_git}/chromium/src/third_party/jinja2@a82a4944a7f2496639f34a89c9923be5908b80aa',
     'condition': 'dawn_standalone',
   },
   'third_party/markupsafe': {
-    'url': '{chromium_git}/chromium/src/third_party/markupsafe@8f45f5cfa0009d2a70589bcda0349b8cb2b72783',
+    'url': '{chromium_git}/chromium/src/third_party/markupsafe@0944e71f4b2cb9a871bcbe353f95e889b64a611a',
     'condition': 'dawn_standalone',
   },
+
 }
 
 hooks = [
@@ -84,6 +76,14 @@ hooks = [
     'condition': 'checkout_linux and (checkout_x64 and dawn_standalone)',
     'action': ['python', 'build/linux/sysroot_scripts/install-sysroot.py',
                '--arch=x64'],
+  },
+  {
+    # Update the Mac toolchain if possible, this makes builders use "hermetic XCode" which is
+    # is more consistent (only changes when rolling build/) and is cached.
+    'name': 'mac_toolchain',
+    'pattern': '.',
+    'condition': 'checkout_mac',
+    'action': ['python', 'build/mac_toolchain.py'],
   },
   {
     # Update the Windows toolchain if necessary. Must run before 'clang' below.
@@ -121,6 +121,17 @@ hooks = [
                 '--no_auth',
                 '--bucket', 'chromium-clang-format',
                 '-s', 'buildtools/win/clang-format.exe.sha1',
+    ],
+  },
+  {
+    'name': 'clang_format_mac',
+    'pattern': '.',
+    'condition': 'host_os == "mac"',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--no_auth',
+                '--bucket', 'chromium-clang-format',
+                '-s', 'buildtools/mac/clang-format.sha1',
     ],
   },
   {

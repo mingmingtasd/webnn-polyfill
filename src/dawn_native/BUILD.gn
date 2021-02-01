@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../scripts/dawn_overrides_with_defaults.gni")
+import("//third_party/dawn/scripts/dawn_overrides_with_defaults.gni")
 
 import("//build_overrides/build.gni")
-import("${dawn_root}/generator/dawn_generator.gni")
 import("${dawn_root}/scripts/dawn_component.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
+import("${webnn_root}/build_overrides/webnn_features.gni")
+import("${webnn_root}/generator/webnn_generator.gni")
 
 # Import mac_min_system_version
 if (is_mac) {
@@ -29,7 +30,7 @@ if (is_mac) {
 }
 
 config("dawn_native_internal") {
-  configs = [ "${dawn_root}/src/common:dawn_internal" ]
+  configs = [ "${webnn_root}/src/common:dawn_internal" ]
 
   # Suppress warnings that Metal isn't in the deployment target of Chrome:
   # initialization of the Metal backend is behind a IsMetalSupported check so
@@ -52,7 +53,7 @@ config("dawn_native_weak_framework") {
   }
 }
 
-dawn_json_generator("dawn_native_utils_gen") {
+webnn_json_generator("dawn_native_utils_gen") {
   target = "dawn_native_utils"
   outputs = [
     "src/dawn_native/ProcTable.cpp",
@@ -66,11 +67,12 @@ dawn_json_generator("dawn_native_utils_gen") {
 # Public dawn_native headers so they can be publicly visible for
 # dependencies of dawn_native
 source_set("dawn_native_headers") {
-  public_deps = [ "${dawn_root}/src/dawn:dawncpp_headers" ]
-  all_dependent_configs = [ "${dawn_root}/src/common:dawn_public_include_dirs" ]
+  public_deps = [ "${webnn_root}/src/dawn:dawncpp_headers" ]
+  all_dependent_configs =
+      [ "${webnn_root}/src/common:dawn_public_include_dirs" ]
   sources = [
-    "${dawn_root}/src/include/dawn_native/DawnNative.h",
-    "${dawn_root}/src/include/dawn_native/dawn_native_export.h",
+    "${webnn_root}/src/include/dawn_native/DawnNative.h",
+    "${webnn_root}/src/include/dawn_native/dawn_native_export.h",
   ]
 }
 
@@ -81,7 +83,7 @@ source_set("dawn_native_sources") {
   deps = [
     ":dawn_native_headers",
     ":dawn_native_utils_gen",
-    "${dawn_root}/src/common",
+    "${webnn_root}/src/common",
   ]
   defines = []
   libs = []
@@ -218,7 +220,7 @@ dawn_component("dawn_native") {
 
   deps = [
     ":dawn_native_sources",
-    "${dawn_root}/src/common",
+    "${webnn_root}/src/common",
   ]
   sources = [ "DawnNative.cpp" ]
   configs = [ ":dawn_native_internal" ]

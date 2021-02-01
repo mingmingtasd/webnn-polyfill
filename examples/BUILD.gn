@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../scripts/dawn_overrides_with_defaults.gni")
+import("//third_party/dawn/scripts/dawn_overrides_with_defaults.gni")
 
 group("dawn_samples") {
   deps = [
@@ -29,12 +29,12 @@ static_library("dawn_sample_utils") {
 
   # Export all of these as public deps so that `gn check` allows includes
   public_deps = [
-    "${dawn_root}/src/common",
-    "${dawn_root}/src/dawn:dawn_proc",
-    "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn_native",
+    "${webnn_root}/src/common",
+    "${webnn_root}/src/dawn:dawn_proc",
+    "${webnn_root}/src/dawn:dawncpp",
+    "${webnn_root}/src/dawn_native",
   ]
-  public_configs = [ "${dawn_root}/src/common:dawn_internal" ]
+  public_configs = [ "${webnn_root}/src/common:dawn_internal" ]
 }
 
 # Template for samples to avoid listing dawn_sample_utils as a dep every time
