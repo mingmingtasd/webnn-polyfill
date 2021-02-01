@@ -15,8 +15,8 @@
 #include "tests/unittests/validation/ValidationTest.h"
 
 #include "common/Assert.h"
-#include "webnn/webnn_proc.h"
 #include "webnn/webnn.h"
+#include "webnn/webnn_proc.h"
 
 void ValidationTest::SetUp() {
     WebnnProcTable backendProcs = webnn_native::GetProcs();

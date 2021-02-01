@@ -136,15 +136,16 @@ int main(int argc, const char* argv[]) {
     uint32_t byteOffset = 0;
     std::vector<int32_t> inputShape = {1, 1, 28, 28};
     webnn::OperandDescriptor inputDesc = {webnn::OperandType::Float32, inputShape.data(),
-                                        (uint32_t)inputShape.size()};
+                                          (uint32_t)inputShape.size()};
 
     webnn::Operand input = builder.Input("input", &inputDesc);
 
     std::vector<int32_t> conv2d1FilterShape = {20, 1, 5, 5};
     float* conv2d1FilterData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(conv2d1FilterShape);
-    webnn::OperandDescriptor conv2d1FilterDesc = {
-        webnn::OperandType::Float32, conv2d1FilterShape.data(), (uint32_t)conv2d1FilterShape.size()};
+    webnn::OperandDescriptor conv2d1FilterDesc = {webnn::OperandType::Float32,
+                                                  conv2d1FilterShape.data(),
+                                                  (uint32_t)conv2d1FilterShape.size()};
     webnn::Operand conv2d1FilterConstant = builder.Constant(
         &conv2d1FilterDesc, conv2d1FilterData, product(conv2d1FilterShape) * sizeof(float));
     webnn::Conv2dOptions conv2d1Options = {};
@@ -154,7 +155,7 @@ int main(int argc, const char* argv[]) {
     float* add1BiasData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(add1BiasShape);
     webnn::OperandDescriptor add1BiasDesc = {webnn::OperandType::Float32, add1BiasShape.data(),
-                                           (uint32_t)add1BiasShape.size()};
+                                             (uint32_t)add1BiasShape.size()};
     webnn::Operand add1BiasConstant =
         builder.Constant(&add1BiasDesc, add1BiasData, product(add1BiasShape) * sizeof(float));
     webnn::Operand add1 = builder.Add(conv1, add1BiasConstant);
@@ -178,8 +179,9 @@ int main(int argc, const char* argv[]) {
     };
     float* conv2d2FilterData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(conv2d2FilterShape);
-    webnn::OperandDescriptor conv2d2FilterDesc = {
-        webnn::OperandType::Float32, conv2d2FilterShape.data(), (uint32_t)conv2d2FilterShape.size()};
+    webnn::OperandDescriptor conv2d2FilterDesc = {webnn::OperandType::Float32,
+                                                  conv2d2FilterShape.data(),
+                                                  (uint32_t)conv2d2FilterShape.size()};
     webnn::Operand conv2d2FilterConstant = builder.Constant(
         &conv2d2FilterDesc, conv2d2FilterData, product(conv2d2FilterShape) * sizeof(float));
     webnn::Conv2dOptions conv2d2Options = {};
@@ -189,7 +191,7 @@ int main(int argc, const char* argv[]) {
     float* add2BiasData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(add2BiasShape);
     webnn::OperandDescriptor add2BiasDesc = {webnn::OperandType::Float32, add2BiasShape.data(),
-                                           (uint32_t)add2BiasShape.size()};
+                                             (uint32_t)add2BiasShape.size()};
     webnn::Operand add2BiasConstant =
         builder.Constant(&add2BiasDesc, add2BiasData, product(add2BiasShape) * sizeof(float));
     webnn::Operand add2 = builder.Add(conv2, add2BiasConstant);
@@ -214,7 +216,7 @@ int main(int argc, const char* argv[]) {
     float* matmulData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(matmulShape);
     webnn::OperandDescriptor matmulDataDesc = {webnn::OperandType::Float32, matmulShape.data(),
-                                             (uint32_t)matmulShape.size()};
+                                               (uint32_t)matmulShape.size()};
     webnn::Operand matmulWeights =
         builder.Constant(&matmulDataDesc, matmulData, product(matmulShape) * sizeof(float));
 
@@ -225,7 +227,7 @@ int main(int argc, const char* argv[]) {
     float* add3BiasData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(add3BiasShape);
     webnn::OperandDescriptor add3BiasDesc = {webnn::OperandType::Float32, add3BiasShape.data(),
-                                           (uint32_t)add3BiasShape.size()};
+                                             (uint32_t)add3BiasShape.size()};
     webnn::Operand add3BiasConstant =
         builder.Constant(&add3BiasDesc, add3BiasData, product(add3BiasShape) * sizeof(float));
     webnn::Operand add3 = builder.Add(matmul1, add3BiasConstant);
@@ -239,7 +241,7 @@ int main(int argc, const char* argv[]) {
     float* matmulData2 = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(matmulShape2);
     webnn::OperandDescriptor matmulData2Desc = {webnn::OperandType::Float32, matmulShape2.data(),
-                                              (uint32_t)matmulShape2.size()};
+                                                (uint32_t)matmulShape2.size()};
     webnn::Operand matmulWeights2 =
         builder.Constant(&matmulData2Desc, matmulData2, product(matmulShape2) * sizeof(float));
 
@@ -250,7 +252,7 @@ int main(int argc, const char* argv[]) {
     float* add4BiasData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(add4BiasShape);
     webnn::OperandDescriptor add4BiasDesc = {webnn::OperandType::Float32, add4BiasShape.data(),
-                                           (uint32_t)add4BiasShape.size()};
+                                             (uint32_t)add4BiasShape.size()};
     webnn::Operand add4BiasConstant =
         builder.Constant(&add4BiasDesc, add4BiasData, product(add4BiasShape) * sizeof(float));
     webnn::Operand add4 = builder.Add(matmul2, add4BiasConstant);

@@ -15,8 +15,8 @@
 #ifndef WEBNN_WEBNN_PROC_H_
 #define WEBNN_WEBNN_PROC_H_
 
-#include "webnn/webnn_proc_table.h"
 #include "webnn/webnn.h"
+#include "webnn/webnn_proc_table.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -15,8 +15,8 @@
 #ifndef WEBNN_NATIVE_WEBNN_NATIVE_H_
 #define WEBNN_NATIVE_WEBNN_NATIVE_H_
 
-#include <webnn/webnn_proc_table.h>
 #include <webnn/webnn.h>
+#include <webnn/webnn_proc_table.h>
 #include <webnn_native/webnn_native_export.h>
 #include <string>
 #include <vector>

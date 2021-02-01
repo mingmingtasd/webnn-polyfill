@@ -64,7 +64,9 @@ namespace webnn_native {
     }
 
     // static
-    void ErrorScope::HandleErrorImpl(ErrorScope* scope, webnn::ErrorType type, const char* message) {
+    void ErrorScope::HandleErrorImpl(ErrorScope* scope,
+                                     webnn::ErrorType type,
+                                     const char* message) {
         ErrorScope* currentScope = scope;
         for (; !currentScope->IsRoot(); currentScope = currentScope->GetParent()) {
             ASSERT(currentScope != nullptr);

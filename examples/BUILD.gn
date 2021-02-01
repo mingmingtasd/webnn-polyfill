@@ -15,9 +15,7 @@
 import("//third_party/dawn/scripts/dawn_overrides_with_defaults.gni")
 
 group("webnn_samples") {
-  deps = [
-    ":LeNet",
-  ]
+  deps = [ ":LeNet" ]
 }
 
 # Static library to contain code and dependencies common to all samples

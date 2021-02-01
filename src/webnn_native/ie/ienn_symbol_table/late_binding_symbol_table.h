@@ -118,18 +118,18 @@ class LateBindingSymbolTable {
   ClassName##_SYMBOL_TABLE_INDEX_##sym,
 
 // This macro completes the header declaration.
-#define LATE_BINDING_SYMBOL_TABLE_DECLARE_END(ClassName)                       \
-  ClassName##_SYMBOL_TABLE_SIZE                                                \
-  }                                                                            \
-  ;                                                                            \
-                                                                               \
-  extern const char ClassName##_kDllName[];                                    \
-  extern const char* const                                                     \
-      ClassName##_kSymbolNames[ClassName##_SYMBOL_TABLE_SIZE];                 \
-                                                                               \
-  typedef ::webnn_native::LateBindingSymbolTable<ClassName##_SYMBOL_TABLE_SIZE, \
-                                                ClassName##_kDllName,          \
-                                                ClassName##_kSymbolNames>      \
+#define LATE_BINDING_SYMBOL_TABLE_DECLARE_END(ClassName)       \
+  ClassName##_SYMBOL_TABLE_SIZE                                \
+  }                                                            \
+  ;                                                            \
+                                                               \
+  extern const char ClassName##_kDllName[];                    \
+  extern const char* const                                     \
+      ClassName##_kSymbolNames[ClassName##_SYMBOL_TABLE_SIZE]; \
+                                                               \
+  typedef ::webnn_native::LateBindingSymbolTable<              \
+      ClassName##_SYMBOL_TABLE_SIZE, ClassName##_kDllName,     \
+      ClassName##_kSymbolNames>                                \
       ClassName;
 
 // This macro must be invoked in a .cc file to define a previously-declared
