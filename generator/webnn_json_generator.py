@@ -170,15 +170,6 @@ def as_frontendType(typ):
         return as_cType(typ.name)
 
 
-def as_wireType(typ):
-    if typ.category == 'object':
-        return typ.name.CamelCase() + '*'
-    elif typ.category in ['bitmask', 'enum']:
-        return 'WNN' + typ.name.CamelCase()
-    else:
-        return as_cppType(typ.name)
-
-
 def c_methods(types, typ):
     return typ.methods + [
         Method(Name('reference'), types['void'], []),
@@ -204,17 +195,13 @@ class MultiGeneratorFromWebnnJSON(Generator):
     def add_commandline_arguments(self, parser):
         allowed_targets = [
             'webnn_headers', 'webnncpp_headers', 'webnncpp', 'webnn_proc',
-            'mock_webnn', 'webnn_wire', "webnn_native_utils"
+            'mock_webnn', 'webnn_native_utils'
         ]
 
         parser.add_argument('--webnn-json',
                             required=True,
                             type=str,
                             help='The WebNN JSON definition to use.')
-        parser.add_argument('--wire-json',
-                            default=None,
-                            type=str,
-                            help='The WebNN WIRE JSON definition to use.')
         parser.add_argument(
             '--targets',
             required=True,
@@ -234,11 +221,6 @@ class MultiGeneratorFromWebnnJSON(Generator):
         api_params = parse_json(loaded_json)
 
         targets = args.targets.split(',')
-
-        wire_json = None
-        if args.wire_json:
-            with open(args.wire_json) as f:
-                wire_json = json.loads(f.read())
 
         base_params = {
             'Name': lambda name: Name(name),
@@ -351,8 +333,6 @@ class MultiGeneratorFromWebnnJSON(Generator):
 
     def get_dependencies(self, args):
         deps = [os.path.abspath(args.webnn_json)]
-        if args.wire_json != None:
-            deps += [os.path.abspath(args.wire_json)]
         return deps
 
 
