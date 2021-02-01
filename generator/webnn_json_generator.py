@@ -45,7 +45,7 @@ def as_cType(name):
     if name.native:
         return name.concatcase()
     else:
-        return 'WNN' + name.CamelCase()
+        return 'WEBNN' + name.CamelCase()
 
 
 def as_cTypeDawn(name):
@@ -118,7 +118,7 @@ def annotated(typ, arg):
 
 def as_cEnum(type_name, value_name):
     assert not type_name.native and not value_name.native
-    return 'WNN' + type_name.CamelCase() + '_' + value_name.CamelCase()
+    return 'WEBNN' + type_name.CamelCase() + '_' + value_name.CamelCase()
 
 
 def as_cEnumDawn(type_name, value_name):
@@ -136,7 +136,7 @@ def as_cppEnum(value_name):
 
 def as_cMethod(type_name, method_name):
     assert not type_name.native and not method_name.native
-    return 'wnn' + type_name.CamelCase() + method_name.CamelCase()
+    return 'webnn' + type_name.CamelCase() + method_name.CamelCase()
 
 
 def as_cMethodDawn(type_name, method_name):
@@ -151,7 +151,7 @@ def as_MethodSuffix(type_name, method_name):
 
 def as_cProc(type_name, method_name):
     assert not type_name.native and not method_name.native
-    return 'WNN' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
+    return 'WEBNN' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
 
 
 def as_cProcDawn(type_name, method_name):
@@ -163,7 +163,7 @@ def as_frontendType(typ):
     if typ.category == 'object':
         return typ.name.CamelCase() + 'Base*'
     elif typ.category in ['bitmask', 'enum']:
-        return 'wnn::' + typ.name.CamelCase()
+        return 'webnn::' + typ.name.CamelCase()
     elif typ.category == 'structure':
         return as_cppType(typ.name)
     else:
@@ -318,12 +318,12 @@ class MultiGeneratorFromWebnnJSON(Generator):
                            'src/webnn_native/ValidationUtils_autogen.cpp',
                            frontend_params))
             renders.append(
-                FileRender('webnn_native/wnn_structs.h',
-                           'src/webnn_native/wnn_structs_autogen.h',
+                FileRender('webnn_native/webnn_structs.h',
+                           'src/webnn_native/webnn_structs_autogen.h',
                            frontend_params))
             renders.append(
-                FileRender('webnn_native/wnn_structs.cpp',
-                           'src/webnn_native/wnn_structs_autogen.cpp',
+                FileRender('webnn_native/webnn_structs.cpp',
+                           'src/webnn_native/webnn_structs_autogen.cpp',
                            frontend_params))
             renders.append(
                 FileRender('webnn_native/ProcTable.cpp',

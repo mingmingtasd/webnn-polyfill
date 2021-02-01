@@ -51,8 +51,8 @@ webnn_json_generator("webnn_native_utils_gen") {
   target = "webnn_native_utils"
   outputs = [
     "src/webnn_native/ProcTable.cpp",
-    "src/webnn_native/wnn_structs_autogen.h",
-    "src/webnn_native/wnn_structs_autogen.cpp",
+    "src/webnn_native/webnn_structs_autogen.h",
+    "src/webnn_native/webnn_structs_autogen.cpp",
     "src/webnn_native/ValidationUtils_autogen.h",
     "src/webnn_native/ValidationUtils_autogen.cpp",
   ]

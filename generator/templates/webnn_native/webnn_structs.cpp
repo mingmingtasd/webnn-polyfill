@@ -12,7 +12,7 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#include "webnn_native/wnn_structs_autogen.h"
+#include "webnn_native/webnn_structs_autogen.h"
 
 namespace webnn_native {
 

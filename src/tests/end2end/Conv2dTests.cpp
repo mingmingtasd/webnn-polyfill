@@ -19,9 +19,9 @@ class Conv2d : public utils::WrappedModel {
   public:
     Conv2d() : mOptions({}) {
     }
-    wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
-        wnn::Operand input = nn.Input("input", InputDesc());
-        wnn::Operand constant = nn.Constant(ConstantDesc(), ConstantBuffer(), ConstantLength());
+    webnn::Operand GenerateOutput(webnn::ModelBuilder nn) override {
+        webnn::Operand input = nn.Input("input", InputDesc());
+        webnn::Operand constant = nn.Constant(ConstantDesc(), ConstantBuffer(), ConstantLength());
         return nn.Conv2d(input, constant, &mOptions);
     }
     void SetPadding(std::vector<int32_t> padding) {
@@ -30,7 +30,7 @@ class Conv2d : public utils::WrappedModel {
     }
 
   private:
-    wnn::Conv2dOptions mOptions;
+    webnn::Conv2dOptions mOptions;
     std::vector<int32_t> mPadding;
 };
 

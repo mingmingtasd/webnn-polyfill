@@ -55,7 +55,7 @@ namespace webnn_native { namespace ie {
         friend class Compilation;
 
       private:
-        void CompileImpl(WNNCompileCallback callback,
+        void CompileImpl(WEBNNCompileCallback callback,
                          void* userdata,
                          CompilationOptions const* options) override;
 

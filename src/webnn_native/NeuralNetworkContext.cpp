@@ -32,14 +32,14 @@ namespace webnn_native {
         UNREACHABLE();
     }
 
-    void NeuralNetworkContextBase::PushErrorScope(wnn::ErrorFilter filter) {
+    void NeuralNetworkContextBase::PushErrorScope(webnn::ErrorFilter filter) {
         if (ConsumedError(ValidateErrorFilter(filter))) {
             return;
         }
         current_error_scope_ = AcquireRef(new ErrorScope(filter, current_error_scope_.Get()));
     }
 
-    bool NeuralNetworkContextBase::PopErrorScope(wnn::ErrorCallback callback, void* userdata) {
+    bool NeuralNetworkContextBase::PopErrorScope(webnn::ErrorCallback callback, void* userdata) {
         if (DAWN_UNLIKELY(current_error_scope_.Get() == root_error_scope_.Get())) {
             return false;
         }
@@ -49,7 +49,7 @@ namespace webnn_native {
         return true;
     }
 
-    void NeuralNetworkContextBase::SetUncapturedErrorCallback(wnn::ErrorCallback callback,
+    void NeuralNetworkContextBase::SetUncapturedErrorCallback(webnn::ErrorCallback callback,
                                                               void* userdata) {
         root_error_scope_->SetCallback(callback, userdata);
     }
@@ -65,7 +65,7 @@ namespace webnn_native {
 
         // Still forward device loss and internal errors to the error scopes so they
         // all reject.
-        current_error_scope_->HandleError(ToWNNErrorType(error->GetType()), ss.str().c_str());
+        current_error_scope_->HandleError(ToWEBNNErrorType(error->GetType()), ss.str().c_str());
     }
 
 }  // namespace webnn_native

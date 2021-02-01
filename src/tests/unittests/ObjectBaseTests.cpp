@@ -16,16 +16,16 @@
 
 #include "webnn/webnn_cpp.h"
 
-class Object : public wnn::ObjectBase<Object, int*> {
+class Object : public webnn::ObjectBase<Object, int*> {
   public:
     using ObjectBase::ObjectBase;
     using ObjectBase::operator=;
 
-    static void WNNReference(int* handle) {
+    static void WEBNNReference(int* handle) {
         ASSERT_LE(0, *handle);
         *handle += 1;
     }
-    static void WNNRelease(int* handle) {
+    static void WEBNNRelease(int* handle) {
         ASSERT_LT(0, *handle);
         *handle -= 1;
     }

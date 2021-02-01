@@ -19,8 +19,8 @@ class MaxPool2d : public utils::WrappedModel {
   public:
     MaxPool2d() : mOptions({}) {
     }
-    wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
-        wnn::Operand input = nn.Input("input", InputDesc());
+    webnn::Operand GenerateOutput(webnn::ModelBuilder nn) override {
+        webnn::Operand input = nn.Input("input", InputDesc());
         return nn.MaxPool2d(input, &mOptions);
     }
     void SetPadding(std::vector<int32_t> padding) {
@@ -33,7 +33,7 @@ class MaxPool2d : public utils::WrappedModel {
     }
 
   private:
-    wnn::Pool2dOptions mOptions;
+    webnn::Pool2dOptions mOptions;
     std::vector<int32_t> mPadding;
     std::vector<int32_t> mWindowDimensions;
 };

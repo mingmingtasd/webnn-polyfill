@@ -18,8 +18,8 @@ class ReluTests : public testing::Test {};
 class ReluModel : public utils::WrappedModel {
   public:
     ReluModel() = default;
-    wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
-        wnn::Operand input = nn.Input("input", InputDesc());
+    webnn::Operand GenerateOutput(webnn::ModelBuilder nn) override {
+        webnn::Operand input = nn.Input("input", InputDesc());
         return nn.Relu(input);
     }
 };

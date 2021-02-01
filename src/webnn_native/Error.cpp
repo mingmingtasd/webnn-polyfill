@@ -30,32 +30,32 @@ namespace webnn_native {
         }
     }
 
-    wnn::ErrorType ToWNNErrorType(InternalErrorType type) {
+    webnn::ErrorType ToWEBNNErrorType(InternalErrorType type) {
         switch (type) {
             case InternalErrorType::Validation:
-                return wnn::ErrorType::Validation;
+                return webnn::ErrorType::Validation;
             case InternalErrorType::OutOfMemory:
-                return wnn::ErrorType::OutOfMemory;
+                return webnn::ErrorType::OutOfMemory;
 
             // There is no equivalent of Internal errors in the WebGPU API. Internal
             // errors cause the device at the API level to be lost, so treat it like a
             // DeviceLost error.
             case InternalErrorType::Internal:
             case InternalErrorType::DeviceLost:
-                return wnn::ErrorType::DeviceLost;
+                return webnn::ErrorType::DeviceLost;
 
             default:
-                return wnn::ErrorType::Unknown;
+                return webnn::ErrorType::Unknown;
         }
     }
 
-    InternalErrorType FromWNNErrorType(wnn::ErrorType type) {
+    InternalErrorType FromWEBNNErrorType(webnn::ErrorType type) {
         switch (type) {
-            case wnn::ErrorType::Validation:
+            case webnn::ErrorType::Validation:
                 return InternalErrorType::Validation;
-            case wnn::ErrorType::OutOfMemory:
+            case webnn::ErrorType::OutOfMemory:
                 return InternalErrorType::OutOfMemory;
-            case wnn::ErrorType::DeviceLost:
+            case webnn::ErrorType::DeviceLost:
                 return InternalErrorType::DeviceLost;
             default:
                 return InternalErrorType::Internal;

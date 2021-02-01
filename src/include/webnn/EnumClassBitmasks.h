@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWN_ENUM_CLASS_BITMASKS_H_
-#define DAWN_ENUM_CLASS_BITMASKS_H_
+#ifndef WEBNN_ENUM_CLASS_BITMASKS_H_
+#define WEBNN_ENUM_CLASS_BITMASKS_H_
 
 #include <type_traits>
 
-namespace wnn {
+namespace webnn {
 
     template <typename T>
     struct IsDawnBitmask {
@@ -139,6 +139,6 @@ namespace wnn {
         return (static_cast<Integral>(value) & (static_cast<Integral>(value) - 1)) == 0;
     }
 
-}  // namespace wnn
+}  // namespace webnn
 
-#endif  // DAWN_ENUM_CLASS_BITMASKS_H_
+#endif  // WEBNN_ENUM_CLASS_BITMASKS_H_

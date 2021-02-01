@@ -18,8 +18,8 @@ class ReshapeTests : public testing::Test {};
 class ReshapeModel : public utils::WrappedModel {
   public:
     ReshapeModel() = default;
-    wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
-        wnn::Operand input = nn.Input("input", InputDesc());
+    webnn::Operand GenerateOutput(webnn::ModelBuilder nn) override {
+        webnn::Operand input = nn.Input("input", InputDesc());
         return nn.Reshape(input, mNewShape.data(), mNewShape.size());
     }
     void SetNewShape(std::vector<int32_t> newshape) {

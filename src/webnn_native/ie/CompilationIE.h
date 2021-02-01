@@ -24,13 +24,13 @@ namespace webnn_native { namespace ie {
         Compilation(Ref<Model> model);
         ~Compilation() override;
 
-        void Compile(WNNCompileCallback callback,
+        void Compile(WEBNNCompileCallback callback,
                      void* userdata,
                      CompilationOptions const* options);
 
       private:
         void ComputeImpl(NamedInputsBase* inputs,
-                         WNNComputeCallback callback,
+                         WEBNNComputeCallback callback,
                          void* userdata,
                          NamedOutputsBase* outputs) override;
 
@@ -40,7 +40,7 @@ namespace webnn_native { namespace ie {
         // Hold those variable to async compute.
         void CompletedCallback();
         ie_complete_call_back_t ie_callback_;
-        WNNComputeCallback callback_;
+        WEBNNComputeCallback callback_;
         void* user_data_;
         NamedOutputsBase* outputs_;
     };

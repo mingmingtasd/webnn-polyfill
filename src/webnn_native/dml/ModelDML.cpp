@@ -20,15 +20,15 @@
 namespace webnn_native { namespace dml {
 
     namespace {
-        bool GetDmlTensorDataType(wnn::OperandType operand_type,
+        bool GetDmlTensorDataType(webnn::OperandType operand_type,
                                   DML_TENSOR_DATA_TYPE& dml_tensor_data_type) {
-            if (operand_type == wnn::OperandType::Float32) {
+            if (operand_type == webnn::OperandType::Float32) {
                 dml_tensor_data_type = DML_TENSOR_DATA_TYPE_FLOAT32;
-            } else if (operand_type == wnn::OperandType::Float16) {
+            } else if (operand_type == webnn::OperandType::Float16) {
                 dml_tensor_data_type = DML_TENSOR_DATA_TYPE_FLOAT16;
-            } else if (operand_type == wnn::OperandType::Int32) {
+            } else if (operand_type == webnn::OperandType::Int32) {
                 dml_tensor_data_type = DML_TENSOR_DATA_TYPE_INT32;
-            } else if (operand_type == wnn::OperandType::Uint32) {
+            } else if (operand_type == webnn::OperandType::Uint32) {
                 dml_tensor_data_type = DML_TENSOR_DATA_TYPE_UINT32;
             } else {
                 return false;
@@ -685,12 +685,12 @@ namespace webnn_native { namespace dml {
         return {};
     }
 
-    void Model::CompileImpl(WNNCompileCallback callback,
+    void Model::CompileImpl(WEBNNCompileCallback callback,
                             void* userdata,
                             CompilationOptions const* options) {
         // FIXME(nhu): implement async
-        WNNCompileStatus status = WNNCompileStatus_Success;
-        callback(status, reinterpret_cast<WNNCompilation>(new Compilation(this)), nullptr,
+        WEBNNCompileStatus status = WEBNNCompileStatus_Success;
+        callback(status, reinterpret_cast<WEBNNCompilation>(new Compilation(this)), nullptr,
                  userdata);
     }
 

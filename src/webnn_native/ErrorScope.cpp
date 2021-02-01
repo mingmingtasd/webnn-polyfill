@@ -21,7 +21,7 @@ namespace webnn_native {
     ErrorScope::ErrorScope() : mIsRoot(true) {
     }
 
-    ErrorScope::ErrorScope(wnn::ErrorFilter errorFilter, ErrorScope* parent)
+    ErrorScope::ErrorScope(webnn::ErrorFilter errorFilter, ErrorScope* parent)
         : RefCounted(), mErrorFilter(errorFilter), mParent(parent), mIsRoot(false) {
         ASSERT(mParent.Get() != nullptr);
     }
@@ -32,7 +32,7 @@ namespace webnn_native {
         }
     }
 
-    void ErrorScope::SetCallback(wnn::ErrorCallback callback, void* userdata) {
+    void ErrorScope::SetCallback(webnn::ErrorCallback callback, void* userdata) {
         mCallback = callback;
         mUserdata = userdata;
     }
@@ -50,12 +50,12 @@ namespace webnn_native {
 
         if (mCallback != nullptr) {
             // For non-root error scopes, the callback can run at most once.
-            mCallback(static_cast<WNNErrorType>(mErrorType), mErrorMessage.c_str(), mUserdata);
+            mCallback(static_cast<WEBNNErrorType>(mErrorType), mErrorMessage.c_str(), mUserdata);
             mCallback = nullptr;
         }
     }
 
-    void ErrorScope::HandleError(wnn::ErrorType type, const char* message) {
+    void ErrorScope::HandleError(webnn::ErrorType type, const char* message) {
         HandleErrorImpl(this, type, message);
     }
 
@@ -64,23 +64,23 @@ namespace webnn_native {
     }
 
     // static
-    void ErrorScope::HandleErrorImpl(ErrorScope* scope, wnn::ErrorType type, const char* message) {
+    void ErrorScope::HandleErrorImpl(ErrorScope* scope, webnn::ErrorType type, const char* message) {
         ErrorScope* currentScope = scope;
         for (; !currentScope->IsRoot(); currentScope = currentScope->GetParent()) {
             ASSERT(currentScope != nullptr);
 
             bool consumed = false;
             switch (type) {
-                case wnn::ErrorType::Validation:
-                    if (currentScope->mErrorFilter != wnn::ErrorFilter::Validation) {
+                case webnn::ErrorType::Validation:
+                    if (currentScope->mErrorFilter != webnn::ErrorFilter::Validation) {
                         // Error filter does not match. Move on to the next scope.
                         continue;
                     }
                     consumed = true;
                     break;
 
-                case wnn::ErrorType::OutOfMemory:
-                    if (currentScope->mErrorFilter != wnn::ErrorFilter::OutOfMemory) {
+                case webnn::ErrorType::OutOfMemory:
+                    if (currentScope->mErrorFilter != webnn::ErrorFilter::OutOfMemory) {
                         // Error filter does not match. Move on to the next scope.
                         continue;
                     }
@@ -89,18 +89,18 @@ namespace webnn_native {
 
                 // Unknown and DeviceLost are fatal. All error scopes capture them.
                 // |consumed| is false because these should bubble to all scopes.
-                case wnn::ErrorType::Unknown:
-                case wnn::ErrorType::DeviceLost:
+                case webnn::ErrorType::Unknown:
+                case webnn::ErrorType::DeviceLost:
                     consumed = false;
                     break;
 
-                case wnn::ErrorType::NoError:
+                case webnn::ErrorType::NoError:
                     UNREACHABLE();
                     return;
             }
 
             // Record the error if the scope doesn't have one yet.
-            if (currentScope->mErrorType == wnn::ErrorType::NoError) {
+            if (currentScope->mErrorType == webnn::ErrorType::NoError) {
                 currentScope->mErrorType = type;
                 currentScope->mErrorMessage = message;
             }
@@ -113,7 +113,7 @@ namespace webnn_native {
         // The root error scope captures all uncaptured errors.
         ASSERT(currentScope->IsRoot());
         if (currentScope->mCallback) {
-            currentScope->mCallback(static_cast<WNNErrorType>(type), message,
+            currentScope->mCallback(static_cast<WEBNNErrorType>(type), message,
                                     currentScope->mUserdata);
         }
     }
@@ -129,8 +129,8 @@ namespace webnn_native {
             ASSERT(parentScope.Get() != nullptr);
 
             // On shutdown, error scopes that have yet to have a status get Unknown.
-            if (currentScope->mErrorType == wnn::ErrorType::NoError) {
-                currentScope->mErrorType = wnn::ErrorType::Unknown;
+            if (currentScope->mErrorType == webnn::ErrorType::NoError) {
+                currentScope->mErrorType = webnn::ErrorType::Unknown;
                 currentScope->mErrorMessage = "Error scope destroyed";
             }
 

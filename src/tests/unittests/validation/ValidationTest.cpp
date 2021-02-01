@@ -22,7 +22,7 @@ void ValidationTest::SetUp() {
     WebnnProcTable backendProcs = webnn_native::GetProcs();
     ASSERT_NE(&backendProcs, nullptr);
     webnnProcSetProcs(&backendProcs);
-    context = wnn::NeuralNetworkContext::Acquire(webnn_native::CreateNeuralNetworkContext());
+    context = webnn::NeuralNetworkContext::Acquire(webnn_native::CreateNeuralNetworkContext());
     context.SetUncapturedErrorCallback(ErrorCallback, this);
 }
 
@@ -46,8 +46,8 @@ std::string ValidationTest::GetLastErrorMessage() const {
     return mErrorMessage;
 }
 
-void ValidationTest::ErrorCallback(WNNErrorType type, char const* message, void* userdata) {
-    ASSERT(type != WNNErrorType_NoError);
+void ValidationTest::ErrorCallback(WEBNNErrorType type, char const* message, void* userdata) {
+    ASSERT(type != WEBNNErrorType_NoError);
     auto self = static_cast<ValidationTest*>(userdata);
     self->mErrorMessage = message;
 

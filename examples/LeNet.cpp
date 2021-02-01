@@ -19,14 +19,14 @@
 #include "common/Log.h"
 
 // The Compilation should be released unitl ComputeCallback.
-wnn::Compilation gCompilation;
+webnn::Compilation gCompilation;
 utils::ComputeSync gComputeSync;
 std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-void ComputeCallback(WNNComputeStatus status,
-                     WNNNamedResults impl,
+void ComputeCallback(WEBNNComputeStatus status,
+                     WEBNNNamedResults impl,
                      char const* message,
                      void* userData) {
-    if (status != WNNComputeStatus_Success) {
+    if (status != WEBNNComputeStatus_Success) {
         dawn::ErrorLog() << message;
         gComputeSync.Finish();
         return;
@@ -35,8 +35,8 @@ void ComputeCallback(WNNComputeStatus status,
     std::chrono::duration<double, std::milli> elapsedTime = end - start;
     dawn::InfoLog() << "inference time: " << elapsedTime.count() << " ms";
 
-    wnn::NamedResults outputs = outputs.Acquire(impl);
-    wnn::Result output = outputs.Get("output");
+    webnn::NamedResults outputs = outputs.Acquire(impl);
+    webnn::Result output = outputs.Get("output");
 
     std::vector<float> expectedData = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0};
     bool expected = true;
@@ -55,11 +55,11 @@ void ComputeCallback(WNNComputeStatus status,
     gComputeSync.Finish();
 }
 
-void CompilationCallback(WNNCompileStatus status,
-                         WNNCompilation impl,
+void CompilationCallback(WEBNNCompileStatus status,
+                         WEBNNCompilation impl,
                          char const* message,
                          void* userData) {
-    if (status != WNNCompileStatus_Success) {
+    if (status != WEBNNCompileStatus_Success) {
         dawn::ErrorLog() << message;
         gComputeSync.Finish();
         return;
@@ -112,10 +112,10 @@ void CompilationCallback(WNNCompileStatus status,
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0};
 
-    wnn::Input a;
+    webnn::Input a;
     a.buffer = inputBuffer.data();
     a.size = inputBuffer.size() * sizeof(float);
-    wnn::NamedInputs inputs = CreateCppNamedInputs();
+    webnn::NamedInputs inputs = CreateCppNamedInputs();
     inputs.Set("input", &a);
 
     start = std::chrono::high_resolution_clock::now();
@@ -123,8 +123,8 @@ void CompilationCallback(WNNCompileStatus status,
 }
 
 int main(int argc, const char* argv[]) {
-    wnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
-    wnn::ModelBuilder builder = context.CreateModelBuilder();
+    webnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
+    webnn::ModelBuilder builder = context.CreateModelBuilder();
 
     FILE* fp = fopen("lenet.bin", "rb");
     const int32_t length = 1724336;
@@ -135,31 +135,31 @@ int main(int argc, const char* argv[]) {
 
     uint32_t byteOffset = 0;
     std::vector<int32_t> inputShape = {1, 1, 28, 28};
-    wnn::OperandDescriptor inputDesc = {wnn::OperandType::Float32, inputShape.data(),
+    webnn::OperandDescriptor inputDesc = {webnn::OperandType::Float32, inputShape.data(),
                                         (uint32_t)inputShape.size()};
 
-    wnn::Operand input = builder.Input("input", &inputDesc);
+    webnn::Operand input = builder.Input("input", &inputDesc);
 
     std::vector<int32_t> conv2d1FilterShape = {20, 1, 5, 5};
     float* conv2d1FilterData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(conv2d1FilterShape);
-    wnn::OperandDescriptor conv2d1FilterDesc = {
-        wnn::OperandType::Float32, conv2d1FilterShape.data(), (uint32_t)conv2d1FilterShape.size()};
-    wnn::Operand conv2d1FilterConstant = builder.Constant(
+    webnn::OperandDescriptor conv2d1FilterDesc = {
+        webnn::OperandType::Float32, conv2d1FilterShape.data(), (uint32_t)conv2d1FilterShape.size()};
+    webnn::Operand conv2d1FilterConstant = builder.Constant(
         &conv2d1FilterDesc, conv2d1FilterData, product(conv2d1FilterShape) * sizeof(float));
-    wnn::Conv2dOptions conv2d1Options = {};
-    wnn::Operand conv1 = builder.Conv2d(input, conv2d1FilterConstant, &conv2d1Options);
+    webnn::Conv2dOptions conv2d1Options = {};
+    webnn::Operand conv1 = builder.Conv2d(input, conv2d1FilterConstant, &conv2d1Options);
 
     std::vector<int32_t> add1BiasShape = {1, 20, 1, 1};
     float* add1BiasData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(add1BiasShape);
-    wnn::OperandDescriptor add1BiasDesc = {wnn::OperandType::Float32, add1BiasShape.data(),
+    webnn::OperandDescriptor add1BiasDesc = {webnn::OperandType::Float32, add1BiasShape.data(),
                                            (uint32_t)add1BiasShape.size()};
-    wnn::Operand add1BiasConstant =
+    webnn::Operand add1BiasConstant =
         builder.Constant(&add1BiasDesc, add1BiasData, product(add1BiasShape) * sizeof(float));
-    wnn::Operand add1 = builder.Add(conv1, add1BiasConstant);
+    webnn::Operand add1 = builder.Add(conv1, add1BiasConstant);
 
-    wnn::Pool2dOptions options = {};
+    webnn::Pool2dOptions options = {};
     std::vector<int32_t> windowDimensions = {2, 2};
     options.windowDimensions = windowDimensions.data();
     std::vector<int32_t> strides = {2, 2};
@@ -168,7 +168,7 @@ int main(int argc, const char* argv[]) {
     std::vector<int32_t> padding = {0, 0, 0, 0};
     options.padding = padding.data();
     options.paddingCount = 4;
-    wnn::Operand pool1 = builder.MaxPool2d(add1, &options);
+    webnn::Operand pool1 = builder.MaxPool2d(add1, &options);
 
     std::vector<int32_t> conv2d2FilterShape = {
         50,
@@ -178,23 +178,23 @@ int main(int argc, const char* argv[]) {
     };
     float* conv2d2FilterData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(conv2d2FilterShape);
-    wnn::OperandDescriptor conv2d2FilterDesc = {
-        wnn::OperandType::Float32, conv2d2FilterShape.data(), (uint32_t)conv2d2FilterShape.size()};
-    wnn::Operand conv2d2FilterConstant = builder.Constant(
+    webnn::OperandDescriptor conv2d2FilterDesc = {
+        webnn::OperandType::Float32, conv2d2FilterShape.data(), (uint32_t)conv2d2FilterShape.size()};
+    webnn::Operand conv2d2FilterConstant = builder.Constant(
         &conv2d2FilterDesc, conv2d2FilterData, product(conv2d2FilterShape) * sizeof(float));
-    wnn::Conv2dOptions conv2d2Options = {};
-    wnn::Operand conv2 = builder.Conv2d(pool1, conv2d2FilterConstant, &conv2d2Options);
+    webnn::Conv2dOptions conv2d2Options = {};
+    webnn::Operand conv2 = builder.Conv2d(pool1, conv2d2FilterConstant, &conv2d2Options);
 
     std::vector<int32_t> add2BiasShape = {1, 50, 1, 1};
     float* add2BiasData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(add2BiasShape);
-    wnn::OperandDescriptor add2BiasDesc = {wnn::OperandType::Float32, add2BiasShape.data(),
+    webnn::OperandDescriptor add2BiasDesc = {webnn::OperandType::Float32, add2BiasShape.data(),
                                            (uint32_t)add2BiasShape.size()};
-    wnn::Operand add2BiasConstant =
+    webnn::Operand add2BiasConstant =
         builder.Constant(&add2BiasDesc, add2BiasData, product(add2BiasShape) * sizeof(float));
-    wnn::Operand add2 = builder.Add(conv2, add2BiasConstant);
+    webnn::Operand add2 = builder.Add(conv2, add2BiasConstant);
 
-    wnn::Pool2dOptions options2 = {};
+    webnn::Pool2dOptions options2 = {};
     std::vector<int32_t> windowDimensions2 = {2, 2};
     options2.windowDimensions = windowDimensions2.data();
     std::vector<int32_t> strides2 = {2, 2};
@@ -203,63 +203,63 @@ int main(int argc, const char* argv[]) {
     std::vector<int32_t> padding2 = {0, 0, 0, 0};
     options2.padding = padding2.data();
     options2.paddingCount = 4;
-    wnn::Operand pool2 = builder.MaxPool2d(add2, &options2);
+    webnn::Operand pool2 = builder.MaxPool2d(add2, &options2);
 
     std::vector<int32_t> newShape = {1, -1};
-    wnn::Operand reshape1 = builder.Reshape(pool2, newShape.data(), newShape.size());
+    webnn::Operand reshape1 = builder.Reshape(pool2, newShape.data(), newShape.size());
     // skip the new shape
     byteOffset += 4;
 
     std::vector<int32_t> matmulShape = {500, 800};
     float* matmulData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(matmulShape);
-    wnn::OperandDescriptor matmulDataDesc = {wnn::OperandType::Float32, matmulShape.data(),
+    webnn::OperandDescriptor matmulDataDesc = {webnn::OperandType::Float32, matmulShape.data(),
                                              (uint32_t)matmulShape.size()};
-    wnn::Operand matmulWeights =
+    webnn::Operand matmulWeights =
         builder.Constant(&matmulDataDesc, matmulData, product(matmulShape) * sizeof(float));
 
-    wnn::Operand matmul1WeightsTransposed = builder.Transpose(matmulWeights);
-    wnn::Operand matmul1 = builder.Matmul(reshape1, matmul1WeightsTransposed);
+    webnn::Operand matmul1WeightsTransposed = builder.Transpose(matmulWeights);
+    webnn::Operand matmul1 = builder.Matmul(reshape1, matmul1WeightsTransposed);
 
     std::vector<int32_t> add3BiasShape = {1, 500};
     float* add3BiasData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(add3BiasShape);
-    wnn::OperandDescriptor add3BiasDesc = {wnn::OperandType::Float32, add3BiasShape.data(),
+    webnn::OperandDescriptor add3BiasDesc = {webnn::OperandType::Float32, add3BiasShape.data(),
                                            (uint32_t)add3BiasShape.size()};
-    wnn::Operand add3BiasConstant =
+    webnn::Operand add3BiasConstant =
         builder.Constant(&add3BiasDesc, add3BiasData, product(add3BiasShape) * sizeof(float));
-    wnn::Operand add3 = builder.Add(matmul1, add3BiasConstant);
+    webnn::Operand add3 = builder.Add(matmul1, add3BiasConstant);
 
-    wnn::Operand relu = builder.Relu(add3);
+    webnn::Operand relu = builder.Relu(add3);
 
     std::vector<int32_t> newShape2 = {1, -1};
-    wnn::Operand reshape2 = builder.Reshape(relu, newShape2.data(), newShape2.size());
+    webnn::Operand reshape2 = builder.Reshape(relu, newShape2.data(), newShape2.size());
 
     std::vector<int32_t> matmulShape2 = {10, 500};
     float* matmulData2 = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(matmulShape2);
-    wnn::OperandDescriptor matmulData2Desc = {wnn::OperandType::Float32, matmulShape2.data(),
+    webnn::OperandDescriptor matmulData2Desc = {webnn::OperandType::Float32, matmulShape2.data(),
                                               (uint32_t)matmulShape2.size()};
-    wnn::Operand matmulWeights2 =
+    webnn::Operand matmulWeights2 =
         builder.Constant(&matmulData2Desc, matmulData2, product(matmulShape2) * sizeof(float));
 
-    wnn::Operand matmul1WeightsTransposed2 = builder.Transpose(matmulWeights2);
-    wnn::Operand matmul2 = builder.Matmul(reshape2, matmul1WeightsTransposed2);
+    webnn::Operand matmul1WeightsTransposed2 = builder.Transpose(matmulWeights2);
+    webnn::Operand matmul2 = builder.Matmul(reshape2, matmul1WeightsTransposed2);
 
     std::vector<int32_t> add4BiasShape = {1, 10};
     float* add4BiasData = static_cast<float*>(dataBuffer) + byteOffset;
     byteOffset += product(add4BiasShape);
-    wnn::OperandDescriptor add4BiasDesc = {wnn::OperandType::Float32, add4BiasShape.data(),
+    webnn::OperandDescriptor add4BiasDesc = {webnn::OperandType::Float32, add4BiasShape.data(),
                                            (uint32_t)add4BiasShape.size()};
-    wnn::Operand add4BiasConstant =
+    webnn::Operand add4BiasConstant =
         builder.Constant(&add4BiasDesc, add4BiasData, product(add4BiasShape) * sizeof(float));
-    wnn::Operand add4 = builder.Add(matmul2, add4BiasConstant);
+    webnn::Operand add4 = builder.Add(matmul2, add4BiasConstant);
 
-    wnn::Operand softmax = builder.Softmax(add4);
+    webnn::Operand softmax = builder.Softmax(add4);
 
-    wnn::NamedOperands namedOperands = CreateCppNamedOperands();
+    webnn::NamedOperands namedOperands = CreateCppNamedOperands();
     namedOperands.Set("output", softmax);
-    wnn::Model model = builder.CreateModel(namedOperands);
+    webnn::Model model = builder.CreateModel(namedOperands);
     model.Compile(CompilationCallback, nullptr);
 
     gComputeSync.Wait();

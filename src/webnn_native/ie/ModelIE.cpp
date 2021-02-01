@@ -30,16 +30,16 @@ namespace webnn_native { namespace ie {
             ie_desc.dimensions = desc->dimensions;
             ie_desc.dimensionsCount = desc->dimensionsCount;
             switch (desc->type) {
-                case wnn::OperandType::Float32:
+                case webnn::OperandType::Float32:
                     ie_desc.type = ie_operand_type::Float32;
                     break;
-                case wnn::OperandType::Int32:
+                case webnn::OperandType::Int32:
                     ie_desc.type = ie_operand_type::Int32;
                     break;
-                case wnn::OperandType::Float16:
+                case webnn::OperandType::Float16:
                     ie_desc.type = ie_operand_type::Float16;
                     break;
-                case wnn::OperandType::Uint32:
+                case webnn::OperandType::Uint32:
                     ie_desc.type = ie_operand_type::Uint32;
                     break;
                 default:
@@ -225,7 +225,7 @@ namespace webnn_native { namespace ie {
         return {};
     }
 
-    void Model::CompileImpl(WNNCompileCallback callback,
+    void Model::CompileImpl(WEBNNCompileCallback callback,
                             void* userdata,
                             CompilationOptions const* options) {
         Compilation* compilation = new Compilation(this);

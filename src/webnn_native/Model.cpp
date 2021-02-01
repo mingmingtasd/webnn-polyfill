@@ -23,11 +23,11 @@ namespace webnn_native {
         : ObjectBase(model_builder->GetContext()) {
     }
 
-    void ModelBase::Compile(WNNCompileCallback callback,
+    void ModelBase::Compile(WEBNNCompileCallback callback,
                             void* userdata,
                             CompilationOptions const* options) {
         if (DAWN_UNLIKELY(this->IsError())) {
-            callback(WNNCompileStatus_Error, nullptr, "Object is an error", userdata);
+            callback(WEBNNCompileStatus_Error, nullptr, "Object is an error", userdata);
             return;
         }
         CompileImpl(callback, userdata, options);
@@ -82,7 +82,7 @@ namespace webnn_native {
         UNREACHABLE();
     }
 
-    void ModelBase::CompileImpl(WNNCompileCallback callback,
+    void ModelBase::CompileImpl(WEBNNCompileCallback callback,
                                 void* userdata,
                                 CompilationOptions const* options) {
         UNREACHABLE();

@@ -12,8 +12,8 @@
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
 
-#ifndef WEBNN_NATIVE_WNN_STRUCTS_H_
-#define WEBNN_NATIVE_WNN_STRUCTS_H_
+#ifndef WEBNN_NATIVE_WEBNN_STRUCTS_H_
+#define WEBNN_NATIVE_WEBNN_STRUCTS_H_
 
 #include "webnn/webnn_cpp.h"
 #include "webnn_native/Forward.h"
@@ -24,7 +24,7 @@ namespace webnn_native {
     {%- if member.annotation in ["*", "const*", "const*const*"] and member.optional -%}
         {{" "}}= nullptr
     {%- elif member.type.category in ["enum", "bitmask"] and member.default_value != None -%}
-        {{" "}}= wnn::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
+        {{" "}}= webnn::{{as_cppType(member.type.name)}}::{{as_cppEnum(Name(member.default_value))}}
     {%- elif member.type.category == "native" and member.default_value != None -%}
         {{" "}}= {{member.default_value}}
     {%- else -%}
@@ -34,14 +34,13 @@ namespace webnn_native {
 
     struct ChainedStruct {
         ChainedStruct const * nextInChain = nullptr;
-        // wnn::SType sType = wnn::SType::Invalid;
     };
 
     {% for type in by_category["structure"] %}
         {% if type.chained %}
             struct {{as_cppType(type.name)}} : ChainedStruct {
                 {{as_cppType(type.name)}}() {
-                    sType = wnn::SType::{{type.name.CamelCase()}};
+                    sType = webnn::SType::{{type.name.CamelCase()}};
                 }
         {% else %}
             struct {{as_cppType(type.name)}} {
@@ -64,4 +63,4 @@ namespace webnn_native {
 
 } // namespace webnn_native
 
-#endif  // WEBNN_NATIVE_WNN_STRUCTS_H_
+#endif  // WEBNN_NATIVE_WEBNN_STRUCTS_H_

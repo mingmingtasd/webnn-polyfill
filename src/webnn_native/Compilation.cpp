@@ -19,7 +19,7 @@
 namespace webnn_native {
 
     void CompilationBase::Compute(NamedInputsBase* inputs,
-                                  WNNComputeCallback callback,
+                                  WEBNNComputeCallback callback,
                                   void* userdata,
                                   NamedOutputsBase* outputs) {
         ComputeImpl(inputs, callback, userdata, outputs);

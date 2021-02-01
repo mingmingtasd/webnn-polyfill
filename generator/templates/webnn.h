@@ -48,32 +48,32 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#ifndef WEBGPU_H_
-#define WEBGPU_H_
+#ifndef WEBNN_H_
+#define WEBNN_H_
 
-#if defined(WNN_SHARED_LIBRARY)
+#if defined(WEBNN_SHARED_LIBRARY)
 #    if defined(_WIN32)
-#        if defined(WNN_IMPLEMENTATION)
-#            define WNN_EXPORT __declspec(dllexport)
+#        if defined(WEBNN_IMPLEMENTATION)
+#            define WEBNN_EXPORT __declspec(dllexport)
 #        else
-#            define WNN_EXPORT __declspec(dllimport)
+#            define WEBNN_EXPORT __declspec(dllimport)
 #        endif
 #    else  // defined(_WIN32)
-#        if defined(WNN_IMPLEMENTATION)
-#            define WNN_EXPORT __attribute__((visibility("default")))
+#        if defined(WEBNN_IMPLEMENTATION)
+#            define WEBNN_EXPORT __attribute__((visibility("default")))
 #        else
-#            define WNN_EXPORT
+#            define WEBNN_EXPORT
 #        endif
 #    endif  // defined(_WIN32)
-#else       // defined(WNN_SHARED_LIBRARY)
-#    define WNN_EXPORT
-#endif  // defined(WNN_SHARED_LIBRARY)
+#else       // defined(WEBNN_SHARED_LIBRARY)
+#    define WEBNN_EXPORT
+#endif  // defined(WEBNN_SHARED_LIBRARY)
 
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
 
-typedef uint32_t WNNFlags;
+typedef uint32_t WEBNNFlags;
 
 {% for type in by_category["object"] %}
     typedef struct {{as_cType(type.name)}}Impl* {{as_cType(type.name)}};
@@ -87,13 +87,13 @@ typedef uint32_t WNNFlags;
         {{as_cEnum(type.name, Name("force32"))}} = 0x7FFFFFFF
     } {{as_cType(type.name)}};
     {% if type.category == "bitmask" %}
-        typedef WNNFlags {{as_cType(type.name)}}Flags;
+        typedef WEBNNFlags {{as_cType(type.name)}}Flags;
     {% endif %}
 
 {% endfor %}
 //* TODO(dawn:22) remove this once the PSA is sent and the deadline passed.
-#define WNNTextureFormat_RG11B10Float WNNTextureFormat_RG11B10Ufloat
-#define WNNTextureFormat_BC6HRGBSfloat WNNTextureFormat_BC6HRGBFloat
+#define WEBNNTextureFormat_RG11B10Float WEBNNTextureFormat_RG11B10Ufloat
+#define WEBNNTextureFormat_BC6HRGBSfloat WEBNNTextureFormat_BC6HRGBFloat
 
 {% for type in by_category["structure"] %}
     typedef struct {{as_cType(type.name)}} {
@@ -116,9 +116,9 @@ extern "C" {
     );
 {% endfor %}
 
-typedef void (*WNNProc)(void);
+typedef void (*WEBNNProc)(void);
 
-#if !defined(WNN_SKIP_PROCS)
+#if !defined(WEBNN_SKIP_PROCS)
 
 
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
@@ -133,14 +133,14 @@ typedef void (*WNNProc)(void);
     {% endfor %}
 
 {% endfor %}
-#endif  // !defined(WNN_SKIP_PROCS)
+#endif  // !defined(WEBNN_SKIP_PROCS)
 
-#if !defined(WNN_SKIP_DECLARATIONS)
+#if !defined(WEBNN_SKIP_DECLARATIONS)
 
 {% for type in by_category["object"] if len(c_methods(type)) > 0 %}
     // Methods of {{type.name.CamelCase()}}
     {% for method in c_methods(type) %}
-        WNN_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
+        WEBNN_EXPORT {{as_cType(method.return_type.name)}} {{as_cMethod(type.name, method.name)}}(
             {{-as_cType(type.name)}} {{as_varName(type.name)}}
             {%- for arg in method.arguments -%}
                 , {{as_annotated_cType(arg)}}
@@ -149,10 +149,10 @@ typedef void (*WNNProc)(void);
     {% endfor %}
 
 {% endfor %}
-#endif  // !defined(WNN_SKIP_DECLARATIONS)
+#endif  // !defined(WEBNN_SKIP_DECLARATIONS)
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#endif // WEBGPU_H_
+#endif // WEBNN_H_

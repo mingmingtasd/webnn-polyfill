@@ -39,28 +39,28 @@ namespace webnn_native {
     }
 
     // Should put the default null backend at the end.
-    WNNNeuralNetworkContext CreateNeuralNetworkContext() {
+    WEBNNNeuralNetworkContext CreateNeuralNetworkContext() {
 #if defined(DAWN_ENABLE_BACKEND_IE)
-        return reinterpret_cast<WNNNeuralNetworkContext>(ie::Create());
+        return reinterpret_cast<WEBNNNeuralNetworkContext>(ie::Create());
 #elif defined(DAWN_ENABLE_BACKEND_DML)
-        return reinterpret_cast<WNNNeuralNetworkContext>(dml::Create());
+        return reinterpret_cast<WEBNNNeuralNetworkContext>(dml::Create());
 #elif defined(DAWN_ENABLE_BACKEND_NULL)
-        return reinterpret_cast<WNNNeuralNetworkContext>(null::Create());
+        return reinterpret_cast<WEBNNNeuralNetworkContext>(null::Create());
 #else
         return nullptr;
 #endif
     }
 
-    WNNNamedInputs CreateNamedInputs() {
-        return reinterpret_cast<WNNNamedInputs>(new NamedInputsBase());
+    WEBNNNamedInputs CreateNamedInputs() {
+        return reinterpret_cast<WEBNNNamedInputs>(new NamedInputsBase());
     }
 
-    WNNNamedOperands CreateNamedOperands() {
-        return reinterpret_cast<WNNNamedOperands>(new NamedOperandsBase());
+    WEBNNNamedOperands CreateNamedOperands() {
+        return reinterpret_cast<WEBNNNamedOperands>(new NamedOperandsBase());
     }
 
-    WNNNamedOutputs CreateNamedOutputs() {
-        return reinterpret_cast<WNNNamedOutputs>(new NamedOutputsBase());
+    WEBNNNamedOutputs CreateNamedOutputs() {
+        return reinterpret_cast<WEBNNNamedOutputs>(new NamedOutputsBase());
     }
 
 }  // namespace webnn_native

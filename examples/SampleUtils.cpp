@@ -26,22 +26,22 @@ uint32_t product(const std::vector<int32_t>& dims) {
     return prod;
 }
 
-wnn::NeuralNetworkContext CreateCppNeuralNetworkContext() {
+webnn::NeuralNetworkContext CreateCppNeuralNetworkContext() {
     WebnnProcTable backendProcs = webnn_native::GetProcs();
     webnnProcSetProcs(&backendProcs);
-    return wnn::NeuralNetworkContext::Acquire(webnn_native::CreateNeuralNetworkContext());
+    return webnn::NeuralNetworkContext::Acquire(webnn_native::CreateNeuralNetworkContext());
 }
 
-wnn::NamedInputs CreateCppNamedInputs() {
-    return wnn::NamedInputs::Acquire(webnn_native::CreateNamedInputs());
+webnn::NamedInputs CreateCppNamedInputs() {
+    return webnn::NamedInputs::Acquire(webnn_native::CreateNamedInputs());
 }
 
-wnn::NamedOperands CreateCppNamedOperands() {
-    return wnn::NamedOperands::Acquire(webnn_native::CreateNamedOperands());
+webnn::NamedOperands CreateCppNamedOperands() {
+    return webnn::NamedOperands::Acquire(webnn_native::CreateNamedOperands());
 }
 
-wnn::NamedOutputs CreateCppNamedOutputs() {
-    return wnn::NamedOutputs::Acquire(webnn_native::CreateNamedOutputs());
+webnn::NamedOutputs CreateCppNamedOutputs() {
+    return webnn::NamedOutputs::Acquire(webnn_native::CreateNamedOutputs());
 }
 
 bool Expected(float output, float expected) {
@@ -56,10 +56,10 @@ namespace utils {
     void WrappedModel::SetInput(std::vector<int32_t> shape, std::vector<float> buffer) {
         mInputShape = std::move(shape);
         mInputBuffer = std::move(buffer);
-        mInputDesc = {wnn::OperandType::Float32, mInputShape.data(), (uint32_t)mInputShape.size()};
+        mInputDesc = {webnn::OperandType::Float32, mInputShape.data(), (uint32_t)mInputShape.size()};
     }
 
-    wnn::OperandDescriptor* WrappedModel::InputDesc() {
+    webnn::OperandDescriptor* WrappedModel::InputDesc() {
         return &mInputDesc;
     }
 
@@ -70,11 +70,11 @@ namespace utils {
     void WrappedModel::SetConstant(std::vector<int32_t> shape, std::vector<float> buffer) {
         mConstantShape = std::move(shape);
         mConstantBuffer = std::move(buffer);
-        mConstantDesc = {wnn::OperandType::Float32, mConstantShape.data(),
+        mConstantDesc = {webnn::OperandType::Float32, mConstantShape.data(),
                          (uint32_t)mConstantShape.size()};
     }
 
-    wnn::OperandDescriptor* WrappedModel::ConstantDesc() {
+    webnn::OperandDescriptor* WrappedModel::ConstantDesc() {
         return &mConstantDesc;
     }
 
@@ -110,7 +110,7 @@ namespace utils {
         return mExpectedBuffer;
     }
 
-    wnn::Operand WrappedModel::GenerateOutput(wnn::ModelBuilder nn) {
+    webnn::Operand WrappedModel::GenerateOutput(webnn::ModelBuilder nn) {
         UNREACHABLE();
     }
 
@@ -123,7 +123,7 @@ namespace utils {
     }
 
     // The Compilation should be released unitl ComputeCallback.
-    wnn::Compilation gCompilation;
+    webnn::Compilation gCompilation;
     WrappedModel* gWrappedModel;
     ComputeSync gComputeSync;
 
@@ -142,18 +142,18 @@ namespace utils {
         return;
     }
 
-    void ComputeCallback(WNNComputeStatus status,
-                         WNNNamedResults impl,
+    void ComputeCallback(WEBNNComputeStatus status,
+                         WEBNNNamedResults impl,
                          char const* message,
                          void* userData) {
-        if (status != WNNComputeStatus_Success) {
+        if (status != WEBNNComputeStatus_Success) {
             dawn::InfoLog() << "Test failed.";
             dawn::ErrorLog() << message;
             gComputeSync.Finish();
             return;
         }
-        wnn::NamedResults outputs = outputs.Acquire(impl);
-        wnn::Result output = outputs.Get("output");
+        webnn::NamedResults outputs = outputs.Acquire(impl);
+        webnn::Result output = outputs.Get("output");
         std::vector<float> expectedData = gWrappedModel->ExpectedBuffer();
         bool expected = true;
         for (size_t i = 0; i < output.BufferSize() / sizeof(float); ++i) {
@@ -189,28 +189,28 @@ namespace utils {
         return;
     }
 
-    void CompilationCallback(WNNCompileStatus status,
-                             WNNCompilation impl,
+    void CompilationCallback(WEBNNCompileStatus status,
+                             WEBNNCompilation impl,
                              char const* message,
                              void* userData) {
-        if (status != WNNCompileStatus_Success) {
+        if (status != WEBNNCompileStatus_Success) {
             dawn::ErrorLog() << message;
             gComputeSync.Finish();
             return;
         }
 
         std::vector<float> inputBuffer = gWrappedModel->InputBuffer();
-        wnn::Input a;
+        webnn::Input a;
         a.buffer = inputBuffer.data();
         a.size = inputBuffer.size() * sizeof(float);
-        wnn::NamedInputs inputs = CreateCppNamedInputs();
+        webnn::NamedInputs inputs = CreateCppNamedInputs();
         inputs.Set("input", &a);
         gCompilation = gCompilation.Acquire(impl);
         gCompilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
     }
 
-    void ErrorCallback(WNNErrorType type, char const* message, void* userdata) {
-        if (type != WNNErrorType_NoError) {
+    void ErrorCallback(WEBNNErrorType type, char const* message, void* userdata) {
+        if (type != WEBNNErrorType_NoError) {
             dawn::ErrorLog() << "error type is " << type << ", messages are " << message;
         }
     }
@@ -218,16 +218,16 @@ namespace utils {
     // Wrapped Compilation
     bool Test(WrappedModel* wrappedModel) {
         gWrappedModel = wrappedModel;
-        wnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
+        webnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
         context.SetUncapturedErrorCallback(ErrorCallback, nullptr);
 
-        wnn::ModelBuilder builder = context.CreateModelBuilder();
-        wnn::Operand outputOperand = wrappedModel->GenerateOutput(builder);
-        wnn::NamedOperands namedOperands = CreateCppNamedOperands();
+        webnn::ModelBuilder builder = context.CreateModelBuilder();
+        webnn::Operand outputOperand = wrappedModel->GenerateOutput(builder);
+        webnn::NamedOperands namedOperands = CreateCppNamedOperands();
         namedOperands.Set("output", outputOperand);
         // Use Promise in JS to await callback.
-        context.PushErrorScope(wnn::ErrorFilter::Validation);
-        wnn::Model model = builder.CreateModel(namedOperands);
+        context.PushErrorScope(webnn::ErrorFilter::Validation);
+        webnn::Model model = builder.CreateModel(namedOperands);
         context.PopErrorScope(ErrorCallback, nullptr);
         model.Compile(CompilationCallback, nullptr);
 

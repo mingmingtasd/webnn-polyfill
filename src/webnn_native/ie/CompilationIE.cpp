@@ -52,25 +52,25 @@ namespace webnn_native { namespace ie {
         IE(ie_compilation_free)(ie_compilation_);
     }
 
-    void Compilation::Compile(WNNCompileCallback callback,
+    void Compilation::Compile(WEBNNCompileCallback callback,
                               void* userdata,
                               CompilationOptions const* options) {
         // We may leverage https://dawn-review.googlesource.com/c/dawn/+/36360 to
         // implement async compilation as standle-alone component.
-        WNNCompileStatus status = WNNCompileStatus_Error;
+        WEBNNCompileStatus status = WEBNNCompileStatus_Error;
         // Create compilation for IE backend.
         IEStatusCode code =
             IE(ie_create_compilation)(model_->GetInferenceEngineModel(), &ie_compilation_);
         DAWN_CALLBACK_TRY(code, "IE create compilation");
-        status = WNNCompileStatus_Success;
-        callback(status, reinterpret_cast<WNNCompilation>(this), nullptr, userdata);
+        status = WEBNNCompileStatus_Success;
+        callback(status, reinterpret_cast<WEBNNCompilation>(this), nullptr, userdata);
     }
 
     void Compilation::ComputeImpl(NamedInputsBase* inputs,
-                                  WNNComputeCallback callback,
+                                  WEBNNComputeCallback callback,
                                   void* userdata,
                                   NamedOutputsBase* outputs) {
-        WNNComputeStatus status = WNNComputeStatus_Error;
+        WEBNNComputeStatus status = WEBNNComputeStatus_Error;
         // Set input data to nGraph.
         for (auto& input : inputs->GetRecords()) {
             ie_operand_t ie_operand;
@@ -97,9 +97,9 @@ namespace webnn_native { namespace ie {
 
     void Compilation::CompletedCallback() {
         // Get Data from nGraph with output.
-        WNNComputeStatus status = WNNComputeStatus_Error;
+        WEBNNComputeStatus status = WEBNNComputeStatus_Error;
         void* userdata = user_data_;
-        WNNComputeCallback callback = callback_;
+        WEBNNComputeCallback callback = callback_;
         Ref<NamedResultsBase> results = AcquireRef(new NamedResultsBase());
         size_t output_number = model_->GetOutputsNumber();
         for (size_t i = 0; i < output_number; ++i) {
@@ -129,8 +129,8 @@ namespace webnn_native { namespace ie {
                 DAWN_CALLBACK_TRY(code, "IE get output");
             }
         }
-        status = WNNComputeStatus_Success;
-        callback(status, reinterpret_cast<WNNNamedResults>(results.Detach()), nullptr, userdata);
+        status = WEBNNComputeStatus_Success;
+        callback(status, reinterpret_cast<WEBNNNamedResults>(results.Detach()), nullptr, userdata);
         return;
     }
 

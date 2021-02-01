@@ -56,7 +56,7 @@ namespace webnn_native { namespace op {
         options_.dilationsCount = dilations_.size();
 
         if (options == nullptr) {
-            options_.layout = wnn::OperandLayout::Nchw;
+            options_.layout = webnn::OperandLayout::Nchw;
         } else {
             options_.layout = options->layout;
         }

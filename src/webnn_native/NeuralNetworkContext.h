@@ -35,9 +35,9 @@ namespace webnn_native {
 
         // Dawn API
         ModelBuilderBase* CreateModelBuilder();
-        void PushErrorScope(wnn::ErrorFilter filter);
-        bool PopErrorScope(wnn::ErrorCallback callback, void* userdata);
-        void SetUncapturedErrorCallback(wnn::ErrorCallback callback, void* userdata);
+        void PushErrorScope(webnn::ErrorFilter filter);
+        bool PopErrorScope(webnn::ErrorCallback callback, void* userdata);
+        void SetUncapturedErrorCallback(webnn::ErrorCallback callback, void* userdata);
 
       private:
         void HandleError(std::unique_ptr<ErrorData> error);

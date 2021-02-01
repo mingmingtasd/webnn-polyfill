@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef WEBNN_NATIVE_DAWNNATIVE_H_
-#define WEBNN_NATIVE_DAWNNATIVE_H_
+#ifndef WEBNN_NATIVE_WEBNN_NATIVE_H_
+#define WEBNN_NATIVE_WEBNN_NATIVE_H_
 
 #include <webnn/webnn_proc_table.h>
 #include <webnn/webnn.h>
@@ -26,11 +26,11 @@ namespace webnn_native {
     // Backend-agnostic API for webnn_native
     DAWN_NATIVE_EXPORT WebnnProcTable GetProcs();
 
-    DAWN_NATIVE_EXPORT WNNNeuralNetworkContext CreateNeuralNetworkContext();
-    DAWN_NATIVE_EXPORT WNNNamedInputs CreateNamedInputs();
-    DAWN_NATIVE_EXPORT WNNNamedOperands CreateNamedOperands();
-    DAWN_NATIVE_EXPORT WNNNamedOutputs CreateNamedOutputs();
+    DAWN_NATIVE_EXPORT WEBNNNeuralNetworkContext CreateNeuralNetworkContext();
+    DAWN_NATIVE_EXPORT WEBNNNamedInputs CreateNamedInputs();
+    DAWN_NATIVE_EXPORT WEBNNNamedOperands CreateNamedOperands();
+    DAWN_NATIVE_EXPORT WEBNNNamedOutputs CreateNamedOutputs();
 
 }  // namespace webnn_native
 
-#endif  // WEBNN_NATIVE_DAWNNATIVE_H_
+#endif  // WEBNN_NATIVE_WEBNN_NATIVE_H_
