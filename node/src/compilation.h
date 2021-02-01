@@ -4,13 +4,13 @@
 #include "Base.h"
 
 template <typename T>
-T ParseOperand(Napi::Object item, const std::string &name) {
+T ParseOperand(Napi::Object item, const std::string& name) {
   Napi::Object obj = item.Get(name).As<Napi::Object>();
   // The Buffer can't be set with DescriptorDecoder
   Napi::TypedArray array = obj.Get("buffer").As<Napi::TypedArray>();
   Napi::ArrayBuffer buffer = array.ArrayBuffer();
   T operand;
-  operand.buffer = reinterpret_cast<void *>(buffer.Data());
+  operand.buffer = reinterpret_cast<void*>(buffer.Data());
   operand.size = buffer.ByteLength();
   return operand;
 }
@@ -27,15 +27,11 @@ public:
   WNNCompilation GetCompilation();
 
   Napi::Value Compute(const Napi::CallbackInfo &info);
-  ComputeAsyncWorker *GetAsyncWorker();
 
 private:
   WNNCompilation compilation_;
   Napi::ObjectReference model_object_;
-
-  // Support async compute with AsyncWorker.
-  // TODO(junwei): support multipe compute with different promise.
-  ComputeAsyncWorker *compute_worker_;
+  ComputeAsyncWorker* compute_worker_;
 };
 
 #endif // __Compilation_H__
