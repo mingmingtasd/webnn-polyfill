@@ -207,7 +207,7 @@ source_set("webnn_native_sources") {
 # already compiled in webnn_native_sources, but we still need to compile
 # files defining exported symbols.
 dawn_component("webnn_native") {
-  DEFINE_PREFIX = "DAWN_NATIVE"
+  DEFINE_PREFIX = "WEBNN_NATIVE"
 
   #Make headers publically visible
   public_deps = [ ":webnn_native_headers" ]
@@ -219,8 +219,8 @@ dawn_component("webnn_native") {
   sources = [ "WebnnNative.cpp" ]
   configs = [ ":webnn_native_internal" ]
   defines = [
-    "DAWN_NATIVE_SHARED_LIBRARY",
-    "DAWN_NATIVE_IMPLEMENTATION",
+    "WEBNN_NATIVE_SHARED_LIBRARY",
+    "WEBNN_NATIVE_IMPLEMENTATION",
   ]
 }
 

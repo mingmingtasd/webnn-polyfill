@@ -26,7 +26,7 @@ namespace webnn_native {
         NamedRecords() = default;
         virtual ~NamedRecords() = default;
 
-        // DAWN API
+        // WebNN API
         void Set(char const* name, const T* record) {
             records_[std::string(name)] = record;
         }

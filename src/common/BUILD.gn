@@ -62,15 +62,15 @@ config("dawn_internal") {
   }
 
   if (webnn_enable_null) {
-    defines += [ "DAWN_ENABLE_BACKEND_NULL" ]
+    defines += [ "WEBNN_ENABLE_BACKEND_NULL" ]
   }
 
   if (webnn_enable_ie) {
-    defines += [ "DAWN_ENABLE_BACKEND_IE" ]
+    defines += [ "WEBNN_ENABLE_BACKEND_IE" ]
   }
 
   if (webnn_enable_dml) {
-    defines += [ "DAWN_ENABLE_BACKEND_DML" ]
+    defines += [ "WEBNN_ENABLE_BACKEND_DML" ]
   }
 
   # Only internal Dawn targets can use this config, this means only targets in

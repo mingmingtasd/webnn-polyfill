@@ -40,11 +40,11 @@ namespace webnn_native {
 
     // Should put the default null backend at the end.
     WEBNNNeuralNetworkContext CreateNeuralNetworkContext() {
-#if defined(DAWN_ENABLE_BACKEND_IE)
+#if defined(WEBNN_ENABLE_BACKEND_IE)
         return reinterpret_cast<WEBNNNeuralNetworkContext>(ie::Create());
-#elif defined(DAWN_ENABLE_BACKEND_DML)
+#elif defined(WEBNN_ENABLE_BACKEND_DML)
         return reinterpret_cast<WEBNNNeuralNetworkContext>(dml::Create());
-#elif defined(DAWN_ENABLE_BACKEND_NULL)
+#elif defined(WEBNN_ENABLE_BACKEND_NULL)
         return reinterpret_cast<WEBNNNeuralNetworkContext>(null::Create());
 #else
         return nullptr;

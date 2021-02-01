@@ -28,7 +28,7 @@ namespace webnn_native {
         ModelBuilderBase(NeuralNetworkContextBase* context);
         virtual ~ModelBuilderBase() = default;
 
-        // DAWN API
+        // WebNN API
         OperandBase* Constant(OperandDescriptor const* desc, void const* value, size_t size);
         OperandBase* Input(char const* name, OperandDescriptor const* desc);
         OperandBase* Matmul(OperandBase* a, OperandBase* b);
