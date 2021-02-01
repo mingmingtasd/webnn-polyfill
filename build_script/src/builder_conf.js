@@ -42,6 +42,23 @@ class BuilderConf {
     this.logFile_ = undefined;
     this.logLevel_ = undefined;
     this.logger_ = undefined;
+
+    // archive-server
+    this.archiveServer_ = {
+      host: undefined,
+      dir: undefined,
+      sshUser: undefined,
+    };
+
+    // email-service
+    this.emailService_ = {
+      user: undefined,
+      host: undefined,
+      from: undefined,
+      to: undefined,
+      subject: undefined,
+      text: undefined,
+    };
   }
 
   /**
@@ -50,6 +67,8 @@ class BuilderConf {
    *  this.targetCpu_
    *  this.gnArgs_
    *  this.cleanBuild_
+   *  this.archiveServer_
+   *  this.emailService_
    *  this.logFile_
    *  this.logLevel_
    *  this.logger_
@@ -69,6 +88,15 @@ class BuilderConf {
     this.gnArgs_.isDebug = config['gnArgs']['is-debug'];
 
     this.cleanBuild_ = config['clean-build'];
+
+    this.archiveServer_.host = config['archive-server']['host'];
+    this.archiveServer_.dir = config['archive-server']['dir'];
+    this.archiveServer_.sshUser = config['archive-server']['ssh-user'];
+
+    this.emailService_.user = config['email-service']['user'];
+    this.emailService_.host = config['email-service']['host'];
+    this.emailService_.from = config['email-service']['from'];
+    this.emailService_.to = config['email-service']['to'];
 
     // Handel logger
     this.logLevel_ = config['logging']['level'] || 'info';
@@ -127,8 +155,8 @@ class BuilderConf {
    * @return {string} arguments to run 'gn gen'.
    */
   get gnArgs() {
-    let args = 'target_os=\"' + this.targetOs + '\"';
-    args += ' target_cpu=\"' + this.targetCpu + '\"';
+    let args = 'target_os=\"' + this.targetOs_ + '\"';
+    args += ' target_cpu=\"' + this.targetCpu_ + '\"';
     args += ' is_debug=' + (this.gnArgs_.isDebug).toString();
     args += ' is_component_build=' + (this.gnArgs_.isComponent).toString();
     args += ' is_clang=' + (this.gnArgs_.isClang).toString();
@@ -151,6 +179,26 @@ class BuilderConf {
   }
 
   /**
+   * @return {string} path of package name.
+   */
+  get packageName() {
+    let name = null;
+    switch (this.targetOs_) {
+      case 'linux':
+        name =
+          `webnn-${this.targetOs_}-${this.targetCpu_}-${this.backend_}.tar.gz`;
+        break;
+      case 'windows':
+        name =
+          `webnn-${this.targetOs_}-${this.targetCpu_}-${this.backend_}.zip`;
+        break;
+      default:
+        break;
+    }
+    return name;
+  }
+
+  /**
    * @return {object} logger.
    */
   get logger() {
@@ -169,6 +217,20 @@ class BuilderConf {
    */
   get logLevel() {
     return this.logLevel_;
+  }
+
+  /**
+   * @return {object} archive server.
+   */
+  get archiveServer() {
+    return this.archiveServer_;
+  }
+
+  /**
+   * @return {object} email service.
+   */
+  get emailService() {
+    return this.emailService_;
   }
 
   /**

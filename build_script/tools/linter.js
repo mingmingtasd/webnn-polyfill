@@ -46,7 +46,7 @@ function doCppLint(files) {
 function doJsLint(files) {
   if (!files || files.length == 0) return;
 
-  const jsLinterDir = path.join(__dirname, '..', '..', 'node_modules', '.bin');
+  const jsLinterDir = path.join(__dirname, '..', 'node_modules', '.bin');
 
   for (const linter of ['eslint']) {
     let output = null;
