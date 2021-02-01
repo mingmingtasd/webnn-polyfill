@@ -141,15 +141,12 @@ StatusCode Compilation::GetDimensions(const char* name,
   return StatusCode::OK;
 }
 
-StatusCode Compilation::Compute(ie_complete_call_back_t* callback) {
+StatusCode Compilation::Compute() {
   InferRequest* infer_request = GetInferenceRequest();
   if (!infer_request) {
     return StatusCode::NETWORK_NOT_LOADED;
   }
-
-  auto fun = [=]() { callback->completeCallBackFunc(callback->args); };
-  infer_request->SetCompletionCallback(fun);
-  infer_request->StartAsync();
+  infer_request->Infer();
 
   return StatusCode::OK;
 }

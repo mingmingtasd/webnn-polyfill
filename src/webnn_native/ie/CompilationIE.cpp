@@ -81,25 +81,9 @@ namespace webnn_native { namespace ie {
         }
 
         // Compute the compiled model.
-        ie_callback_.args = this;
-        ie_callback_.completeCallBackFunc = [](void* args) {
-            DAWN_ASSERT(args);
-            Compilation* compilation = reinterpret_cast<Compilation*>(args);
-            compilation->CompletedCallback();
-        };
-        IEStatusCode code = IE(ie_compilation_compute)(ie_compilation_, &ie_callback_);
+        IEStatusCode code = IE(ie_compilation_compute)(ie_compilation_);
         DAWN_CALLBACK_TRY(code, "IE compute model");
-        callback_ = callback;
-        user_data_ = userdata;
-        outputs_ = outputs;
-        return;
-    }
-
-    void Compilation::CompletedCallback() {
         // Get Data from nGraph with output.
-        WEBNNComputeStatus status = WEBNNComputeStatus_Error;
-        void* userdata = user_data_;
-        WEBNNComputeCallback callback = callback_;
         Ref<NamedResultsBase> results = AcquireRef(new NamedResultsBase());
         size_t output_number = model_->GetOutputsNumber();
         for (size_t i = 0; i < output_number; ++i) {
@@ -120,8 +104,8 @@ namespace webnn_native { namespace ie {
                 AcquireRef(new Result::ResultBase(output_buffer, buffer_length, dimensions));
             std::string output_name = model_->output_name_map_[output_id];
             results->Set(output_name.c_str(), result.Detach());
-            if (outputs_ != nullptr) {
-                const Output* output = outputs_->GetRecords().at(output_name);
+            if (outputs != nullptr) {
+                const Output* output = outputs->GetRecords().at(output_name);
                 ie_operand_t ie_operand;
                 ie_operand.name = const_cast<char*>(output_id.c_str());
                 IEStatusCode code = IE(ie_compilation_get_output)(ie_compilation_, &ie_operand,
