@@ -14,10 +14,10 @@
 #ifndef WEBNN_CPP_H_
 #define WEBNN_CPP_H_
 
-#include "dawn/webnn.h"
-#include "dawn/EnumClassBitmasks.h"
+#include "webnn/webnn.h"
+#include "webnn/EnumClassBitmasks.h"
 
-namespace wnn {
+namespace webnn {
 
     {% for type in by_category["enum"] %}
         enum class {{as_cppType(type.name)}} : uint32_t {
@@ -50,7 +50,7 @@ namespace wnn {
 
     {% endfor %}
 
-    using Proc = WNNProc;
+    using Proc = WEBNNProc;
     {% for type in by_category["callback"] %}
         using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
     {% endfor %}
@@ -68,10 +68,10 @@ namespace wnn {
       public:
         ObjectBase() = default;
         ObjectBase(CType handle): mHandle(handle) {
-            if (mHandle) Derived::WNNReference(mHandle);
+            if (mHandle) Derived::WEBNNReference(mHandle);
         }
         ~ObjectBase() {
-            if (mHandle) Derived::WNNRelease(mHandle);
+            if (mHandle) Derived::WEBNNRelease(mHandle);
         }
 
         ObjectBase(ObjectBase const& other)
@@ -79,9 +79,9 @@ namespace wnn {
         }
         Derived& operator=(ObjectBase const& other) {
             if (&other != this) {
-                if (mHandle) Derived::WNNRelease(mHandle);
+                if (mHandle) Derived::WEBNNRelease(mHandle);
                 mHandle = other.mHandle;
-                if (mHandle) Derived::WNNReference(mHandle);
+                if (mHandle) Derived::WEBNNReference(mHandle);
             }
 
             return static_cast<Derived&>(*this);
@@ -93,7 +93,7 @@ namespace wnn {
         }
         Derived& operator=(ObjectBase&& other) {
             if (&other != this) {
-                if (mHandle) Derived::WNNRelease(mHandle);
+                if (mHandle) Derived::WEBNNRelease(mHandle);
                 mHandle = other.mHandle;
                 other.mHandle = 0;
             }
@@ -104,7 +104,7 @@ namespace wnn {
         ObjectBase(std::nullptr_t) {}
         Derived& operator=(std::nullptr_t) {
             if (mHandle != nullptr) {
-                Derived::WNNRelease(mHandle);
+                Derived::WEBNNRelease(mHandle);
                 mHandle = nullptr;
             }
             return static_cast<Derived&>(*this);
@@ -179,8 +179,8 @@ namespace wnn {
 
           private:
             friend ObjectBase<{{CppType}}, {{CType}}>;
-            static void WNNReference({{CType}} handle);
-            static void WNNRelease({{CType}} handle);
+            static void WEBNNReference({{CType}} handle);
+            static void WEBNNRelease({{CType}} handle);
         };
 
     {% endfor %}
@@ -215,6 +215,6 @@ namespace wnn {
 
     {% endfor %}
 
-}  // namespace wnn
+}  // namespace webnn
 
 #endif // WEBNN_CPP_H_

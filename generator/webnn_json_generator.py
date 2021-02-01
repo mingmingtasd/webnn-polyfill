@@ -45,7 +45,7 @@ def as_cType(name):
     if name.native:
         return name.concatcase()
     else:
-        return 'WNN' + name.CamelCase()
+        return 'WEBNN' + name.CamelCase()
 
 
 def as_cTypeDawn(name):
@@ -118,7 +118,7 @@ def annotated(typ, arg):
 
 def as_cEnum(type_name, value_name):
     assert not type_name.native and not value_name.native
-    return 'WNN' + type_name.CamelCase() + '_' + value_name.CamelCase()
+    return 'WEBNN' + type_name.CamelCase() + '_' + value_name.CamelCase()
 
 
 def as_cEnumDawn(type_name, value_name):
@@ -136,7 +136,7 @@ def as_cppEnum(value_name):
 
 def as_cMethod(type_name, method_name):
     assert not type_name.native and not method_name.native
-    return 'wnn' + type_name.CamelCase() + method_name.CamelCase()
+    return 'webnn' + type_name.CamelCase() + method_name.CamelCase()
 
 
 def as_cMethodDawn(type_name, method_name):
@@ -151,7 +151,7 @@ def as_MethodSuffix(type_name, method_name):
 
 def as_cProc(type_name, method_name):
     assert not type_name.native and not method_name.native
-    return 'WNN' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
+    return 'WEBNN' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
 
 
 def as_cProcDawn(type_name, method_name):
@@ -163,20 +163,11 @@ def as_frontendType(typ):
     if typ.category == 'object':
         return typ.name.CamelCase() + 'Base*'
     elif typ.category in ['bitmask', 'enum']:
-        return 'wnn::' + typ.name.CamelCase()
+        return 'webnn::' + typ.name.CamelCase()
     elif typ.category == 'structure':
         return as_cppType(typ.name)
     else:
         return as_cType(typ.name)
-
-
-def as_wireType(typ):
-    if typ.category == 'object':
-        return typ.name.CamelCase() + '*'
-    elif typ.category in ['bitmask', 'enum']:
-        return 'WNN' + typ.name.CamelCase()
-    else:
-        return as_cppType(typ.name)
 
 
 def c_methods(types, typ):
@@ -204,17 +195,13 @@ class MultiGeneratorFromWebnnJSON(Generator):
     def add_commandline_arguments(self, parser):
         allowed_targets = [
             'webnn_headers', 'webnncpp_headers', 'webnncpp', 'webnn_proc',
-            'mock_webnn', 'webnn_wire', "webnn_native_utils"
+            'mock_webnn', 'webnn_native_utils'
         ]
 
         parser.add_argument('--webnn-json',
                             required=True,
                             type=str,
                             help='The WebNN JSON definition to use.')
-        parser.add_argument('--wire-json',
-                            default=None,
-                            type=str,
-                            help='The WebNN WIRE JSON definition to use.')
         parser.add_argument(
             '--targets',
             required=True,
@@ -234,11 +221,6 @@ class MultiGeneratorFromWebnnJSON(Generator):
         api_params = parse_json(loaded_json)
 
         targets = args.targets.split(',')
-
-        wire_json = None
-        if args.wire_json:
-            with open(args.wire_json) as f:
-                wire_json = json.loads(f.read())
 
         base_params = {
             'Name': lambda name: Name(name),
@@ -268,38 +250,38 @@ class MultiGeneratorFromWebnnJSON(Generator):
 
         renders = []
 
-        if 'dawn_headers' in targets:
+        if 'webnn_headers' in targets:
             renders.append(
-                FileRender('webnn.h', 'src/include/dawn/webnn.h',
+                FileRender('webnn.h', 'src/include/webnn/webnn.h',
                            [base_params, api_params]))
             renders.append(
-                FileRender('dawn_proc_table.h',
-                           'src/include/dawn/dawn_proc_table.h',
-                           [base_params, api_params]))
-
-        if 'dawncpp_headers' in targets:
-            renders.append(
-                FileRender('webnn_cpp.h', 'src/include/dawn/webnn_cpp.h',
+                FileRender('webnn_proc_table.h',
+                           'src/include/webnn/webnn_proc_table.h',
                            [base_params, api_params]))
 
-        if 'dawn_proc' in targets:
+        if 'webnncpp_headers' in targets:
             renders.append(
-                FileRender('dawn_proc.c', 'src/dawn/dawn_proc.c',
+                FileRender('webnn_cpp.h', 'src/include/webnn/webnn_cpp.h',
                            [base_params, api_params]))
 
-        if 'dawncpp' in targets:
+        if 'webnn_proc' in targets:
             renders.append(
-                FileRender('webnn_cpp.cpp', 'src/dawn/webnn_cpp.cpp',
+                FileRender('webnn_proc.c', 'src/webnn/webnn_proc.c',
+                           [base_params, api_params]))
+
+        if 'webnncpp' in targets:
+            renders.append(
+                FileRender('webnn_cpp.cpp', 'src/webnn/webnn_cpp.cpp',
                            [base_params, api_params]))
 
         if 'emscripten_bits' in targets:
             renders.append(
                 FileRender('webnn_struct_info.json',
-                           'src/dawn/webnn_struct_info.json',
+                           'src/webnn/webnn_struct_info.json',
                            [base_params, api_params]))
             renders.append(
                 FileRender('library_webnn_enum_tables.js',
-                           'src/dawn/library_webnn_enum_tables.js',
+                           'src/webnn/library_webnn_enum_tables.js',
                            [base_params, api_params]))
 
         if 'mock_webnn' in targets:
@@ -309,13 +291,13 @@ class MultiGeneratorFromWebnnJSON(Generator):
                 }
             ]
             renders.append(
-                FileRender('mock_webnn.h', 'src/dawn/mock_webnn.h',
+                FileRender('mock_webnn.h', 'src/webnn/mock_webnn.h',
                            mock_params))
             renders.append(
-                FileRender('mock_webnn.cpp', 'src/dawn/mock_webnn.cpp',
+                FileRender('mock_webnn.cpp', 'src/webnn/mock_webnn.cpp',
                            mock_params))
 
-        if 'dawn_native_utils' in targets:
+        if 'webnn_native_utils' in targets:
             frontend_params = [
                 base_params,
                 api_params,
@@ -328,86 +310,29 @@ class MultiGeneratorFromWebnnJSON(Generator):
             ]
 
             renders.append(
-                FileRender('dawn_native/ValidationUtils.h',
-                           'src/dawn_native/ValidationUtils_autogen.h',
+                FileRender('webnn_native/ValidationUtils.h',
+                           'src/webnn_native/ValidationUtils_autogen.h',
                            frontend_params))
             renders.append(
-                FileRender('dawn_native/ValidationUtils.cpp',
-                           'src/dawn_native/ValidationUtils_autogen.cpp',
+                FileRender('webnn_native/ValidationUtils.cpp',
+                           'src/webnn_native/ValidationUtils_autogen.cpp',
                            frontend_params))
             renders.append(
-                FileRender('dawn_native/wnn_structs.h',
-                           'src/dawn_native/wnn_structs_autogen.h',
+                FileRender('webnn_native/webnn_structs.h',
+                           'src/webnn_native/webnn_structs_autogen.h',
                            frontend_params))
             renders.append(
-                FileRender('dawn_native/wnn_structs.cpp',
-                           'src/dawn_native/wnn_structs_autogen.cpp',
+                FileRender('webnn_native/webnn_structs.cpp',
+                           'src/webnn_native/webnn_structs_autogen.cpp',
                            frontend_params))
             renders.append(
-                FileRender('dawn_native/ProcTable.cpp',
-                           'src/dawn_native/ProcTable.cpp', frontend_params))
-
-        if 'dawn_wire' in targets:
-            additional_params = compute_wire_params(api_params, wire_json)
-
-            wire_params = [
-                base_params, api_params, {
-                    'as_wireType': as_wireType,
-                    'as_annotated_wireType': \
-                        lambda arg: annotated(as_wireType(arg.type), arg),
-                }, additional_params
-            ]
-            renders.append(
-                FileRender('dawn_wire/WireCmd.h',
-                           'src/dawn_wire/WireCmd_autogen.h', wire_params))
-            renders.append(
-                FileRender('dawn_wire/WireCmd.cpp',
-                           'src/dawn_wire/WireCmd_autogen.cpp', wire_params))
-            renders.append(
-                FileRender('dawn_wire/client/ApiObjects.h',
-                           'src/dawn_wire/client/ApiObjects_autogen.h',
-                           wire_params))
-            renders.append(
-                FileRender('dawn_wire/client/ApiProcs.cpp',
-                           'src/dawn_wire/client/ApiProcs_autogen.cpp',
-                           wire_params))
-            renders.append(
-                FileRender('dawn_wire/client/ClientBase.h',
-                           'src/dawn_wire/client/ClientBase_autogen.h',
-                           wire_params))
-            renders.append(
-                FileRender('dawn_wire/client/ClientHandlers.cpp',
-                           'src/dawn_wire/client/ClientHandlers_autogen.cpp',
-                           wire_params))
-            renders.append(
-                FileRender(
-                    'dawn_wire/client/ClientPrototypes.inc',
-                    'src/dawn_wire/client/ClientPrototypes_autogen.inc',
-                    wire_params))
-            renders.append(
-                FileRender('dawn_wire/server/ServerBase.h',
-                           'src/dawn_wire/server/ServerBase_autogen.h',
-                           wire_params))
-            renders.append(
-                FileRender('dawn_wire/server/ServerDoers.cpp',
-                           'src/dawn_wire/server/ServerDoers_autogen.cpp',
-                           wire_params))
-            renders.append(
-                FileRender('dawn_wire/server/ServerHandlers.cpp',
-                           'src/dawn_wire/server/ServerHandlers_autogen.cpp',
-                           wire_params))
-            renders.append(
-                FileRender(
-                    'dawn_wire/server/ServerPrototypes.inc',
-                    'src/dawn_wire/server/ServerPrototypes_autogen.inc',
-                    wire_params))
+                FileRender('webnn_native/ProcTable.cpp',
+                           'src/webnn_native/ProcTable.cpp', frontend_params))
 
         return renders
 
     def get_dependencies(self, args):
         deps = [os.path.abspath(args.webnn_json)]
-        if args.wire_json != None:
-            deps += [os.path.abspath(args.wire_json)]
         return deps
 
 

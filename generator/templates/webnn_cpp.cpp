@@ -11,9 +11,9 @@
 //* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //* See the License for the specific language governing permissions and
 //* limitations under the License.
-#include "dawn/webnn_cpp.h"
+#include "webnn/webnn_cpp.h"
 
-namespace wnn {
+namespace webnn {
     {% for type in by_category["enum"] %}
         {% set CppType = as_cppType(type.name) %}
         {% set CType = as_cType(type.name) %}
@@ -117,12 +117,12 @@ namespace wnn {
                 {% endif %}
             }
         {% endfor %}
-        void {{CppType}}::WNNReference({{CType}} handle) {
+        void {{CppType}}::WEBNNReference({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("reference"))}}(handle);
             }
         }
-        void {{CppType}}::WNNRelease({{CType}} handle) {
+        void {{CppType}}::WEBNNRelease({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("release"))}}(handle);
             }

@@ -15,14 +15,14 @@
 #include "tests/unittests/validation/ValidationTest.h"
 
 #include "common/Assert.h"
-#include "dawn/dawn_proc.h"
-#include "dawn/webnn.h"
+#include "webnn/webnn.h"
+#include "webnn/webnn_proc.h"
 
 void ValidationTest::SetUp() {
-    DawnProcTable backendProcs = dawn_native::GetProcs();
+    WebnnProcTable backendProcs = webnn_native::GetProcs();
     ASSERT_NE(&backendProcs, nullptr);
-    dawnProcSetProcs(&backendProcs);
-    context = wnn::NeuralNetworkContext::Acquire(dawn_native::CreateNeuralNetworkContext());
+    webnnProcSetProcs(&backendProcs);
+    context = webnn::NeuralNetworkContext::Acquire(webnn_native::CreateNeuralNetworkContext());
     context.SetUncapturedErrorCallback(ErrorCallback, this);
 }
 
@@ -46,8 +46,8 @@ std::string ValidationTest::GetLastErrorMessage() const {
     return mErrorMessage;
 }
 
-void ValidationTest::ErrorCallback(WNNErrorType type, char const* message, void* userdata) {
-    ASSERT(type != WNNErrorType_NoError);
+void ValidationTest::ErrorCallback(WEBNNErrorType type, char const* message, void* userdata) {
+    ASSERT(type != WEBNNErrorType_NoError);
     auto self = static_cast<ValidationTest*>(userdata);
     self->mErrorMessage = message;
 

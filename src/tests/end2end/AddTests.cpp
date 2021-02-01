@@ -18,9 +18,9 @@ class AddTests : public testing::Test {};
 class AddModel : public utils::WrappedModel {
   public:
     AddModel() = default;
-    wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
-        wnn::Operand input = nn.Input("input", InputDesc());
-        wnn::Operand constant = nn.Constant(ConstantDesc(), ConstantBuffer(), ConstantLength());
+    webnn::Operand GenerateOutput(webnn::ModelBuilder nn) override {
+        webnn::Operand input = nn.Input("input", InputDesc());
+        webnn::Operand constant = nn.Constant(ConstantDesc(), ConstantBuffer(), ConstantLength());
         return nn.Add(input, constant);
     }
 };

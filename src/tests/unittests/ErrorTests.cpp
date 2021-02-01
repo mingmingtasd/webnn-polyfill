@@ -14,10 +14,10 @@
 
 #include <gtest/gtest.h>
 
-#include "dawn_native/Error.h"
-#include "dawn_native/ErrorData.h"
+#include "webnn_native/Error.h"
+#include "webnn_native/ErrorData.h"
 
-using namespace dawn_native;
+using namespace webnn_native;
 
 namespace {
 

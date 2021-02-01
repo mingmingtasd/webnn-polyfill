@@ -40,10 +40,10 @@ namespace {
 ProcTableAsClass::~ProcTableAsClass() {
 }
 
-void ProcTableAsClass::CompilationCompute(WNNCompilation self,
-                                WNNNamedInputs inputs,
-                                WNNComputeCallback callback,
-                                void* userdata, WNNNamedOutputs outputs){
+void ProcTableAsClass::CompilationCompute(WEBNNCompilation self,
+                                WEBNNNamedInputs inputs,
+                                WEBNNComputeCallback callback,
+                                void* userdata, WEBNNNamedOutputs outputs){
    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
    object->computeCallback = callback;
    object->userdata = userdata;
@@ -52,9 +52,9 @@ void ProcTableAsClass::CompilationCompute(WNNCompilation self,
 
 }
 
-void ProcTableAsClass::ModelCompile(WNNModel self, WNNCompileCallback callback,
+void ProcTableAsClass::ModelCompile(WEBNNModel self, WEBNNCompileCallback callback,
                           void* userdata,
-                          WNNCompilationOptions const * options){
+                          WEBNNCompilationOptions const * options){
    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
    object->compileCallback = callback;
    object->userdata = userdata;
@@ -63,18 +63,18 @@ void ProcTableAsClass::ModelCompile(WNNModel self, WNNCompileCallback callback,
 
 }
 
-bool ProcTableAsClass::NeuralNetworkContextPopErrorScope(WNNNeuralNetworkContext neuralNetworkContext,
-                                               WNNErrorCallback callback, void * userdata){
+bool ProcTableAsClass::NeuralNetworkContextPopErrorScope(WEBNNNeuralNetworkContext neuralNetworkContext,
+                                               WEBNNErrorCallback callback, void * userdata){
   return OnNeuralNetworkContextPopErrorScopeCallback(neuralNetworkContext, callback, userdata);
 }
 
 void ProcTableAsClass::NeuralNetworkContextSetUncapturedErrorCallback(
-		       WNNNeuralNetworkContext neuralNetworkContext,
-                       WNNErrorCallback callback, void * userdata){
+		       WEBNNNeuralNetworkContext neuralNetworkContext,
+                       WEBNNErrorCallback callback, void * userdata){
 }
 
 
-void ProcTableAsClass::GetProcTableAndDevice(DawnProcTable* table) {
+void ProcTableAsClass::GetProcTableAndDevice(WebnnProcTable* table) {
     // *device = GetNewDevice();
 
     {% for type in by_category["object"] %}

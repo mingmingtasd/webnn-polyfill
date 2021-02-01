@@ -18,9 +18,9 @@ class MulTests : public testing::Test {};
 class MulModel : public utils::WrappedModel {
   public:
     MulModel() = default;
-    wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
-        wnn::Operand input = nn.Input("input", InputDesc());
-        wnn::Operand constant = nn.Constant(ConstantDesc(), ConstantBuffer(), ConstantLength());
+    webnn::Operand GenerateOutput(webnn::ModelBuilder nn) override {
+        webnn::Operand input = nn.Input("input", InputDesc());
+        webnn::Operand constant = nn.Constant(ConstantDesc(), ConstantBuffer(), ConstantLength());
         return nn.Mul(input, constant);
     }
 };

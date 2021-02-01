@@ -13,8 +13,8 @@
 #ifndef WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
 #define WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
 
-#include <dawn/webnn.h>
-#include <dawn/webnn_cpp.h>
+#include <webnn/webnn.h>
+#include <webnn/webnn_cpp.h>
 #include <condition_variable>
 #include <mutex>
 #include <vector>
@@ -23,13 +23,13 @@
 
 uint32_t product(const std::vector<int32_t>& dims);
 
-wnn::NeuralNetworkContext CreateCppNeuralNetworkContext();
+webnn::NeuralNetworkContext CreateCppNeuralNetworkContext();
 
-wnn::NamedInputs CreateCppNamedInputs();
+webnn::NamedInputs CreateCppNamedInputs();
 
-wnn::NamedOperands CreateCppNamedOperands();
+webnn::NamedOperands CreateCppNamedOperands();
 
-wnn::NamedOutputs CreateCppNamedOutputs();
+webnn::NamedOutputs CreateCppNamedOutputs();
 
 bool Expected(float output, float expected);
 
@@ -41,15 +41,15 @@ namespace utils {
         ~WrappedModel() = default;
 
         void SetInput(std::vector<int32_t> shape, std::vector<float> buffer);
-        wnn::OperandDescriptor* InputDesc();
+        webnn::OperandDescriptor* InputDesc();
         std::vector<float> InputBuffer();
 
         void SetConstant(std::vector<int32_t> shape, std::vector<float> buffer);
-        wnn::OperandDescriptor* ConstantDesc();
+        webnn::OperandDescriptor* ConstantDesc();
         void const* ConstantBuffer();
         size_t ConstantLength();
 
-        virtual wnn::Operand GenerateOutput(wnn::ModelBuilder nn);
+        virtual webnn::Operand GenerateOutput(webnn::ModelBuilder nn);
         void SetOutputShape(std::vector<int32_t> shape);
         std::vector<int32_t> OutputShape();
 
@@ -64,11 +64,11 @@ namespace utils {
         bool GetComputedResult();
 
       private:
-        wnn::ModelBuilder mModelBuilder;
+        webnn::ModelBuilder mModelBuilder;
         std::vector<int32_t> mInputShape;
         std::vector<float> mInputBuffer;
-        wnn::OperandDescriptor mInputDesc;
-        wnn::OperandDescriptor mConstantDesc;
+        webnn::OperandDescriptor mInputDesc;
+        webnn::OperandDescriptor mConstantDesc;
         std::vector<int32_t> mConstantShape;
         std::vector<float> mConstantBuffer;
         std::vector<int32_t> mOutputShape;

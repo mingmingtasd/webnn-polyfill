@@ -14,14 +14,12 @@
 
 import("//third_party/dawn/scripts/dawn_overrides_with_defaults.gni")
 
-group("dawn_samples") {
-  deps = [
-    ":LeNet",
-  ]
+group("webnn_samples") {
+  deps = [ ":LeNet" ]
 }
 
 # Static library to contain code and dependencies common to all samples
-static_library("dawn_sample_utils") {
+static_library("webnn_sample_utils") {
   sources = [
     "SampleUtils.cpp",
     "SampleUtils.h",
@@ -30,17 +28,17 @@ static_library("dawn_sample_utils") {
   # Export all of these as public deps so that `gn check` allows includes
   public_deps = [
     "${webnn_root}/src/common",
-    "${webnn_root}/src/dawn:dawn_proc",
-    "${webnn_root}/src/dawn:dawncpp",
-    "${webnn_root}/src/dawn_native",
+    "${webnn_root}/src/webnn:webnn_proc",
+    "${webnn_root}/src/webnn:webnncpp",
+    "${webnn_root}/src/webnn_native",
   ]
   public_configs = [ "${webnn_root}/src/common:dawn_internal" ]
 }
 
-# Template for samples to avoid listing dawn_sample_utils as a dep every time
-template("dawn_sample") {
+# Template for samples to avoid listing webnn_sample_utils as a dep every time
+template("webnn_sample") {
   executable(target_name) {
-    deps = [ ":dawn_sample_utils" ]
+    deps = [ ":webnn_sample_utils" ]
     forward_variables_from(invoker, "*", [ "deps" ])
 
     if (defined(invoker.deps)) {
@@ -49,6 +47,6 @@ template("dawn_sample") {
   }
 }
 
-dawn_sample("LeNet") {
+webnn_sample("LeNet") {
   sources = [ "LeNet.cpp" ]
 }

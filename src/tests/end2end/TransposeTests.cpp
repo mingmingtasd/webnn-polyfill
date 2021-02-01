@@ -19,8 +19,8 @@ class Transpose : public utils::WrappedModel {
   public:
     Transpose() : mOptions({}) {
     }
-    wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
-        wnn::Operand input = nn.Input("input", InputDesc());
+    webnn::Operand GenerateOutput(webnn::ModelBuilder nn) override {
+        webnn::Operand input = nn.Input("input", InputDesc());
         if (!mPermutation.empty()) {
             mOptions.permutation = mPermutation.data();
             mOptions.permutationCount = mPermutation.size();
@@ -32,7 +32,7 @@ class Transpose : public utils::WrappedModel {
     }
 
   private:
-    wnn::TransposeOptions mOptions;
+    webnn::TransposeOptions mOptions;
     std::vector<int32_t> mPermutation;
 };
 

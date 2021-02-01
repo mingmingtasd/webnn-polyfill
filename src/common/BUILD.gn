@@ -61,16 +61,16 @@ config("dawn_internal") {
     defines += [ "DAWN_ABORT_ON_ASSERT" ]
   }
 
-  if (dawn_enable_null) {
-    defines += [ "DAWN_ENABLE_BACKEND_NULL" ]
+  if (webnn_enable_null) {
+    defines += [ "WEBNN_ENABLE_BACKEND_NULL" ]
   }
 
-  if (dawn_enable_ie) {
-    defines += [ "DAWN_ENABLE_BACKEND_IE" ]
+  if (webnn_enable_ie) {
+    defines += [ "WEBNN_ENABLE_BACKEND_IE" ]
   }
 
-  if (dawn_enable_dml) {
-    defines += [ "DAWN_ENABLE_BACKEND_DML" ]
+  if (webnn_enable_dml) {
+    defines += [ "WEBNN_ENABLE_BACKEND_DML" ]
   }
 
   # Only internal Dawn targets can use this config, this means only targets in
@@ -121,7 +121,7 @@ config("dawn_internal") {
   }
 
   if (!is_clang && is_win) {
-    # Dawn extends wnn enums with internal enums.
+    # Dawn extends webnn enums with internal enums.
     # MSVC considers these invalid switch values. crbug.com/dawn/397.
     cflags += [ "/wd4063" ]
   }
@@ -154,7 +154,7 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
     ]
 
     public_configs = [ ":dawn_internal" ]
-    deps = [ "${webnn_root}/src/dawn:dawn_headers" ]
+    deps = [ "${webnn_root}/src/webnn:webnn_headers" ]
     if (is_android) {
       libs = [ "log" ]
     }

@@ -18,8 +18,8 @@ class SoftmaxTests : public testing::Test {};
 class SoftmaxModel : public utils::WrappedModel {
   public:
     SoftmaxModel() = default;
-    wnn::Operand GenerateOutput(wnn::ModelBuilder nn) override {
-        wnn::Operand input = nn.Input("input", InputDesc());
+    webnn::Operand GenerateOutput(webnn::ModelBuilder nn) override {
+        webnn::Operand input = nn.Input("input", InputDesc());
         return nn.Softmax(input);
     }
 };

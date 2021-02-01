@@ -16,9 +16,9 @@
 #define TESTS_UNITTESTS_VALIDATIONTEST_H_
 
 #include "common/Log.h"
-#include "dawn/webnn_cpp.h"
-#include "dawn_native/DawnNative.h"
 #include "gtest/gtest.h"
+#include "webnn/webnn_cpp.h"
+#include "webnn_native/WebnnNative.h"
 
 #define ASSERT_CONTEXT_ERROR(statement)                          \
     StartExpectContextError();                                   \
@@ -41,10 +41,10 @@ class ValidationTest : public testing::Test {
     std::string GetLastErrorMessage() const;
 
   protected:
-    wnn::NeuralNetworkContext context;
+    webnn::NeuralNetworkContext context;
 
   private:
-    static void ErrorCallback(WNNErrorType type, const char* message, void* userdata);
+    static void ErrorCallback(WEBNNErrorType type, const char* message, void* userdata);
     std::string mErrorMessage;
     bool mExpectError = false;
     bool mError = false;

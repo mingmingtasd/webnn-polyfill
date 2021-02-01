@@ -18,13 +18,13 @@ import("//testing/test.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
 import("${webnn_root}/generator/webnn_generator.gni")
 
-group("dawn_tests") {
+group("webnn_tests") {
   testonly = true
   deps = [
-    ":dawn_end2end_tests",
+    ":webnn_end2end_tests",
 
-    #":dawn_perf_tests",
-    ":dawn_unittests",
+    # TODO: ":webnn_perf_tests",
+    ":webnn_unittests",
   ]
 }
 
@@ -91,32 +91,32 @@ if (!build_with_chromium) {
 }
 
 ###############################################################################
-# Dawn unittests
+# WebNN unittests
 ###############################################################################
 
 webnn_json_generator("mock_webnn_gen") {
   target = "mock_webnn"
   outputs = [
-    "src/dawn/mock_webnn.h",
-    "src/dawn/mock_webnn.cpp",
+    "src/webnn/mock_webnn.h",
+    "src/webnn/mock_webnn.cpp",
   ]
 }
 
-test("dawn_unittests") {
+test("webnn_unittests") {
   configs += [ "${webnn_root}/src/common:dawn_internal" ]
 
   deps = [
     ":gmock_and_gtest",
     ":mock_webnn_gen",
     "${webnn_root}/src/common",
-    "${webnn_root}/src/dawn:dawn_proc",
-    "${webnn_root}/src/dawn:dawncpp",
-    "${webnn_root}/src/dawn_native",
-    "${webnn_root}/src/dawn_native:dawn_native_sources",
+    "${webnn_root}/src/webnn:webnn_proc",
+    "${webnn_root}/src/webnn:webnncpp",
+    "${webnn_root}/src/webnn_native",
+    "${webnn_root}/src/webnn_native:webnn_native_sources",
   ]
 
-  # Add internal dawn_native config for internal unittests.
-  configs += [ "${webnn_root}/src/dawn_native:dawn_native_internal" ]
+  # Add internal webnn_native config for internal unittests.
+  configs += [ "${webnn_root}/src/webnn_native:webnn_native_internal" ]
 
   sources = get_target_outputs(":mock_webnn_gen")
   sources += [
@@ -130,41 +130,41 @@ test("dawn_unittests") {
   # When building inside Chromium, use their gtest main function because it is
   # needed to run in swarming correctly.
   if (build_with_chromium) {
-    deps += [ ":dawn_unittests_main" ]
+    deps += [ ":webnn_unittests_main" ]
   } else {
     sources += [ "UnittestsMain.cpp" ]
   }
 }
 
 ###############################################################################
-# Dawn end2end tests targets
+# WebNN end2end tests targets
 ###############################################################################
 
-source_set("dawn_end2end_tests_sources") {
+source_set("webnn_end2end_tests_sources") {
   configs += [ "${webnn_root}/src/common:dawn_internal" ]
   testonly = true
 
   deps = [
     ":gmock_and_gtest",
     "${webnn_root}/src/common",
-    "${webnn_root}/src/dawn:dawn_proc",
-    "${webnn_root}/src/dawn:dawncpp",
-    "${webnn_root}/src/dawn_native",
+    "${webnn_root}/src/webnn:webnn_proc",
+    "${webnn_root}/src/webnn:webnncpp",
+    "${webnn_root}/src/webnn_native",
   ]
 
   sources = [
     "${webnn_root}/examples/SampleUtils.cpp",
     "${webnn_root}/examples/SampleUtils.h",
     "end2end/AddTests.cpp",
-    "end2end/MulTests.cpp",
     "end2end/AveragePool2dTests.cpp",
+    "end2end/Conv2dTests.cpp",
+    "end2end/MatMulTests.cpp",
     "end2end/MaxPool2dTests.cpp",
+    "end2end/MulTests.cpp",
     "end2end/ReluTests.cpp",
     "end2end/ReshapeTests.cpp",
     "end2end/SoftmaxTests.cpp",
     "end2end/TransposeTests.cpp",
-    "end2end/Conv2dTests.cpp",
-    "end2end/MatMulTests.cpp",
   ]
 
   # Validation tests that need OS windows live in end2end tests.
@@ -172,16 +172,16 @@ source_set("dawn_end2end_tests_sources") {
   libs = []
 }
 
-test("dawn_end2end_tests") {
+test("webnn_end2end_tests") {
   configs += [ "${webnn_root}/src/common:dawn_internal" ]
 
   deps = [
-    ":dawn_end2end_tests_sources",
     ":gmock_and_gtest",
+    ":webnn_end2end_tests_sources",
     "${webnn_root}/src/common",
-    "${webnn_root}/src/dawn:dawn_proc",
-    "${webnn_root}/src/dawn:dawncpp",
-    "${webnn_root}/src/dawn_native",
+    "${webnn_root}/src/webnn:webnn_proc",
+    "${webnn_root}/src/webnn:webnncpp",
+    "${webnn_root}/src/webnn_native",
   ]
 
   libs = []
@@ -189,7 +189,7 @@ test("dawn_end2end_tests") {
   # When building inside Chromium, use their gtest main function because it is
   # needed to run in swarming correctly.
   if (build_with_chromium) {
-    deps += [ ":dawn_end2end_tests_main" ]
+    deps += [ ":webnn_end2end_tests_main" ]
   } else {
     sources = [ "End2EndTestsMain.cpp" ]
   }
