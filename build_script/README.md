@@ -70,7 +70,12 @@ Seetings in **"email-service"**: Specifies directory for storing output packages
 - from: Sender of the format (address or name \<address\> or "name" \<address\>).
 - to: Recipients (same format as above), multiple recipients are separated by a comma.
 
-### Help
+### Install
+```sh
+> npm install.
+```
+
+### Use Node Scripts
 ```sh
 $ ./bin/build_webnn --help
 
@@ -98,8 +103,94 @@ Usage: build_webnn build [options]
 
 Options:
   -b, --backend <backend>  Build with target backend (default: "null")
-  -c, --conf <config>      Configuration file (default: "build_script/bot_config.json")
+  -c, --conf <config>      Configuration file (default: "bot_config.json")
   -h, --help               display help for command
+```
+
+### Use Batch Wrapper Scripts
+[build_webnn](./build_webnn) script is for build on Linux platform
+[build_webnn.bat](./build_webnn.bat) script is for build on Windows platform.
+
+### Sync dependencies
+```sh
+> ./build_webnn sync
+```
+```sh
+> build_webnn.bat sync
+```
+
+### Fetch code
+```sh
+> ./build_webnn pull
+```
+```sh
+> build_webnn.bat pull
+```
+
+### Build
+##### Build with enabling the compilation of Dawn's Null backend and default arguments from configurations in [./bot_config.json](./bot_config.json)
+```sh
+> ./build_webnn
+```
+```sh
+> build_webnn.bat
+```
+
+##### Or build with enabling the compilation of OpenVINO Inference Engine backend (ie) or DirectML backend (dml) and default arguments from configurations in ./bot_config.json
+```sh
+> ./build_webnn --backend=[ie|dml]
+```
+```sh
+> build_webnn.bat "--backend=[ie|dml]"
+```
+##### Or build with enabling the compilation of Dawn's Null backend and default arguments from configurations in given config json file
+```sh
+> ./build_webnn --config=<path>
+```
+```sh
+> build_webnn.bat "--config=<path>"
+```
+
+##### Or build with enabling the compilation of OpenVINO Inference Engine backend (ie) or DirectML backend (dml) and arguments from configurations in given config json file
+```sh
+> ./build_webnn --backend=[ie|dml] --config=<path>
+```
+```sh
+> build_webnn.bat "--backend=[ie|dml] --config=<path>"
+```
+
+### Package
+```sh
+> ./build_webnn package
+```
+```sh
+> build_webnn.bat package
+```
+
+### Upload package and log file to Store Server
+```sh
+> ./build_webnn upload
+```
+```sh
+> build_webnn.bat upload
+```
+
+### Notify by sending Email
+```sh
+> ./build_webnn notify
+```
+```sh
+> build_webnn.bat notify
+```
+
+### All above commands in one command
+The usage of backend and config arguments are same with above **Build** command
+
+```sh
+> ./build_webnn all --backend=[ie|dml] --config=<path>
+```
+```sh
+> build_webnn.bat all "--backend=[ie|dml] --config=<path>"
 ```
 
 ## BKMs

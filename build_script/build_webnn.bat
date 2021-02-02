@@ -6,23 +6,23 @@ set arg=%*
 echo %1 | find "all" >NULL
 if not ERRORLEVEL 1 (
 	echo Run all command.
-  node build_script\bin\build_webnn all %arg:~5,-1%
+  node bin\build_webnn all %arg:~5,-1%
   goto:eof
 ) else (
   set cmds=sync pull package upload notify
   (for %%a in (%cmds%) do (
     if [%%a]==[%arg%] (
       echo Run %%a command.
-      node build_script\bin\build_webnn %%a
+      node bin\build_webnn %%a
       goto:eof
     )
   ))
   if [%arg%]==[] (
     echo Run build with default null backend and default bot_config.json.
-    node build_script\bin\build_webnn build
+    node bin\build_webnn build
     goto:eof
   ) else (
     echo Run build command with %arg:~1,-1%.
-    node build_script\bin\build_webnn build %arg:~1,-1%
+    node bin\build_webnn build %arg:~1,-1%
   )
 )
