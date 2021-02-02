@@ -36,13 +36,6 @@ namespace webnn_native { namespace ie {
 
         Ref<Model> model_;
         ie_compilation_t* ie_compilation_;
-
-        // Hold those variable to async compute.
-        void CompletedCallback();
-        ie_complete_call_back_t ie_callback_;
-        WEBNNComputeCallback callback_;
-        void* user_data_;
-        NamedOutputsBase* outputs_;
     };
 
 }}  // namespace webnn_native::ie

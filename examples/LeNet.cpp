@@ -20,7 +20,6 @@
 
 // The Compilation should be released unitl ComputeCallback.
 webnn::Compilation gCompilation;
-utils::ComputeSync gComputeSync;
 std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 void ComputeCallback(WEBNNComputeStatus status,
                      WEBNNNamedResults impl,
@@ -28,7 +27,6 @@ void ComputeCallback(WEBNNComputeStatus status,
                      void* userData) {
     if (status != WEBNNComputeStatus_Success) {
         dawn::ErrorLog() << message;
-        gComputeSync.Finish();
         return;
     }
     end = std::chrono::high_resolution_clock::now();
@@ -52,7 +50,6 @@ void ComputeCallback(WEBNNComputeStatus status,
     if (expected) {
         dawn::InfoLog() << "The output output as expected.";
     }
-    gComputeSync.Finish();
 }
 
 void CompilationCallback(WEBNNCompileStatus status,
@@ -61,7 +58,6 @@ void CompilationCallback(WEBNNCompileStatus status,
                          void* userData) {
     if (status != WEBNNCompileStatus_Success) {
         dawn::ErrorLog() << message;
-        gComputeSync.Finish();
         return;
     }
     gCompilation = gCompilation.Acquire(impl);
@@ -263,8 +259,6 @@ int main(int argc, const char* argv[]) {
     namedOperands.Set("output", softmax);
     webnn::Model model = builder.CreateModel(namedOperands);
     model.Compile(CompilationCallback, nullptr);
-
-    gComputeSync.Wait();
 
     free(dataBuffer);
     // Release backend resources in main thread.
