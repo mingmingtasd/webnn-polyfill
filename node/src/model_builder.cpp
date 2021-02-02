@@ -3,7 +3,6 @@
 #include <iostream>
 #include <vector>
 
-#include "DescriptorDecoder.h"
 #include "model.h"
 #include "neural_network_context.h"
 #include "operand.h"

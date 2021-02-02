@@ -5,16 +5,8 @@
   "engines": {
     "node": ">= 13.0.0"
   },
-  "config": {
-    "DAWN_PATH": "PATH_TO_DAWN",
-    "GEN_OUT_DIR": "./generated",
-    "SPEC_DIR": "./generator/specifications",
-    "TEMPLATE_DIR": "./generator/templates"
-  },
   "scripts": {
-    "build": "node ./build.js",
-    "generate": "node --experimental-modules --experimental-json-modules ./generator/index.mjs",
-    "all": "npm run generate && npm run build",
+    "build": "node-gyp configure & node-gyp build",
     "tests": "node --experimental-modules tests/index.mjs",
     "start": "http-server",
     "test": "mocha ./test/ops"

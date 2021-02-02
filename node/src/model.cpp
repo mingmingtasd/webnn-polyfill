@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "DescriptorDecoder.h"
 #include "compilation.h"
 
 Napi::FunctionReference Model::constructor;

@@ -1,10 +1,9 @@
 {
   "variables": {
-    "root": "../../..",
     "platform": "<(OS)",
     "build": "<@(module_root_dir)/build",
     "release": "<(build)/Release",
-    "dawn": "{{ DAWN_PATH | safe }}",
+    "dawn": "<@(module_root_dir)/../",
   },
   "conditions": [
     [ "platform == 'win'",   { "variables": { "platform": "win" } } ],
@@ -30,7 +29,7 @@
           "OS=='win'",
           {
             "sources": [
-              {{ SOURCE_INCLUDES | safe }}
+              "src/*.cpp","src/ops/*.cc"
             ],
             "target_name": "addon-win32",
             "cflags!": [
@@ -41,12 +40,11 @@
             ],
             "include_dirs": [
               "<!@(node -p \"require('node-addon-api').include\")",
-              #"<(root)/lib/include",
               "<(dawn)/src/include",
               "<(dawn)/out/Shared/gen/src/include",
             ],
             "library_dirs": [
-              "<(build)/"
+              "<(dawn)/out/Shared",
             ],
             "link_settings": {
               "libraries": [
@@ -119,7 +117,8 @@
             "library_dirs": [
               "<@(module_root_dir)/build",
               "<@(module_root_dir)/build/Release",
-              "<(module_root_dir)/../../../build/<(platform)"
+              "<(module_root_dir)/../../../build/<(platform)",
+              "<(dawn)/out/Shared",
             ],
             "libraries": [
               "-Wl,-rpath,./<(rel_release)",
