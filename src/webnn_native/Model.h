@@ -44,7 +44,7 @@ namespace webnn_native {
         static ModelBase* MakeError(ModelBuilderBase* model_builder);
 
         // Dawn API
-        void Compile(WEBNNCompileCallback callback,
+        void Compile(WebnnCompileCallback callback,
                      void* userdata,
                      CompilationOptions const* options);
 
@@ -61,7 +61,7 @@ namespace webnn_native {
 
       private:
         ModelBase(ModelBuilderBase* model_builder, ObjectBase::ErrorTag tag);
-        virtual void CompileImpl(WEBNNCompileCallback callback,
+        virtual void CompileImpl(WebnnCompileCallback callback,
                                  void* userdata,
                                  CompilationOptions const* options);
     };

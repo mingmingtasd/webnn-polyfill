@@ -52,39 +52,39 @@ class ProcTableAsClass {
         {% endfor %}
 
 	// Special cased mockable methods
-        virtual void OnCompilationComputeCallback(WEBNNCompilation self,
-                                WEBNNNamedInputs inputs,
-                                WEBNNComputeCallback callback,
-                                void* userdata, WEBNNNamedOutputs outputs) = 0; 	
+        virtual void OnCompilationComputeCallback(WebnnCompilation self,
+                                WebnnNamedInputs inputs,
+                                WebnnComputeCallback callback,
+                                void* userdata, WebnnNamedOutputs outputs) = 0; 	
 
-	virtual void  OnModelCompileCallback(WEBNNModel self, WEBNNCompileCallback callback,
+	virtual void  OnModelCompileCallback(WebnnModel self, WebnnCompileCallback callback,
                           void* userdata,
-                          WEBNNCompilationOptions const * options) = 0;
+                          WebnnCompilationOptions const * options) = 0;
  
-	virtual bool OnNeuralNetworkContextPopErrorScopeCallback(WEBNNNeuralNetworkContext 
+	virtual bool OnNeuralNetworkContextPopErrorScopeCallback(WebnnNeuralNetworkContext 
 		         neuralNetworkContext,
-                         WEBNNErrorCallback callback, void * userdata) = 0;
+                         WebnnErrorCallback callback, void * userdata) = 0;
 
-	void CompilationCompute(WEBNNCompilation self, 
-			        WEBNNNamedInputs inputs, 
-				WEBNNComputeCallback callback, 
-				void* userdata, WEBNNNamedOutputs outputs);
+	void CompilationCompute(WebnnCompilation self, 
+			        WebnnNamedInputs inputs, 
+				WebnnComputeCallback callback, 
+				void* userdata, WebnnNamedOutputs outputs);
 
-	void ModelCompile(WEBNNModel self, WEBNNCompileCallback callback, 
+	void ModelCompile(WebnnModel self, WebnnCompileCallback callback, 
 			  void* userdata, 
-			  WEBNNCompilationOptions const * options);
+			  WebnnCompilationOptions const * options);
 
-	bool NeuralNetworkContextPopErrorScope(WEBNNNeuralNetworkContext neuralNetworkContext, 
-			                       WEBNNErrorCallback callback, void * userdata);
+	bool NeuralNetworkContextPopErrorScope(WebnnNeuralNetworkContext neuralNetworkContext, 
+			                       WebnnErrorCallback callback, void * userdata);
 
-	void NeuralNetworkContextSetUncapturedErrorCallback(WEBNNNeuralNetworkContext neuralNetworkContext, 
-			                       WEBNNErrorCallback callback, void * userdata);
+	void NeuralNetworkContextSetUncapturedErrorCallback(WebnnNeuralNetworkContext neuralNetworkContext, 
+			                       WebnnErrorCallback callback, void * userdata);
 
 	struct Object {
             ProcTableAsClass* procs = nullptr;
-	    WEBNNComputeCallback computeCallback = nullptr;
-	    WEBNNCompileCallback compileCallback = nullptr;
-	    WEBNNErrorCallback errorCallback = nullptr;
+	    WebnnComputeCallback computeCallback = nullptr;
+	    WebnnCompileCallback compileCallback = nullptr;
+	    WebnnErrorCallback errorCallback = nullptr;
             void* userdata = 0;
         };
 
@@ -117,22 +117,22 @@ class MockProcTable : public ProcTableAsClass {
 
 	 MOCK_METHOD(void, 
 		     OnCompilationComputeCallback, 
-		     (WEBNNCompilation self,
-                     WEBNNNamedInputs inputs,
-                     WEBNNComputeCallback callback,
-                     void* userdata, WEBNNNamedOutputs outputs), (override));
+		     (WebnnCompilation self,
+                     WebnnNamedInputs inputs,
+                     WebnnComputeCallback callback,
+                     void* userdata, WebnnNamedOutputs outputs), (override));
 
 	 MOCK_METHOD(void,
                      OnModelCompileCallback,
-                     (WEBNNModel self, 
-		     WEBNNCompileCallback callback,
+                     (WebnnModel self, 
+		     WebnnCompileCallback callback,
                      void* userdata,
-                     WEBNNCompilationOptions const * options), (override));
+                     WebnnCompilationOptions const * options), (override));
 
 	 MOCK_METHOD(bool,
                      OnNeuralNetworkContextPopErrorScopeCallback,
-                     (WEBNNNeuralNetworkContext neuralNetworkContext,
-                      WEBNNErrorCallback callback, void * userdata), (override));
+                     (WebnnNeuralNetworkContext neuralNetworkContext,
+                      WebnnErrorCallback callback, void * userdata), (override));
 
 
 };

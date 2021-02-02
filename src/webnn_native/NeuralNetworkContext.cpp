@@ -65,7 +65,7 @@ namespace webnn_native {
 
         // Still forward device loss and internal errors to the error scopes so they
         // all reject.
-        current_error_scope_->HandleError(ToWEBNNErrorType(error->GetType()), ss.str().c_str());
+        current_error_scope_->HandleError(ToWebnnErrorType(error->GetType()), ss.str().c_str());
     }
 
 }  // namespace webnn_native

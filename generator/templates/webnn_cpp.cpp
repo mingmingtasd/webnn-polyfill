@@ -117,12 +117,12 @@ namespace webnn {
                 {% endif %}
             }
         {% endfor %}
-        void {{CppType}}::WEBNNReference({{CType}} handle) {
+        void {{CppType}}::WebnnReference({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("reference"))}}(handle);
             }
         }
-        void {{CppType}}::WEBNNRelease({{CType}} handle) {
+        void {{CppType}}::WebnnRelease({{CType}} handle) {
             if (handle != nullptr) {
                 {{as_cMethod(type.name, Name("release"))}}(handle);
             }

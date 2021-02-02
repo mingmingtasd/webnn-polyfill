@@ -50,7 +50,7 @@ namespace webnn {
 
     {% endfor %}
 
-    using Proc = WEBNNProc;
+    using Proc = WebnnProc;
     {% for type in by_category["callback"] %}
         using {{as_cppType(type.name)}} = {{as_cType(type.name)}};
     {% endfor %}
@@ -68,10 +68,10 @@ namespace webnn {
       public:
         ObjectBase() = default;
         ObjectBase(CType handle): mHandle(handle) {
-            if (mHandle) Derived::WEBNNReference(mHandle);
+            if (mHandle) Derived::WebnnReference(mHandle);
         }
         ~ObjectBase() {
-            if (mHandle) Derived::WEBNNRelease(mHandle);
+            if (mHandle) Derived::WebnnRelease(mHandle);
         }
 
         ObjectBase(ObjectBase const& other)
@@ -79,9 +79,9 @@ namespace webnn {
         }
         Derived& operator=(ObjectBase const& other) {
             if (&other != this) {
-                if (mHandle) Derived::WEBNNRelease(mHandle);
+                if (mHandle) Derived::WebnnRelease(mHandle);
                 mHandle = other.mHandle;
-                if (mHandle) Derived::WEBNNReference(mHandle);
+                if (mHandle) Derived::WebnnReference(mHandle);
             }
 
             return static_cast<Derived&>(*this);
@@ -93,7 +93,7 @@ namespace webnn {
         }
         Derived& operator=(ObjectBase&& other) {
             if (&other != this) {
-                if (mHandle) Derived::WEBNNRelease(mHandle);
+                if (mHandle) Derived::WebnnRelease(mHandle);
                 mHandle = other.mHandle;
                 other.mHandle = 0;
             }
@@ -104,7 +104,7 @@ namespace webnn {
         ObjectBase(std::nullptr_t) {}
         Derived& operator=(std::nullptr_t) {
             if (mHandle != nullptr) {
-                Derived::WEBNNRelease(mHandle);
+                Derived::WebnnRelease(mHandle);
                 mHandle = nullptr;
             }
             return static_cast<Derived&>(*this);
@@ -179,8 +179,8 @@ namespace webnn {
 
           private:
             friend ObjectBase<{{CppType}}, {{CType}}>;
-            static void WEBNNReference({{CType}} handle);
-            static void WEBNNRelease({{CType}} handle);
+            static void WebnnReference({{CType}} handle);
+            static void WebnnRelease({{CType}} handle);
         };
 
     {% endfor %}

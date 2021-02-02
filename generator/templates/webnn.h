@@ -87,13 +87,10 @@ typedef uint32_t WEBNNFlags;
         {{as_cEnum(type.name, Name("force32"))}} = 0x7FFFFFFF
     } {{as_cType(type.name)}};
     {% if type.category == "bitmask" %}
-        typedef WEBNNFlags {{as_cType(type.name)}}Flags;
+        typedef WebnnFlags {{as_cType(type.name)}}Flags;
     {% endif %}
 
 {% endfor %}
-//* TODO(dawn:22) remove this once the PSA is sent and the deadline passed.
-#define WEBNNTextureFormat_RG11B10Float WEBNNTextureFormat_RG11B10Ufloat
-#define WEBNNTextureFormat_BC6HRGBSfloat WEBNNTextureFormat_BC6HRGBFloat
 
 {% for type in by_category["structure"] %}
     typedef struct {{as_cType(type.name)}} {
@@ -116,7 +113,7 @@ extern "C" {
     );
 {% endfor %}
 
-typedef void (*WEBNNProc)(void);
+typedef void (*WebnnProc)(void);
 
 #if !defined(WEBNN_SKIP_PROCS)
 

@@ -45,7 +45,7 @@ def as_cType(name):
     if name.native:
         return name.concatcase()
     else:
-        return 'WEBNN' + name.CamelCase()
+        return 'Webnn' + name.CamelCase()
 
 
 def as_cTypeDawn(name):
@@ -118,7 +118,7 @@ def annotated(typ, arg):
 
 def as_cEnum(type_name, value_name):
     assert not type_name.native and not value_name.native
-    return 'WEBNN' + type_name.CamelCase() + '_' + value_name.CamelCase()
+    return 'Webnn' + type_name.CamelCase() + '_' + value_name.CamelCase()
 
 
 def as_cEnumDawn(type_name, value_name):
@@ -151,7 +151,7 @@ def as_MethodSuffix(type_name, method_name):
 
 def as_cProc(type_name, method_name):
     assert not type_name.native and not method_name.native
-    return 'WEBNN' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
+    return 'Webnn' + 'Proc' + type_name.CamelCase() + method_name.CamelCase()
 
 
 def as_cProcDawn(type_name, method_name):

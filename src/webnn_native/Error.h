@@ -116,8 +116,8 @@ namespace webnn_native {
     // Assert that errors are device loss so that we can continue with destruction
     void IgnoreErrors(MaybeError maybeError);
 
-    webnn::ErrorType ToWEBNNErrorType(InternalErrorType type);
-    InternalErrorType FromWEBNNErrorType(webnn::ErrorType type);
+    webnn::ErrorType ToWebnnErrorType(InternalErrorType type);
+    InternalErrorType FromWebnnErrorType(webnn::ErrorType type);
 
 }  // namespace webnn_native
 

@@ -53,7 +53,7 @@ namespace webnn_native { namespace dml {
         friend class Compilation;
 
       private:
-        void CompileImpl(WEBNNCompileCallback callback,
+        void CompileImpl(WebnnCompileCallback callback,
                          void* userdata,
                          CompilationOptions const* options) override;
 

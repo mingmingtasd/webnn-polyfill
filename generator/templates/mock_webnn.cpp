@@ -40,10 +40,10 @@ namespace {
 ProcTableAsClass::~ProcTableAsClass() {
 }
 
-void ProcTableAsClass::CompilationCompute(WEBNNCompilation self,
-                                WEBNNNamedInputs inputs,
-                                WEBNNComputeCallback callback,
-                                void* userdata, WEBNNNamedOutputs outputs){
+void ProcTableAsClass::CompilationCompute(WebnnCompilation self,
+                                WebnnNamedInputs inputs,
+                                WebnnComputeCallback callback,
+                                void* userdata, WebnnNamedOutputs outputs){
    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
    object->computeCallback = callback;
    object->userdata = userdata;
@@ -52,9 +52,9 @@ void ProcTableAsClass::CompilationCompute(WEBNNCompilation self,
 
 }
 
-void ProcTableAsClass::ModelCompile(WEBNNModel self, WEBNNCompileCallback callback,
+void ProcTableAsClass::ModelCompile(WebnnModel self, WebnnCompileCallback callback,
                           void* userdata,
-                          WEBNNCompilationOptions const * options){
+                          WebnnCompilationOptions const * options){
    auto object = reinterpret_cast<ProcTableAsClass::Object*>(self);
    object->compileCallback = callback;
    object->userdata = userdata;
@@ -63,14 +63,14 @@ void ProcTableAsClass::ModelCompile(WEBNNModel self, WEBNNCompileCallback callba
 
 }
 
-bool ProcTableAsClass::NeuralNetworkContextPopErrorScope(WEBNNNeuralNetworkContext neuralNetworkContext,
-                                               WEBNNErrorCallback callback, void * userdata){
+bool ProcTableAsClass::NeuralNetworkContextPopErrorScope(WebnnNeuralNetworkContext neuralNetworkContext,
+                                               WebnnErrorCallback callback, void * userdata){
   return OnNeuralNetworkContextPopErrorScopeCallback(neuralNetworkContext, callback, userdata);
 }
 
 void ProcTableAsClass::NeuralNetworkContextSetUncapturedErrorCallback(
-		       WEBNNNeuralNetworkContext neuralNetworkContext,
-                       WEBNNErrorCallback callback, void * userdata){
+		       WebnnNeuralNetworkContext neuralNetworkContext,
+                       WebnnErrorCallback callback, void * userdata){
 }
 
 
