@@ -125,7 +125,6 @@ namespace utils {
     // The Compilation should be released unitl ComputeCallback.
     webnn::Compilation gCompilation;
     WrappedModel* gWrappedModel;
-    ComputeSync gComputeSync;
 
     void ComputeSync::Wait() {
         // Wait for async callback.
@@ -149,7 +148,6 @@ namespace utils {
         if (status != WEBNNComputeStatus_Success) {
             dawn::InfoLog() << "Test failed.";
             dawn::ErrorLog() << message;
-            gComputeSync.Finish();
             return;
         }
         webnn::NamedResults outputs = outputs.Acquire(impl);
@@ -185,7 +183,6 @@ namespace utils {
             }
         }
         gWrappedModel->SetComputedResult(expected);
-        gComputeSync.Finish();
         return;
     }
 
@@ -195,7 +192,6 @@ namespace utils {
                              void* userData) {
         if (status != WEBNNCompileStatus_Success) {
             dawn::ErrorLog() << message;
-            gComputeSync.Finish();
             return;
         }
 
@@ -231,7 +227,6 @@ namespace utils {
         context.PopErrorScope(ErrorCallback, nullptr);
         model.Compile(CompilationCallback, nullptr);
 
-        gComputeSync.Wait();
         bool expected = wrappedModel->GetComputedResult();
         // Release backend resources in main thread.
         delete gWrappedModel;
