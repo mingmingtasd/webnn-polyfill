@@ -30,8 +30,8 @@ namespace webnn_native { namespace op {
 
     class Binary final : public OperandBase {
       public:
-        Binary(ModelBuilderBase* builder, BinaryOpType op_type, OperandBase* a, OperandBase* b)
-            : OperandBase(builder, {a, b}), op_type_(op_type) {
+        Binary(ModelBuilderBase* builder, BinaryOpType opType, OperandBase* a, OperandBase* b)
+            : OperandBase(builder, {a, b}), mOpType(opType) {
         }
         ~Binary() override = default;
 
@@ -39,12 +39,12 @@ namespace webnn_native { namespace op {
             return model->AddBinary(this);
         }
         BinaryOpType GetType() const {
-            return op_type_;
+            return mOpType;
         }
         MaybeError ValidateAndInferTypes() override;
 
       private:
-        BinaryOpType op_type_;
+        BinaryOpType mOpType;
     };
 
 }}  // namespace webnn_native::op

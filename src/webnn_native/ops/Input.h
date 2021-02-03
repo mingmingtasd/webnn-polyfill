@@ -24,13 +24,13 @@ namespace webnn_native { namespace op {
     class Input final : public OperandBase {
       public:
         Input(ModelBuilderBase* builder, const std::string& name, const OperandDescriptor* desc)
-            : OperandBase(builder), name_(name) {
-            descriptor_.type = desc->type;
-            type_ = desc->type;
-            rank_ = desc->dimensionsCount;
-            dimensions_.assign(desc->dimensions, desc->dimensions + desc->dimensionsCount);
-            descriptor_.dimensions = dimensions_.data();
-            descriptor_.dimensionsCount = dimensions_.size();
+            : OperandBase(builder), mName(name) {
+            mDescriptor.type = desc->type;
+            mType = desc->type;
+            mRank = desc->dimensionsCount;
+            mDimensions.assign(desc->dimensions, desc->dimensions + desc->dimensionsCount);
+            mDescriptor.dimensions = mDimensions.data();
+            mDescriptor.dimensionsCount = mDimensions.size();
         }
         ~Input() override = default;
 
@@ -40,16 +40,16 @@ namespace webnn_native { namespace op {
         MaybeError ValidateAndInferTypes() override;
 
         const std::string& GetName() const {
-            return name_;
+            return mName;
         }
         const OperandDescriptor* GetOperandDescriptor() const {
-            return &descriptor_;
+            return &mDescriptor;
         }
 
       private:
-        std::string name_;
-        OperandDescriptor descriptor_;
-        std::vector<int32_t> dimensions_;
+        std::string mName;
+        OperandDescriptor mDescriptor;
+        std::vector<int32_t> mDimensions;
     };
 
 }}  // namespace webnn_native::op

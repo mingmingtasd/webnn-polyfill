@@ -25,8 +25,8 @@ namespace webnn_native { namespace op {
 
     class Unary final : public OperandBase {
       public:
-        Unary(ModelBuilderBase* builder, UnaryOpType op_type, OperandBase* input)
-            : OperandBase(builder, {input}), op_type_(op_type) {
+        Unary(ModelBuilderBase* builder, UnaryOpType opType, OperandBase* input)
+            : OperandBase(builder, {input}), mOpType(opType) {
         }
         ~Unary() override = default;
 
@@ -35,11 +35,11 @@ namespace webnn_native { namespace op {
         }
         MaybeError ValidateAndInferTypes() override;
         UnaryOpType GetType() const {
-            return op_type_;
+            return mOpType;
         }
 
       private:
-        UnaryOpType op_type_;
+        UnaryOpType mOpType;
     };
 
 }}  // namespace webnn_native::op

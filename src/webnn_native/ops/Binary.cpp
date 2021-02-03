@@ -18,8 +18,8 @@
 namespace webnn_native { namespace op {
 
     MaybeError Binary::ValidateAndInferTypes() {
-        Ref<OperandBase> a = inputs_[0];
-        Ref<OperandBase> b = inputs_[1];
+        Ref<OperandBase> a = mInputs[0];
+        Ref<OperandBase> b = mInputs[1];
         if (a->IsError() || b->IsError()) {
             return DAWN_VALIDATION_ERROR("Argument inputs are invalid.");
         }
@@ -27,7 +27,7 @@ namespace webnn_native { namespace op {
         if (a->Type() != b->Type()) {
             return DAWN_VALIDATION_ERROR("Argument types are inconsistent.");
         }
-        type_ = a->Type();
+        mType = a->Type();
 
         // For element-wise binary ops, The rank of the output tensor
         // is the maximum rank of the input tensors.
@@ -39,10 +39,10 @@ namespace webnn_native { namespace op {
         // 3. if a->Rank() == 1 && b->Rank() == 1, rank_ = 0;
         // 4. if a->Rank() == 1 && b->Rank() == 2, rank_ = 2;
         // 5. if a->Rank() == 2 && b->Rank() == 1, rank_ = 2;
-        if (op_type_ == kMatMul && a->Rank() == 1 && b->Rank() == 1) {
-            rank_ = 0;
+        if (mOpType == kMatMul && a->Rank() == 1 && b->Rank() == 1) {
+            mRank = 0;
         } else {
-            rank_ = std::max(a->Rank(), b->Rank());
+            mRank = std::max(a->Rank(), b->Rank());
         }
         return {};
     }

@@ -24,16 +24,16 @@ namespace webnn_native { namespace op {
             : OperandBase(builder, {input}) {
             if (options == nullptr || options->permutation == nullptr) {
                 int32_t rank = input->Rank();
-                permutation_.resize(rank);
+                mPermutation.resize(rank);
                 for (auto i = 0; i < rank - 1; i++) {
-                    permutation_[i] = rank - 1 - i;
+                    mPermutation[i] = rank - 1 - i;
                 }
             } else {
-                permutation_.assign(options->permutation,
+                mPermutation.assign(options->permutation,
                                     options->permutation + options->permutationCount);
             }
-            options_.permutation = permutation_.data();
-            options_.permutationCount = permutation_.size();
+            mOptions.permutation = mPermutation.data();
+            mOptions.permutationCount = mPermutation.size();
         }
         ~Transpose() override = default;
 
@@ -43,12 +43,12 @@ namespace webnn_native { namespace op {
         MaybeError ValidateAndInferTypes() override;
 
         TransposeOptions const* GetOptions() const {
-            return &options_;
+            return &mOptions;
         }
 
       private:
-        TransposeOptions options_;
-        std::vector<int32_t> permutation_;
+        TransposeOptions mOptions;
+        std::vector<int32_t> mPermutation;
     };
 
 }}  // namespace webnn_native::op

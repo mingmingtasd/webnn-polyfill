@@ -24,13 +24,13 @@ namespace webnn_native { namespace op {
                  const OperandDescriptor* desc,
                  void const* value,
                  size_t size)
-            : OperandBase(builder), value_(value), size_(size) {
-            descriptor_.type = desc->type;
-            type_ = desc->type;
-            rank_ = desc->dimensionsCount;
-            dimensions_.assign(desc->dimensions, desc->dimensions + desc->dimensionsCount);
-            descriptor_.dimensions = dimensions_.data();
-            descriptor_.dimensionsCount = dimensions_.size();
+            : OperandBase(builder), mValue(value), mSize(size) {
+            mDescriptor.type = desc->type;
+            mType = desc->type;
+            mRank = desc->dimensionsCount;
+            mDimensions.assign(desc->dimensions, desc->dimensions + desc->dimensionsCount);
+            mDescriptor.dimensions = mDimensions.data();
+            mDescriptor.dimensionsCount = mDimensions.size();
         }
         ~Constant() override = default;
 
@@ -40,20 +40,20 @@ namespace webnn_native { namespace op {
 
         MaybeError ValidateAndInferTypes() override;
         const OperandDescriptor* GetOperandDescriptor() const {
-            return &descriptor_;
+            return &mDescriptor;
         }
         void const* GetValue() const {
-            return value_;
+            return mValue;
         }
         size_t GetSize() const {
-            return size_;
+            return mSize;
         }
 
       private:
-        OperandDescriptor descriptor_;
-        std::vector<int32_t> dimensions_;
-        void const* value_;
-        size_t size_;
+        OperandDescriptor mDescriptor;
+        std::vector<int32_t> mDimensions;
+        void const* mValue;
+        size_t mSize;
     };
 
 }}  // namespace webnn_native::op
