@@ -41,7 +41,7 @@ namespace webnn_native { namespace op {
         BinaryOpType GetType() const {
             return op_type_;
         }
-        MaybeError Validate() override;
+        MaybeError ValidateAndInferTypes() override;
 
       private:
         BinaryOpType op_type_;

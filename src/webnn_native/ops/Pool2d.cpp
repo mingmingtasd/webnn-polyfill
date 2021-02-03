@@ -74,7 +74,35 @@ namespace webnn_native { namespace op {
         return op_type_;
     }
 
-    MaybeError Pool2d::Validate() {
+    MaybeError Pool2d::ValidateAndInferTypes() {
+        auto input = inputs_[0];
+        if (input->IsError()) {
+            return DAWN_VALIDATION_ERROR("Argument input is invalid.");
+        }
+        // The input 4-D tensor
+        if (input->Rank() != 4) {
+            return DAWN_VALIDATION_ERROR("Argument input is not a 4D tensor.");
+        }
+        // windowDimensions: a sequence of long of length 2
+        if (options_.windowDimensionsCount != 2) {
+            return DAWN_VALIDATION_ERROR("windowDimensionsCount is incorrect.");
+        }
+        // padding: a sequence of long of length 4
+        if (options_.paddingCount != 4) {
+            return DAWN_VALIDATION_ERROR("paddingCount is incorrect.");
+        }
+        // strides: a sequence of long of length 2
+        if (options_.stridesCount != 2) {
+            return DAWN_VALIDATION_ERROR("stridesCount is incorrect.");
+        }
+        // dilations: a sequence of long of length 2.
+        if (options_.dilationsCount != 2) {
+            return DAWN_VALIDATION_ERROR("dilationsCount is incorrect.");
+        }
+
+        type_ = input->Type();
+        rank_ = 4;
+
         return {};
     }
 

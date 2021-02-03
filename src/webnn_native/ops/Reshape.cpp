@@ -10,28 +10,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "webnn_native/ops/Unary.h"
+#include "webnn_native/ops/Reshape.h"
 
 #include "common/Log.h"
 #include "webnn_native/Error.h"
 
 namespace webnn_native { namespace op {
 
-    MaybeError Unary::ValidateAndInferTypes() {
+    MaybeError Reshape::ValidateAndInferTypes() {
+        bool hasMinus1 = false;
+        // Only one component of newShape can be the special value of -1
+        for (auto i : new_shape_) {
+            if (i < -1 || i == 0) {
+                return DAWN_VALIDATION_ERROR("Argument newShape is invalid.");
+            } else if (i == -1) {
+                if (hasMinus1) {
+                    return DAWN_VALIDATION_ERROR("Argument newShape is invalid.");
+                }
+                hasMinus1 = true;
+            }
+        }
         auto input = inputs_[0];
         if (input->IsError()) {
             return DAWN_VALIDATION_ERROR("Argument input is invalid.");
         }
 
-        if (op_type_ == UnaryOpType::kSoftmax) {
-            if (input->Rank() != 2) {
-                return DAWN_VALIDATION_ERROR("Input dimensions is incorrect.");
-            }
-        }
-
-        // only for softmax and relu
         type_ = input->Type();
-        rank_ = input->Rank();
+        rank_ = new_shape_.size();
 
         return {};
     }

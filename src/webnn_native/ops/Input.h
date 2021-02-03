@@ -26,6 +26,8 @@ namespace webnn_native { namespace op {
         Input(ModelBuilderBase* builder, const std::string& name, const OperandDescriptor* desc)
             : OperandBase(builder), name_(name) {
             descriptor_.type = desc->type;
+            type_ = desc->type;
+            rank_ = desc->dimensionsCount;
             dimensions_.assign(desc->dimensions, desc->dimensions + desc->dimensionsCount);
             descriptor_.dimensions = dimensions_.data();
             descriptor_.dimensionsCount = dimensions_.size();
@@ -35,7 +37,7 @@ namespace webnn_native { namespace op {
         MaybeError AddToModel(ModelBase* model) const override {
             return model->AddInput(this);
         }
-        MaybeError Validate() override;
+        MaybeError ValidateAndInferTypes() override;
 
         const std::string& GetName() const {
             return name_;

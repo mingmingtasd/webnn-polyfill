@@ -17,7 +17,33 @@
 
 namespace webnn_native { namespace op {
 
-    MaybeError Binary::Validate() {
+    MaybeError Binary::ValidateAndInferTypes() {
+        Ref<OperandBase> a = inputs_[0];
+        Ref<OperandBase> b = inputs_[1];
+        if (a->IsError() || b->IsError()) {
+            return DAWN_VALIDATION_ERROR("Argument inputs are invalid.");
+        }
+
+        if (a->Type() != b->Type()) {
+            return DAWN_VALIDATION_ERROR("Argument types are inconsistent.");
+        }
+        type_ = a->Type();
+
+        // For element-wise binary ops, The rank of the output tensor
+        // is the maximum rank of the input tensors.
+        // According to
+        // [numpy-broadcasting-rule](https://webmachinelearning.github.io/webnn/#biblio-numpy-broadcasting-rule)
+        // For matmul
+        // 1. if a->Rank() == 2 && b->Rank() == 2, rank_ = 2;
+        // 2. if a->Rank() > 2 || b->Rank() > 2, rank_ = std::max(a->Rank(), b->Rank());
+        // 3. if a->Rank() == 1 && b->Rank() == 1, rank_ = 0;
+        // 4. if a->Rank() == 1 && b->Rank() == 2, rank_ = 2;
+        // 5. if a->Rank() == 2 && b->Rank() == 1, rank_ = 2;
+        if (op_type_ == kMatMul && a->Rank() == 1 && b->Rank() == 1) {
+            rank_ = 0;
+        } else {
+            rank_ = std::max(a->Rank(), b->Rank());
+        }
         return {};
     }
 

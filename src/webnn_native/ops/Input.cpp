@@ -17,7 +17,7 @@
 
 namespace webnn_native { namespace op {
 
-    MaybeError Input::Validate() {
+    MaybeError Input::ValidateAndInferTypes() {
         return {};
     }
 

@@ -33,7 +33,7 @@ namespace webnn_native { namespace op {
         ~Pool2d() override = default;
 
         MaybeError AddToModel(ModelBase* model) const override;
-        MaybeError Validate() override;
+        MaybeError ValidateAndInferTypes() override;
 
         Pool2dOptions const* GetOptions() const;
         Pool2dType GetType() const;

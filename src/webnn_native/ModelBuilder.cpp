@@ -31,13 +31,13 @@
 #include "webnn_native/ops/Transpose.h"
 #include "webnn_native/ops/Unary.h"
 
-#define DAWN_VALIDATE(ptr)                             \
-    Ref<OperandBase> op = AcquireRef(ptr);             \
-    if (GetContext()->ConsumedError(op->Validate())) { \
-        return OperandBase::MakeError(this);           \
-    }                                                  \
-    return op.Detach();                                \
-    for (;;)                                           \
+#define DAWN_VALIDATE_AND_INFER_TYPES(ptr)                          \
+    Ref<OperandBase> op = AcquireRef(ptr);                          \
+    if (GetContext()->ConsumedError(op->ValidateAndInferTypes())) { \
+        return OperandBase::MakeError(this);                        \
+    }                                                               \
+    return op.Detach();                                             \
+    for (;;)                                                        \
     break
 
 namespace webnn_native {
@@ -48,55 +48,57 @@ namespace webnn_native {
     OperandBase* ModelBuilderBase::Constant(OperandDescriptor const* desc,
                                             void const* value,
                                             size_t size) {
-        DAWN_VALIDATE(new op::Constant(this, desc, value, size));
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::Constant(this, desc, value, size));
     }
 
     OperandBase* ModelBuilderBase::Input(char const* name, OperandDescriptor const* desc) {
-        DAWN_VALIDATE(new op::Input(this, std::string(name), desc));
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::Input(this, std::string(name), desc));
     }
 
     OperandBase* ModelBuilderBase::Matmul(OperandBase* a, OperandBase* b) {
-        DAWN_VALIDATE(new op::Binary(this, op::BinaryOpType::kMatMul, a, b));
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::Binary(this, op::BinaryOpType::kMatMul, a, b));
     }
 
     OperandBase* ModelBuilderBase::Add(OperandBase* a, OperandBase* b) {
-        DAWN_VALIDATE(new op::Binary(this, op::BinaryOpType::kAdd, a, b));
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::Binary(this, op::BinaryOpType::kAdd, a, b));
     }
 
     OperandBase* ModelBuilderBase::Mul(OperandBase* a, OperandBase* b) {
-        DAWN_VALIDATE(new op::Binary(this, op::BinaryOpType::kMul, a, b));
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::Binary(this, op::BinaryOpType::kMul, a, b));
     }
 
     OperandBase* ModelBuilderBase::Conv2d(OperandBase* input,
                                           OperandBase* filter,
                                           Conv2dOptions const* options) {
-        DAWN_VALIDATE(new op::Conv2d(this, input, filter, options));
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::Conv2d(this, input, filter, options));
     }
 
     OperandBase* ModelBuilderBase::AveragePool2d(OperandBase* input, Pool2dOptions const* options) {
-        DAWN_VALIDATE(new op::Pool2d(this, op::Pool2dType::kAveragePool2d, input, options));
+        DAWN_VALIDATE_AND_INFER_TYPES(
+            new op::Pool2d(this, op::Pool2dType::kAveragePool2d, input, options));
     }
 
     OperandBase* ModelBuilderBase::MaxPool2d(OperandBase* input, Pool2dOptions const* options) {
-        DAWN_VALIDATE(new op::Pool2d(this, op::Pool2dType::kMaxPool2d, input, options));
+        DAWN_VALIDATE_AND_INFER_TYPES(
+            new op::Pool2d(this, op::Pool2dType::kMaxPool2d, input, options));
     }
 
     OperandBase* ModelBuilderBase::Relu(OperandBase* input) {
-        DAWN_VALIDATE(new op::Unary(this, op::UnaryOpType::kRelu, input));
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::Unary(this, op::UnaryOpType::kRelu, input));
     }
 
     OperandBase* ModelBuilderBase::Reshape(OperandBase* input,
                                            int32_t const* new_shape,
                                            size_t new_shape_count) {
-        DAWN_VALIDATE(new op::Reshape(this, input, new_shape, new_shape_count));
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::Reshape(this, input, new_shape, new_shape_count));
     }
 
     OperandBase* ModelBuilderBase::Softmax(OperandBase* input) {
-        DAWN_VALIDATE(new op::Unary(this, op::UnaryOpType::kSoftmax, input));
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::Unary(this, op::UnaryOpType::kSoftmax, input));
     }
 
     OperandBase* ModelBuilderBase::Transpose(OperandBase* input, TransposeOptions const* options) {
-        DAWN_VALIDATE(new op::Transpose(this, input, options));
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::Transpose(this, input, options));
     }
 
     ModelBase* ModelBuilderBase::CreateModel(NamedOperandsBase const* named_operands) {

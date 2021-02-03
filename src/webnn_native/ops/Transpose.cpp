@@ -10,28 +10,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "webnn_native/ops/Unary.h"
+#include "webnn_native/ops/Transpose.h"
 
 #include "common/Log.h"
 #include "webnn_native/Error.h"
 
 namespace webnn_native { namespace op {
 
-    MaybeError Unary::ValidateAndInferTypes() {
+    MaybeError Transpose::ValidateAndInferTypes() {
         auto input = inputs_[0];
         if (input->IsError()) {
             return DAWN_VALIDATION_ERROR("Argument input is invalid.");
         }
 
-        if (op_type_ == UnaryOpType::kSoftmax) {
-            if (input->Rank() != 2) {
-                return DAWN_VALIDATION_ERROR("Input dimensions is incorrect.");
+        auto rank = input->Rank();
+        // the number of values in the sequence must be the same as the rank of the input tensor
+        if (permutation_.size() != size_t(rank)) {
+            return DAWN_VALIDATION_ERROR("permutation size is invalid.");
+        }
+
+        // the values in the sequence must be within the range from 0 to N-1
+        // with no two or more same values found in the sequence.
+        std::vector<int32_t> new_permutation;
+        new_permutation.assign(permutation_.begin(), permutation_.end());
+        std::sort(new_permutation.begin(), new_permutation.end());
+        for (int32_t i = 0; i < rank - 1; i++) {
+            if (new_permutation[i] != i) {
+                return DAWN_VALIDATION_ERROR("permutation value is invalid.");
             }
         }
 
-        // only for softmax and relu
         type_ = input->Type();
-        rank_ = input->Rank();
+        rank_ = rank;
 
         return {};
     }

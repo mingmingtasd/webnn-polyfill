@@ -17,7 +17,7 @@
 
 namespace webnn_native { namespace op {
 
-    MaybeError Constant::Validate() {
+    MaybeError Constant::ValidateAndInferTypes() {
         return {};
     }
 

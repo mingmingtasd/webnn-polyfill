@@ -27,7 +27,7 @@ namespace webnn_native { namespace op {
         ~Conv2d() override = default;
 
         MaybeError AddToModel(ModelBase* model) const override;
-        MaybeError Validate() override;
+        MaybeError ValidateAndInferTypes() override;
 
         Conv2dOptions const* GetOptions() const;
 
