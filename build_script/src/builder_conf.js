@@ -160,7 +160,7 @@ class BuilderConf {
     args += ' is_debug=' + (this.gnArgs_.isDebug).toString();
     args += ' is_component_build=' + (this.gnArgs_.isComponent).toString();
     args += ' is_clang=' + (this.gnArgs_.isClang).toString();
-    args += ' dawn_enable_' + this.backend_ + '=true';
+    args += ' webnn_enable_' + this.backend_ + '=true';
     return args;
   }
 
