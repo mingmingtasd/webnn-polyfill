@@ -7,7 +7,7 @@ Operand::Operand(const Napi::CallbackInfo& info) :
 }
 void Operand::SetNode(std::shared_ptr<op::Node> node) { node_ = node; }
 
-WNNOperand Operand::GetOperand() { return node_->GetOutput(); }
+WebnnOperand Operand::GetOperand() { return node_->GetOutput(); }
 
 Napi::Object Operand::Initialize(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);

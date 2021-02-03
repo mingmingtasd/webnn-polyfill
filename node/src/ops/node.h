@@ -13,13 +13,13 @@ public:
   Node(const Napi::CallbackInfo &info);
   ~Node();
 
-  std::vector<WNNOperand> &GetInputs();
-  void SetOutput(WNNOperand);
-  WNNOperand GetOutput();
+  std::vector<WebnnOperand> &GetInputs();
+  void SetOutput(WebnnOperand);
+  WebnnOperand GetOutput();
 
 private:
-  std::vector<WNNOperand> inputs_;
-  WNNOperand output_;
+  std::vector<WebnnOperand> inputs_;
+  WebnnOperand output_;
 };
 } // namespace op
 

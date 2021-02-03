@@ -24,6 +24,6 @@ Transpose::Transpose(const Napi::CallbackInfo &info) : Node(info) {
   }
 }
 
-WNNTransposeOptions *Transpose::GetOptions() { return &options_; }
+WebnnTransposeOptions *Transpose::GetOptions() { return &options_; }
 
 } // namespace op

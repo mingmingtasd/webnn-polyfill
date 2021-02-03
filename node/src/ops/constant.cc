@@ -24,7 +24,7 @@ Constant::Constant(const Napi::CallbackInfo &info) : Node(info) {
   value_ = getTypedArrayData<float>(info[1].As<Napi::Value>(), &size_);
 }
 
-const WNNOperandDescriptor *Constant::GetOperandDescriptor() {
+const WebnnOperandDescriptor *Constant::GetOperandDescriptor() {
   return &descriptor_;
 }
 

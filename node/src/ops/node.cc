@@ -16,12 +16,12 @@ Node::Node(const Napi::CallbackInfo &info) {
   }
 }
 
-std::vector<WNNOperand> &Node::GetInputs() { return inputs_; }
+std::vector<WebnnOperand> &Node::GetInputs() { return inputs_; }
 
-void Node::SetOutput(WNNOperand operand) { output_ = operand; }
+void Node::SetOutput(WebnnOperand operand) { output_ = operand; }
 
-WNNOperand Node::GetOutput() { return output_; }
+WebnnOperand Node::GetOutput() { return output_; }
 
-Node::~Node() { wnnOperandRelease(output_); }
+Node::~Node() { webnnOperandRelease(output_); }
 
 } // namespace op

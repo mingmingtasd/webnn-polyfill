@@ -34,12 +34,12 @@ Pool2d::Pool2d(const Napi::CallbackInfo &info) : Node(info) {
       options_.dilations = dilations_.data();
       options_.dilationsCount = dilations_.size();
     } else if (name == "layout") {
-      options_.layout = static_cast<WNNOperandLayout>(
+      options_.layout = static_cast<WebnnOperandLayout>(
           OperandLayout(obj.Get(name).As<Napi::String>().Utf8Value()));
     }
   }
 }
 
-WNNPool2dOptions *Pool2d::GetOptions() { return &options_; }
+WebnnPool2dOptions *Pool2d::GetOptions() { return &options_; }
 
 } // namespace op

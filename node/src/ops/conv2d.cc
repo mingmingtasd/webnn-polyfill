@@ -53,12 +53,12 @@ Conv2d::Conv2d(const Napi::CallbackInfo &info) : Node(info) {
                             .As<Napi::Number>()
                             .Int32Value();
     } else if (name == "layout") {
-      options_.layout = static_cast<WNNOperandLayout>(
+      options_.layout = static_cast<WebnnOperandLayout>(
           OperandLayout(obj.Get(name).As<Napi::String>().Utf8Value()));
     }
   }
 }
 
-WNNConv2dOptions *Conv2d::GetOptions() { return &options_; }
+WebnnConv2dOptions *Conv2d::GetOptions() { return &options_; }
 
 } // namespace op

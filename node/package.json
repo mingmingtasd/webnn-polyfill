@@ -6,7 +6,7 @@
     "node": ">= 13.0.0"
   },
   "scripts": {
-    "build": "node-gyp configure & node-gyp build",
+    "build": "node-gyp configure && node-gyp build",
     "tests": "node --experimental-modules tests/index.mjs",
     "start": "http-server",
     "test": "mocha ./test/ops"
@@ -30,7 +30,7 @@
   },
   "keywords": [
     "webnn",
-    "dawn"
+    "webnn"
   ],
   "author": "Dominic Cerisano",
   "license": "MIT",

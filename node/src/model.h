@@ -10,16 +10,16 @@ public:
 
   explicit Model(const Napi::CallbackInfo &info);
   ~Model();
-  void SetModel(WNNModel);
-  WNNModel GetModel();
+  void SetModel(WebnnModel);
+  WebnnModel GetModel();
 
   Napi::Value Compile(const Napi::CallbackInfo &info);
-  void SetWNNCompilation(WNNCompilation);
+  void SetWebnnCompilation(WebnnCompilation);
   std::vector<std::string> &GetOutputName();
 
 private:
-  WNNModel model_;
-  WNNCompilation compilation_;
+  WebnnModel model_;
+  WebnnCompilation compilation_;
   std::vector<std::string> output_name_;
 };
 

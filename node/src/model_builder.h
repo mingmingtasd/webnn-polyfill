@@ -27,7 +27,7 @@ public:
   Napi::Value CreateModel(const Napi::CallbackInfo &info);
 
 private:
-  WNNModelBuilder model_builder_;
+  WebnnModelBuilder model_builder_;
 };
 
 #endif // __MODEL_BUILDER_H__

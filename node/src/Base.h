@@ -1,11 +1,11 @@
 #define NAPI_EXPERIMENTAL
 #include <napi.h>
 
-#include <dawn/dawn_proc.h>
-#include <dawn/webnn_cpp.h>
-#include <dawn_native/DawnNative.h>
-// #include <dawn_wire/WireClient.h>
-// #include <dawn_wire/WireServer.h>
+#include <webnn/webnn_proc.h>
+#include <webnn/webnn_cpp.h>
+#include <webnn_native/WebnnNative.h>
+// #include <webnn_wire/WireClient.h>
+// #include <webnn_wire/WireServer.h>
 
 #include <algorithm>
 

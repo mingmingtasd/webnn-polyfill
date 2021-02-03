@@ -15,10 +15,10 @@ public:
   Conv2d(const Napi::CallbackInfo &info);
   ~Conv2d() = default;
 
-  WNNConv2dOptions *GetOptions();
+  WebnnConv2dOptions *GetOptions();
 
 private:
-  WNNConv2dOptions options_;
+  WebnnConv2dOptions options_;
   std::vector<int32_t> padding_;
   std::vector<int32_t> stride_;
   std::vector<int32_t> dilations_;

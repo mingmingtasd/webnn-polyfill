@@ -17,13 +17,13 @@ public:
   Input(const Napi::CallbackInfo &info);
   ~Input() = default;
 
-  const WNNOperandDescriptor *GetOperandDescriptor();
+  const WebnnOperandDescriptor *GetOperandDescriptor();
   std::string &GetName();
 
 private:
   std::string name_;
   std::vector<int32_t> dimensions_;
-  WNNOperandDescriptor descriptor_;
+  WebnnOperandDescriptor descriptor_;
 };
 
 } // namespace op
