@@ -21,11 +21,11 @@ class Object : public webnn::ObjectBase<Object, int*> {
     using ObjectBase::ObjectBase;
     using ObjectBase::operator=;
 
-    static void WEBNNReference(int* handle) {
+    static void WebnnReference(int* handle) {
         ASSERT_LE(0, *handle);
         *handle += 1;
     }
-    static void WEBNNRelease(int* handle) {
+    static void WebnnRelease(int* handle) {
         ASSERT_LT(0, *handle);
         *handle -= 1;
     }

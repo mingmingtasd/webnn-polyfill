@@ -52,25 +52,25 @@ namespace webnn_native { namespace ie {
         IE(ie_compilation_free)(ie_compilation_);
     }
 
-    void Compilation::Compile(WEBNNCompileCallback callback,
+    void Compilation::Compile(WebnnCompileCallback callback,
                               void* userdata,
                               CompilationOptions const* options) {
         // We may leverage https://dawn-review.googlesource.com/c/dawn/+/36360 to
         // implement async compilation as standle-alone component.
-        WEBNNCompileStatus status = WEBNNCompileStatus_Error;
+        WebnnCompileStatus status = WebnnCompileStatus_Error;
         // Create compilation for IE backend.
         IEStatusCode code =
             IE(ie_create_compilation)(model_->GetInferenceEngineModel(), &ie_compilation_);
         DAWN_CALLBACK_TRY(code, "IE create compilation");
-        status = WEBNNCompileStatus_Success;
-        callback(status, reinterpret_cast<WEBNNCompilation>(this), nullptr, userdata);
+        status = WebnnCompileStatus_Success;
+        callback(status, reinterpret_cast<WebnnCompilation>(this), nullptr, userdata);
     }
 
     void Compilation::ComputeImpl(NamedInputsBase* inputs,
-                                  WEBNNComputeCallback callback,
+                                  WebnnComputeCallback callback,
                                   void* userdata,
                                   NamedOutputsBase* outputs) {
-        WEBNNComputeStatus status = WEBNNComputeStatus_Error;
+        WebnnComputeStatus status = WebnnComputeStatus_Error;
         // Set input data to nGraph.
         for (auto& input : inputs->GetRecords()) {
             ie_operand_t ie_operand;
@@ -113,8 +113,8 @@ namespace webnn_native { namespace ie {
                 DAWN_CALLBACK_TRY(code, "IE get output");
             }
         }
-        status = WEBNNComputeStatus_Success;
-        callback(status, reinterpret_cast<WEBNNNamedResults>(results.Detach()), nullptr, userdata);
+        status = WebnnComputeStatus_Success;
+        callback(status, reinterpret_cast<WebnnNamedResults>(results.Detach()), nullptr, userdata);
         return;
     }
 

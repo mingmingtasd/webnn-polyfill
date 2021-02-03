@@ -46,8 +46,8 @@ std::string ValidationTest::GetLastErrorMessage() const {
     return mErrorMessage;
 }
 
-void ValidationTest::ErrorCallback(WEBNNErrorType type, char const* message, void* userdata) {
-    ASSERT(type != WEBNNErrorType_NoError);
+void ValidationTest::ErrorCallback(WebnnErrorType type, char const* message, void* userdata) {
+    ASSERT(type != WebnnErrorType_NoError);
     auto self = static_cast<ValidationTest*>(userdata);
     self->mErrorMessage = message;
 

@@ -21,11 +21,11 @@
 // The Compilation should be released unitl ComputeCallback.
 webnn::Compilation gCompilation;
 std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-void ComputeCallback(WEBNNComputeStatus status,
-                     WEBNNNamedResults impl,
+void ComputeCallback(WebnnComputeStatus status,
+                     WebnnNamedResults impl,
                      char const* message,
                      void* userData) {
-    if (status != WEBNNComputeStatus_Success) {
+    if (status != WebnnComputeStatus_Success) {
         dawn::ErrorLog() << message;
         return;
     }
@@ -52,11 +52,11 @@ void ComputeCallback(WEBNNComputeStatus status,
     }
 }
 
-void CompilationCallback(WEBNNCompileStatus status,
-                         WEBNNCompilation impl,
+void CompilationCallback(WebnnCompileStatus status,
+                         WebnnCompilation impl,
                          char const* message,
                          void* userData) {
-    if (status != WEBNNCompileStatus_Success) {
+    if (status != WebnnCompileStatus_Success) {
         dawn::ErrorLog() << message;
         return;
     }

@@ -47,7 +47,7 @@ namespace webnn_native { namespace null {
         ~Model() override = default;
 
       private:
-        void CompileImpl(WEBNNCompileCallback callback,
+        void CompileImpl(WebnnCompileCallback callback,
                          void* userdata,
                          CompilationOptions const* options) override;
     };
@@ -60,7 +60,7 @@ namespace webnn_native { namespace null {
 
       private:
         void ComputeImpl(NamedInputsBase* inputs,
-                         WEBNNComputeCallback callback,
+                         WebnnComputeCallback callback,
                          void* userdata,
                          NamedOutputsBase* outputs = nullptr) override;
     };

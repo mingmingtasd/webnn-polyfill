@@ -50,7 +50,7 @@ namespace webnn_native {
 
         if (mCallback != nullptr) {
             // For non-root error scopes, the callback can run at most once.
-            mCallback(static_cast<WEBNNErrorType>(mErrorType), mErrorMessage.c_str(), mUserdata);
+            mCallback(static_cast<WebnnErrorType>(mErrorType), mErrorMessage.c_str(), mUserdata);
             mCallback = nullptr;
         }
     }
@@ -115,7 +115,7 @@ namespace webnn_native {
         // The root error scope captures all uncaptured errors.
         ASSERT(currentScope->IsRoot());
         if (currentScope->mCallback) {
-            currentScope->mCallback(static_cast<WEBNNErrorType>(type), message,
+            currentScope->mCallback(static_cast<WebnnErrorType>(type), message,
                                     currentScope->mUserdata);
         }
     }

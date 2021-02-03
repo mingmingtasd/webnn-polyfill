@@ -39,14 +39,14 @@ namespace webnn_native { namespace null {
     Model::Model(ModelBuilder* model_builder) : ModelBase(model_builder) {
     }
 
-    void Model::CompileImpl(WEBNNCompileCallback callback,
+    void Model::CompileImpl(WebnnCompileCallback callback,
                             void* userdata,
                             CompilationOptions const* options) {
     }
 
     // Compilation
     void Compilation::ComputeImpl(NamedInputsBase* inputs,
-                                  WEBNNComputeCallback callback,
+                                  WebnnComputeCallback callback,
                                   void* userdata,
                                   NamedOutputsBase* outputs) {
     }

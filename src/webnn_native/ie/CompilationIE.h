@@ -24,13 +24,13 @@ namespace webnn_native { namespace ie {
         Compilation(Ref<Model> model);
         ~Compilation() override;
 
-        void Compile(WEBNNCompileCallback callback,
+        void Compile(WebnnCompileCallback callback,
                      void* userdata,
                      CompilationOptions const* options);
 
       private:
         void ComputeImpl(NamedInputsBase* inputs,
-                         WEBNNComputeCallback callback,
+                         WebnnComputeCallback callback,
                          void* userdata,
                          NamedOutputsBase* outputs) override;
 

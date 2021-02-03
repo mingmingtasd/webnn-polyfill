@@ -685,12 +685,12 @@ namespace webnn_native { namespace dml {
         return {};
     }
 
-    void Model::CompileImpl(WEBNNCompileCallback callback,
+    void Model::CompileImpl(WebnnCompileCallback callback,
                             void* userdata,
                             CompilationOptions const* options) {
         // FIXME(nhu): implement async
-        WEBNNCompileStatus status = WEBNNCompileStatus_Success;
-        callback(status, reinterpret_cast<WEBNNCompilation>(new Compilation(this)), nullptr,
+        WebnnCompileStatus status = WebnnCompileStatus_Success;
+        callback(status, reinterpret_cast<WebnnCompilation>(new Compilation(this)), nullptr,
                  userdata);
     }
 

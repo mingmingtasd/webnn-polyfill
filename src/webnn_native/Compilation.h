@@ -29,13 +29,13 @@ namespace webnn_native {
 
         // Dawn API
         void Compute(NamedInputsBase* inputs,
-                     WEBNNComputeCallback callback,
+                     WebnnComputeCallback callback,
                      void* userdata,
                      NamedOutputsBase* outputs = nullptr);
 
       private:
         virtual void ComputeImpl(NamedInputsBase* inputs,
-                                 WEBNNComputeCallback callback,
+                                 WebnnComputeCallback callback,
                                  void* userdata,
                                  NamedOutputsBase* outputs) = 0;
     };

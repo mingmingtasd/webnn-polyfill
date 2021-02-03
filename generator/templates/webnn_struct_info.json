@@ -22,7 +22,7 @@
         "file": "webnn/webnn.h",
         "defines": [],
         "structs": {
-            "WEBNNChainedStruct": [
+            "WebnnChainedStruct": [
                 "next",
                 "sType"
             ],

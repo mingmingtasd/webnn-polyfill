@@ -48,7 +48,7 @@ namespace webnn_native { namespace dml {
     }
 
     void Compilation::ComputeImpl(NamedInputsBase* inputs,
-                                  WEBNNComputeCallback callback,
+                                  WebnnComputeCallback callback,
                                   void* userdata,
                                   NamedOutputsBase* outputs) {
         // FIXME(nhu): implement async
@@ -108,8 +108,8 @@ namespace webnn_native { namespace dml {
                          << ", dimensions: " << DmlTensorDimensionsToString(tensor->Desc()->sizes);
             delete tensor;
         }
-        WEBNNComputeStatus status = WEBNNComputeStatus_Success;
-        callback(status, reinterpret_cast<WEBNNNamedResults>(results.Detach()), nullptr, userdata);
+        WebnnComputeStatus status = WebnnComputeStatus_Success;
+        callback(status, reinterpret_cast<WebnnNamedResults>(results.Detach()), nullptr, userdata);
         return;
     }
 

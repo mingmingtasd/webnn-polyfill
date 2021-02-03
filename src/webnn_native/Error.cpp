@@ -30,7 +30,7 @@ namespace webnn_native {
         }
     }
 
-    webnn::ErrorType ToWEBNNErrorType(InternalErrorType type) {
+    webnn::ErrorType ToWebnnErrorType(InternalErrorType type) {
         switch (type) {
             case InternalErrorType::Validation:
                 return webnn::ErrorType::Validation;
@@ -49,7 +49,7 @@ namespace webnn_native {
         }
     }
 
-    InternalErrorType FromWEBNNErrorType(webnn::ErrorType type) {
+    InternalErrorType FromWebnnErrorType(webnn::ErrorType type) {
         switch (type) {
             case webnn::ErrorType::Validation:
                 return InternalErrorType::Validation;

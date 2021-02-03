@@ -225,7 +225,7 @@ namespace webnn_native { namespace ie {
         return {};
     }
 
-    void Model::CompileImpl(WEBNNCompileCallback callback,
+    void Model::CompileImpl(WebnnCompileCallback callback,
                             void* userdata,
                             CompilationOptions const* options) {
         Compilation* compilation = new Compilation(this);

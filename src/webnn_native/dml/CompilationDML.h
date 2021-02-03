@@ -29,7 +29,7 @@ namespace webnn_native { namespace dml {
 
       private:
         void ComputeImpl(NamedInputsBase* inputs,
-                         WEBNNComputeCallback callback,
+                         WebnnComputeCallback callback,
                          void* userdata,
                          NamedOutputsBase* outputs = nullptr) override;
 

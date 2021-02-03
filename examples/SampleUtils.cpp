@@ -141,11 +141,11 @@ namespace utils {
         return;
     }
 
-    void ComputeCallback(WEBNNComputeStatus status,
-                         WEBNNNamedResults impl,
+    void ComputeCallback(WebnnComputeStatus status,
+                         WebnnNamedResults impl,
                          char const* message,
                          void* userData) {
-        if (status != WEBNNComputeStatus_Success) {
+        if (status != WebnnComputeStatus_Success) {
             dawn::InfoLog() << "Test failed.";
             dawn::ErrorLog() << message;
             return;
@@ -186,11 +186,11 @@ namespace utils {
         return;
     }
 
-    void CompilationCallback(WEBNNCompileStatus status,
-                             WEBNNCompilation impl,
+    void CompilationCallback(WebnnCompileStatus status,
+                             WebnnCompilation impl,
                              char const* message,
                              void* userData) {
-        if (status != WEBNNCompileStatus_Success) {
+        if (status != WebnnCompileStatus_Success) {
             dawn::ErrorLog() << message;
             return;
         }
@@ -205,8 +205,8 @@ namespace utils {
         gCompilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
     }
 
-    void ErrorCallback(WEBNNErrorType type, char const* message, void* userdata) {
-        if (type != WEBNNErrorType_NoError) {
+    void ErrorCallback(WebnnErrorType type, char const* message, void* userdata) {
+        if (type != WebnnErrorType_NoError) {
             dawn::ErrorLog() << "error type is " << type << ", messages are " << message;
         }
     }
