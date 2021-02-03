@@ -23,13 +23,13 @@ public:
 
   explicit Compilation(const Napi::CallbackInfo &info);
   ~Compilation();
-  void SetCompilation(WNNCompilation);
-  WNNCompilation GetCompilation();
+  void SetCompilation(WebnnCompilation);
+  WebnnCompilation GetCompilation();
 
   Napi::Value Compute(const Napi::CallbackInfo &info);
 
 private:
-  WNNCompilation compilation_;
+  WebnnCompilation compilation_;
   Napi::ObjectReference model_object_;
   ComputeAsyncWorker* compute_worker_;
 };

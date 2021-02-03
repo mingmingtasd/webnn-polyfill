@@ -16,13 +16,13 @@ public:
   Constant(const Napi::CallbackInfo &info);
   ~Constant() = default;
 
-  const WNNOperandDescriptor *GetOperandDescriptor();
+  const WebnnOperandDescriptor *GetOperandDescriptor();
   void const *GetValue();
   size_t GetSize();
 
 private:
   std::vector<int32_t> dimensions_;
-  WNNOperandDescriptor descriptor_;
+  WebnnOperandDescriptor descriptor_;
   void const *value_;
   size_t size_;
 };

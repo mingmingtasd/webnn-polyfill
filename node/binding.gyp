@@ -3,7 +3,7 @@
     "platform": "<(OS)",
     "build": "<@(module_root_dir)/build",
     "release": "<(build)/Release",
-    "dawn": "<@(module_root_dir)/../",
+    "webnn": "<@(module_root_dir)/../",
   },
   "conditions": [
     [ "platform == 'win'",   { "variables": { "platform": "win" } } ],
@@ -40,17 +40,17 @@
             ],
             "include_dirs": [
               "<!@(node -p \"require('node-addon-api').include\")",
-              "<(dawn)/src/include",
-              "<(dawn)/out/Shared/gen/src/include",
+              "<(webnn)/src/include",
+              "<(webnn)/out/Shared/gen/src/include",
             ],
             "library_dirs": [
-              "<(dawn)/out/Shared",
+              "<(webnn)/out/Shared",
             ],
             "link_settings": {
               "libraries": [
-                "-ldawn_native.dll.lib",
-                "-ldawn_proc.dll.lib",
-                #"-ldawn_wire.dll.lib",
+                "-lwebnn_native.dll.lib",
+                "-lwebnn_proc.dll.lib",
+                #"-lwebnn_wire.dll.lib",
               ]
             },
             "defines": [
@@ -97,8 +97,8 @@
             ],
             "include_dirs": [
               "<!@(node -p \"require('node-addon-api').include\")",
-              "<(dawn)/src/include",
-              "<(dawn)/out/Shared/gen/src/include",
+              "<(webnn)/src/include",
+              "<(webnn)/out/Shared/gen/src/include",
             ],
             "cflags": [
              "-std=c++14",
@@ -118,16 +118,15 @@
               "<@(module_root_dir)/build",
               "<@(module_root_dir)/build/Release",
               "<(module_root_dir)/../../../build/<(platform)",
-              "<(dawn)/out/Shared",
+              "<(webnn)/out/Shared",
             ],
             "libraries": [
               "-Wl,-rpath,./<(rel_release)",
-              "-ldawn_native",
-              "-ldawn_proc",
+              "-lwebnn_native",
+              "-lwebnn_proc",
               "-lXrandr",
               "-lXi",
               "-lX11",
-              "-lXxf86vm",
               "-lXinerama",
               "-lXcursor",
               "-ldl",

@@ -12,7 +12,7 @@ public:
   ~Operand() = default;
 
   void SetNode(std::shared_ptr<op::Node>);
-  WNNOperand GetOperand();
+  WebnnOperand GetOperand();
 
 private:
   std::shared_ptr<op::Node> node_;

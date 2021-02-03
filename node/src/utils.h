@@ -28,18 +28,18 @@ template<typename T> inline T* getTypedArrayData(const Napi::Value& value, size_
   return data;
 };
 
-static std::unordered_map<std::string, WNNOperandType> s_operand_type_map = {
-  { "float32", WNNOperandType_Float32 },
-  { "float16", WNNOperandType_Float16 },
-  { "int32", WNNOperandType_Int32 },
-  { "uint32", WNNOperandType_Uint32 },
+static std::unordered_map<std::string, WebnnOperandType> s_operand_type_map = {
+  { "float32", WebnnOperandType_Float32 },
+  { "float16", WebnnOperandType_Float16 },
+  { "int32", WebnnOperandType_Int32 },
+  { "uint32", WebnnOperandType_Uint32 },
 };
 
-inline WNNOperandType getOperandType(const Napi::Value& value) {
+inline WebnnOperandType getOperandType(const Napi::Value& value) {
   if (!value.IsString()) {
     Napi::Env env = value.Env();
     Napi::Error::New(env, "Argument must be a 'String'").ThrowAsJavaScriptException();
-    return WNNOperandType_Force32;
+    return WebnnOperandType_Force32;
   }
   return s_operand_type_map[value.As<Napi::String>().Utf8Value()];
 };

@@ -12,10 +12,10 @@ public:
   Transpose(const Napi::CallbackInfo &info);
   ~Transpose() = default;
 
-  WNNTransposeOptions *GetOptions();
+  WebnnTransposeOptions *GetOptions();
 
 private:
-  WNNTransposeOptions options_;
+  WebnnTransposeOptions options_;
   std::vector<int32_t> permutation_;
 };
 

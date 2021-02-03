@@ -16,30 +16,30 @@ Model::Model(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Model>(info) {
 }
 
 Model::~Model() {
-  wnnModelRelease(model_);
+  webnnModelRelease(model_);
 }
 
-void Model::SetModel(WNNModel model) {
+void Model::SetModel(WebnnModel model) {
   model_ = model;
 }
 
-WNNModel Model::GetModel() {
+WebnnModel Model::GetModel() {
   return model_;
 }
 
-void Model::SetWNNCompilation(WNNCompilation compilation) {
+void Model::SetWebnnCompilation(WebnnCompilation compilation) {
   compilation_ = compilation;
 }
 
 std::vector<std::string> &Model::GetOutputName() { return output_name_; }
 
 Napi::Value Model::Compile(const Napi::CallbackInfo &info) {
-  wnnModelCompile(
+  webnnModelCompile(
       model_,
-      [](WNNCompileStatus status, WNNCompilation compilation,
+      [](WebnnCompileStatus status, WebnnCompilation compilation,
          char const *message, void *userData) {
         Model *self = reinterpret_cast<Model *>(userData);
-        self->SetWNNCompilation(compilation);
+        self->SetWebnnCompilation(compilation);
       },
       reinterpret_cast<void *>(this), nullptr);
 

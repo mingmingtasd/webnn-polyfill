@@ -14,10 +14,10 @@ public:
   // #accessors
   Napi::Value CreateModelBuilder(const Napi::CallbackInfo &info);
 
-  WNNNeuralNetworkContext GetContext();
+  WebnnNeuralNetworkContext GetContext();
 
 private:
-  WNNNeuralNetworkContext context_;
+  WebnnNeuralNetworkContext context_;
 };
 
 #endif // __NEURAL_NETWORK_CONTEXT_H__

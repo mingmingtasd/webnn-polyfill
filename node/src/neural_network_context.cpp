@@ -6,16 +6,16 @@ Napi::FunctionReference NeuralNetworkContext::constructor;
 
 NeuralNetworkContext::NeuralNetworkContext(const Napi::CallbackInfo &info)
     : Napi::ObjectWrap<NeuralNetworkContext>(info) {
-  DawnProcTable backendProcs = dawn_native::GetProcs();
-  dawnProcSetProcs(&backendProcs);
-  context_ = dawn_native::CreateNeuralNetworkContext();
+  WebnnProcTable backendProcs = webnn_native::GetProcs();
+  webnnProcSetProcs(&backendProcs);
+  context_ = webnn_native::CreateNeuralNetworkContext();
 }
 
 NeuralNetworkContext::~NeuralNetworkContext() {
-  wnnNeuralNetworkContextRelease(context_);
+  webnnNeuralNetworkContextRelease(context_);
 }
 
-WNNNeuralNetworkContext NeuralNetworkContext::GetContext() { return context_; }
+WebnnNeuralNetworkContext NeuralNetworkContext::GetContext() { return context_; }
 
 Napi::Value NeuralNetworkContext::CreateModelBuilder(const Napi::CallbackInfo &info) {
   Napi::Env env = info.Env();

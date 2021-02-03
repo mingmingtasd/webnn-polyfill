@@ -26,7 +26,7 @@ Input::Input(const Napi::CallbackInfo &info) : Node(info) {
   descriptor_.dimensionsCount = dimensions_.size();
 }
 
-const WNNOperandDescriptor *Input::GetOperandDescriptor() { return &descriptor_; }
+const WebnnOperandDescriptor *Input::GetOperandDescriptor() { return &descriptor_; }
 
 std::string &Input::GetName() { return name_; }
 

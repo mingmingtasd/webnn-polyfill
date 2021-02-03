@@ -10,10 +10,10 @@ public:
   Pool2d(const Napi::CallbackInfo &info);
   ~Pool2d() = default;
 
-  WNNPool2dOptions *GetOptions();
+  WebnnPool2dOptions *GetOptions();
 
 private:
-  WNNPool2dOptions options_;
+  WebnnPool2dOptions options_;
   std::vector<int32_t> window_dimensions_;
   std::vector<int32_t> padding_;
   std::vector<int32_t> stride_;
