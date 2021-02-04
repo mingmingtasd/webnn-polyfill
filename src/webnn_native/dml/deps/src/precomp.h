@@ -33,7 +33,7 @@
 #include <DirectMLX.h>
 
 #define IID_GRAPHICS_PPV_ARGS IID_PPV_ARGS
-#include "d3dx12.h"
+#include "third_party/DirectML/Python/src/d3dx12.h"
 #include "util.h"
 #include "model.h"
 #include "typeconvert.h"
