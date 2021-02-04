@@ -25,28 +25,28 @@ namespace pydml
     {
         TensorData(void * buffer,
                    size_t size) :
-            buffer_(buffer),
-            size_(size) {}
+            buffer(buffer),
+            size(size) {}
 
         TensorData(dml::TensorDesc* desc) :
-            size_(desc->totalTensorSizeInBytes),
-            desc_(*desc->AsPtr<DML_BUFFER_TENSOR_DESC>())
+            size(desc->totalTensorSizeInBytes),
+            desc(*desc->AsPtr<DML_BUFFER_TENSOR_DESC>())
         {
             // Free by user code.
-            buffer_ = malloc(size_);
+            buffer = malloc(size);
         }
 
         TensorData() {}
 
-        void* Get() const { return buffer_; }
+        void* Get() const { return buffer; }
 
-        size_t Size() const { return size_; }
+        size_t Size() const { return size; }
 
-        const dml::TensorDesc* Desc() const { return &desc_; }
+        const dml::TensorDesc* Desc() const { return &desc; }
 
-        void* buffer_;
-        size_t size_;
-        dml::TensorDesc desc_;
+        void* buffer;
+        size_t size;
+        dml::TensorDesc desc;
     };
 
     struct Binding

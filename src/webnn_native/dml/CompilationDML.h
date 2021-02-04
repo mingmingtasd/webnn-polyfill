@@ -33,8 +33,8 @@ namespace webnn_native { namespace dml {
                          void* userdata,
                          NamedOutputsBase* outputs = nullptr) override;
 
-        Ref<Model> model_;
-        std::unique_ptr<pydml::CompiledModel> compiled_model_;
+        Ref<Model> mModel;
+        std::unique_ptr<pydml::CompiledModel> mCompiledModel;
     };
 
 }}  // namespace webnn_native::dml
