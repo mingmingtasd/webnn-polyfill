@@ -138,6 +138,7 @@ public:
     template <typename T>
     T* AllocateUsing(const T& src)
     {
+        // Fix clang error: use 'template' keyword to treat 'Allocate' as a dependent template name [-Werror]
         T* t = this->template Allocate<T>();
         *t = src;
         return t;
@@ -146,6 +147,7 @@ public:
     template <typename T>
     T* AllocateArrayUsing(dml::Span<const T> src)
     {
+        // Fix clang error: use 'template' keyword to treat 'Allocate' as a dependent template name [-Werror]
         T* t = this->template Allocate<T>(src.size());
         std::copy(src.begin(), src.end(), t);
         return t;
@@ -163,6 +165,7 @@ public:
     DML_BUFFER_ARRAY_BINDING Convert(const DmlBufferArrayBinding& src)
     {
         const size_t count = src.bindings.size();
+        // Fix clang error: use 'template' keyword to treat 'Allocate' as a dependent template name [-Werror]
         DML_BUFFER_BINDING* bindings = this->template Allocate<DML_BUFFER_BINDING>(count);
         for (size_t i = 0; i < count; ++i)
         {
@@ -185,6 +188,7 @@ public:
 
     DML_BINDING_DESC ToBindingDesc(const DmlBufferBinding& src)
     {
+        // Fix clang error: use 'template' keyword to treat 'Allocate' as a dependent template name [-Werror]
         auto* binding = this->template Allocate<DML_BUFFER_BINDING>();
         *binding = Convert(src);
 
@@ -196,6 +200,7 @@ public:
 
     DML_BINDING_DESC ToBindingDesc(const DmlBufferArrayBinding& src)
     {
+        // Fix clang error: use 'template' keyword to treat 'Allocate' as a dependent template name [-Werror]
         auto* binding = this->template Allocate<DML_BUFFER_ARRAY_BINDING>();
         *binding = Convert(src);
 

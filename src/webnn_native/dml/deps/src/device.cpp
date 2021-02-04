@@ -112,6 +112,7 @@ std::vector<pydml::TensorData*> Device::DispatchOperator(
         DmlBufferTensorDesc desc = *input->desc.AsPtr<DML_BUFFER_TENSOR_DESC>();
 
         // If OWNED_BY_DML is *not* set, this input must be bound at execution
+        // fix clang error: logical not is only applied to the left hand side of this bitwise operator [-Werror,-Wlogical-not-parentheses]
         if (!(desc.flags & DML_TENSOR_FLAG_OWNED_BY_DML))
         {
             uint32_t requiredAlignment = std::max(desc.guaranteedBaseOffsetAlignment, DML_MINIMUM_BUFFER_TENSOR_ALIGNMENT);
@@ -242,7 +243,6 @@ std::vector<pydml::TensorData*> Device::DispatchOperator(
     bindingTableDesc.CPUDescriptorHandle = m_descriptorHeap->GetCPUDescriptorHandleForHeapStart();
     bindingTableDesc.GPUDescriptorHandle = m_descriptorHeap->GetGPUDescriptorHandleForHeapStart();
     bindingTableDesc.SizeInDescriptors = bindingProps.RequiredDescriptorCount;
-    dawn::DebugLog() << "SizeInDescriptors: " << bindingTableDesc.SizeInDescriptors;
 
     ThrowIfFailed(m_bindingTable->Reset(&bindingTableDesc));
 
@@ -252,7 +252,6 @@ std::vector<pydml::TensorData*> Device::DispatchOperator(
     {
         inputBindingDescs[i] = converter.ToBindingDesc(inputBindings[i]);
     }
-    dawn::DebugLog() << "inputBindingDescs.size(): " << (int)inputBindingDescs.size();
 
     m_bindingTable->BindInputs(static_cast<uint32_t>(inputBindingDescs.size()), inputBindingDescs.data());
 
@@ -481,12 +480,10 @@ void Device::InitializeOperator(
     bindingTableDesc.CPUDescriptorHandle = m_descriptorHeap->GetCPUDescriptorHandleForHeapStart();
     bindingTableDesc.GPUDescriptorHandle = m_descriptorHeap->GetGPUDescriptorHandleForHeapStart();
     bindingTableDesc.SizeInDescriptors = descriptorHeapSize;
-    dawn::DebugLog() << "SizeInDescriptors: " << bindingTableDesc.SizeInDescriptors;
 
     ThrowIfFailed(m_bindingTable->Reset(&bindingTableDesc));
 
     DML_BINDING_DESC inputBindingDesc = converter.ToBindingDesc(inputBinding);
-    dawn::DebugLog() << "inputBindingDesc.BindingCount: " << ((DML_BUFFER_ARRAY_BINDING*)inputBindingDesc.Desc)->BindingCount;
     m_bindingTable->BindInputs(1, &inputBindingDesc);
 
     if (persistentResourceSize != 0)

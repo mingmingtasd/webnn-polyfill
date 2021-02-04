@@ -125,6 +125,19 @@ config("dawn_internal") {
     # MSVC considers these invalid switch values. crbug.com/dawn/397.
     cflags += [ "/wd4063" ]
   }
+
+  if (is_clang && webnn_enable_dml) {
+    cflags += [
+      # Allow the use of DEFINE_ENUM_FLAG_OPERATORS(ENUMTYPE); in DirectML.h
+      "-Wno-extra-semi",
+
+      # Allow the use of DMLX_THROW(_hr); in DirectMLX.h
+      "-Wno-extra-semi-stmt",
+
+      # Allow the use of DML_OPERATOR_GRAPH_NODE_DESC{ node.op.Get() } in DirectMLX.h
+      "-Wno-missing-field-initializers",
+    ]
+  }
 }
 
 ###############################################################################

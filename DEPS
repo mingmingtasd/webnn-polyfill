@@ -15,6 +15,12 @@ deps = {
     'url': '{dawn_git}/dawn.git@bf1c0cf52377b4db2bf3a433dc5056620aad7cdd'
   },
 
+  # FIXME(nhu): Use the offical repo once issue fixed: https://github.com/microsoft/DirectML/issues/77
+  'third_party/DirectML': {
+    'url': '{github_git}/huningxin/DirectML.git@700303f715384e865c0531e3148c1bc826c2d48e',
+    'condition': 'checkout_win',
+  },
+
   # Dependencies required to use GN/Clang in standalone
   'build': {
     'url': '{chromium_git}/chromium/src/build@3769c3b43c3804f9f7f14c6e37f545639fda2852',
@@ -152,6 +158,13 @@ hooks = [
     'condition': 'dawn_standalone',
     'action': ['python', 'build/util/lastchange.py',
                '-o', 'build/util/LASTCHANGE'],
+  },
+  {
+    # Download the DirectML NuGet package.
+    'name': 'download_dml_unpkg',
+    'pattern': '.',
+    'condition': 'checkout_win',
+    'action': ['python3', 'src/webnn_native/dml/deps/script/download_dml.py'],
   },
 ]
 
