@@ -10,21 +10,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "webnn_native/ie/NeuralNetworkContextIE.h"
+#include "webnn_native/openvino/ModelBuilderIE.h"
 
-#include "common/RefCounted.h"
-#include "webnn_native/ie/ModelBuilderIE.h"
+#include "common/Log.h"
+#include "webnn_native/openvino/ModelIE.h"
 
 namespace webnn_native { namespace ie {
 
-    NeuralNetworkContextBase* Create() {
-        Ref<NeuralNetworkContextBase> context = AcquireRef(new NeuralNetworkContext());
-        return context.Detach();
+    ModelBuilder::ModelBuilder(NeuralNetworkContextBase* context) : ModelBuilderBase(context) {
     }
 
-    ModelBuilderBase* NeuralNetworkContext::CreateModelBuilderImpl() {
-        Ref<ModelBuilderBase> builder = AcquireRef(new ModelBuilder(this));
-        return builder.Detach();
+    ModelBase* ModelBuilder::CreateModelImpl() {
+        Ref<ModelBase> model = AcquireRef(new Model(this));
+        return model.Detach();
     }
 
 }}  // namespace webnn_native::ie

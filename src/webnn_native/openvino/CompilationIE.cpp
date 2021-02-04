@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "webnn_native/ie/CompilationIE.h"
+#include "webnn_native/openvino/CompilationIE.h"
 
 #include <vector>
 
@@ -20,8 +20,8 @@
 #include "webnn_native/NamedResults.h"
 #include "webnn_native/Operand.h"
 #include "webnn_native/Result.h"
-#include "webnn_native/ie/ErrorIE.h"
-#include "webnn_native/ie/ienn_symbol_table/ienn_symbol_table.h"
+#include "webnn_native/openvino/ErrorIE.h"
+#include "webnn_native/openvino/ienn_symbol_table/ienn_symbol_table.h"
 
 #define DAWN_CALLBACK_TRY(code, messages)                                     \
     {                                                                         \

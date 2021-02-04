@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "webnn_native/ie/ModelIE.h"
+#include "webnn_native/openvino/ModelIE.h"
 
 #include <vector>
 
@@ -18,9 +18,9 @@
 #include "common/Log.h"
 #include "webnn_native/ErrorData.h"
 #include "webnn_native/NamedOperands.h"
-#include "webnn_native/ie/CompilationIE.h"
-#include "webnn_native/ie/ErrorIE.h"
-#include "webnn_native/ie/ienn_symbol_table/ienn_symbol_table.h"
+#include "webnn_native/openvino/CompilationIE.h"
+#include "webnn_native/openvino/ErrorIE.h"
+#include "webnn_native/openvino/ienn_symbol_table/ienn_symbol_table.h"
 
 namespace webnn_native { namespace ie {
 

@@ -20,7 +20,7 @@ Sync the dependencies.
 ### Setting up the build
 Generate projects with OpenVINO backend
 ```sh
-> gn gen out/Default --args="webnn_enable_ie = true"
+> gn gen out/Default --args="webnn_enable_openvino = true"
 ```
 
 Or generate projects with DirectML backend

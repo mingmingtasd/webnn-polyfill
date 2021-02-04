@@ -140,25 +140,25 @@ source_set("webnn_native_sources") {
     ]
   }
 
-  if (webnn_enable_ie) {
+  if (webnn_enable_openvino) {
     sources += [
-      "ie/CompilationIE.cpp",
-      "ie/CompilationIE.h",
-      "ie/ErrorIE.cpp",
-      "ie/ErrorIE.h",
-      "ie/ModelBuilderIE.cpp",
-      "ie/ModelBuilderIE.h",
-      "ie/ModelIE.cpp",
-      "ie/ModelIE.h",
-      "ie/NeuralNetworkContextIE.cpp",
-      "ie/NeuralNetworkContextIE.h",
+      "openvino/CompilationIE.cpp",
+      "openvino/CompilationIE.h",
+      "openvino/ErrorIE.cpp",
+      "openvino/ErrorIE.h",
+      "openvino/ModelBuilderIE.cpp",
+      "openvino/ModelBuilderIE.h",
+      "openvino/ModelIE.cpp",
+      "openvino/ModelIE.h",
+      "openvino/NeuralNetworkContextIE.cpp",
+      "openvino/NeuralNetworkContextIE.h",
     ]
 
     sources += [
-      "ie/ienn_symbol_table/ienn_symbol_table.cc",
-      "ie/ienn_symbol_table/ienn_symbol_table.h",
-      "ie/ienn_symbol_table/late_binding_symbol_table.cc",
-      "ie/ienn_symbol_table/late_binding_symbol_table.h",
+      "openvino/ienn_symbol_table/ienn_symbol_table.cc",
+      "openvino/ienn_symbol_table/ienn_symbol_table.h",
+      "openvino/ienn_symbol_table/late_binding_symbol_table.cc",
+      "openvino/ienn_symbol_table/late_binding_symbol_table.h",
     ]
   }
 
@@ -226,7 +226,7 @@ dawn_component("webnn_native") {
   ]
 }
 
-if (webnn_enable_ie) {
+if (webnn_enable_openvino) {
   if (is_win) {
     ie_nn_dll = "ie_nn_c_api.dll"
     os_folder = "Windows64"
@@ -235,7 +235,7 @@ if (webnn_enable_ie) {
     os_folder = "Linux64"
   }
   if (is_win || is_linux) {
-    ie_nn_dll_path = "//src/webnn_native/ie/ienn/lib/${os_folder}"
+    ie_nn_dll_path = "//src/webnn_native/openvino/ienn/lib/${os_folder}"
     copy("copy_ie_nn_dll") {
       sources = [ "${ie_nn_dll_path}/${ie_nn_dll}" ]
       outputs = [ "$root_out_dir/{{source_file_part}}" ]
