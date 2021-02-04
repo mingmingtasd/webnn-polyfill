@@ -29,8 +29,8 @@
 #include <wrl/implements.h>
 
 #define DML_TARGET_VERSION_USE_LATEST 1
-#include <microsoft.ai.directml.1.4.0/include/DirectML.h>
-#include <DirectMLX/DirectMLX.h>
+#include <DirectML.h>
+#include <DirectMLX.h>
 
 #define IID_GRAPHICS_PPV_ARGS IID_PPV_ARGS
 #include "d3dx12.h"
