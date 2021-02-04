@@ -22,14 +22,13 @@ namespace webnn_native { namespace op {
                    OperandBase* input,
                    Pool2dOptions const* options)
         : OperandBase(builder, {input}), mOpType(opType) {
-        if (options == nullptr || options->windowDimensions == nullptr) {
-            mWindowDimensions = std::vector<int32_t>(2, 1);
-        } else {
+        // If windowDimensions not present, the window dimensions will be set in each backend.
+        if (options != nullptr && options->windowDimensions != nullptr) {
             mWindowDimensions.assign(options->windowDimensions,
                                       options->windowDimensions + options->windowDimensionsCount);
+            mOptions.windowDimensions = mWindowDimensions.data();
+            mOptions.windowDimensionsCount = mWindowDimensions.size();
         }
-        mOptions.windowDimensions = mWindowDimensions.data();
-        mOptions.windowDimensionsCount = mWindowDimensions.size();
 
         if (options == nullptr || options->padding == nullptr) {
             mPadding = std::vector<int32_t>(4, 0);
@@ -84,7 +83,7 @@ namespace webnn_native { namespace op {
             return DAWN_VALIDATION_ERROR("Argument input is not a 4D tensor.");
         }
         // windowDimensions: a sequence of long of length 2
-        if (mOptions.windowDimensionsCount != 2) {
+        if (mOptions.windowDimensionsCount != 2 && mOptions.windowDimensionsCount != 0) {
             return DAWN_VALIDATION_ERROR("windowDimensionsCount is incorrect.");
         }
         // padding: a sequence of long of length 4
