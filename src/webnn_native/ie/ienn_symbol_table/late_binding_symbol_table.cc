@@ -16,13 +16,12 @@
 #include <windows.h>
 #endif
 
-// #include "base/files/file_path.h"
 #include "common/Log.h"
+#include "common/SystemUtils.h"
 #if defined(__APPLE__)
 #include "base/mac/bundle_locations.h"
 #include "base/mac/foundation_util.h"
 #endif
-// #include "base/path_service.h"
 
 namespace webnn_native {
 
@@ -39,15 +38,8 @@ inline static const char* GetDllError() {
 DllHandle InternalLoadDll(const char dll_name[]) {
   DllHandle handle = nullptr;
 #if defined(__linux__)
-  // base::FilePath module_path;
-  // if (!base::PathService::Get(base::DIR_MODULE, &module_path)) {
-  //   LOG(ERROR) << "Can't get module path";
-  //   return nullptr;
-  // }
-
-  // base::FilePath dll_path = module_path.Append(dll_name);
-  // handle = dlopen(dll_name.MaybeAsASCII().c_str(), RTLD_NOW);
-  handle = dlopen(dll_name, RTLD_NOW);
+  std::string dll_path = GetExecutableDirectory().append(dll_name);
+  handle = dlopen(dll_path.data(), RTLD_NOW);
 #elif defined(__APPLE__)
   // base::FilePath base_dir;
   // if (base::mac::AmIBundled()) {
