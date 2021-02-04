@@ -184,7 +184,10 @@ source_set("webnn_native_sources") {
       "dml/NeuralNetworkContextDML.h",
     ]
 
-    include_dirs = [ "//third_party/DirectML/Libraries", "//third_party/microsoft.ai.directml.1.4.0/include" ]
+    include_dirs = [
+      "//third_party/DirectML/Libraries",
+      "//third_party/microsoft.ai.directml.1.4.0/include",
+    ]
 
     lib_dirs = [ "//third_party/microsoft.ai.directml.1.4.0/bin/x64-win" ]
 
@@ -244,8 +247,7 @@ if (webnn_enable_openvino) {
 if (webnn_enable_dml) {
   dml_dll = "DirectML.dll"
   os_folder = "x64-win"
-  dml_dll_path =
-      "//third_party/microsoft.ai.directml.1.4.0/bin/${os_folder}"
+  dml_dll_path = "//third_party/microsoft.ai.directml.1.4.0/bin/${os_folder}"
   copy("copy_dml_dll") {
     sources = [ "${dml_dll_path}/${dml_dll}" ]
     outputs = [ "$root_out_dir/{{source_file_part}}" ]
