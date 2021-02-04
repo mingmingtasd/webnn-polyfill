@@ -61,7 +61,8 @@ TEST_F(MaxPool2dTests, MaxPool2d) {
 
 TEST_F(MaxPool2dTests, MaxPool2dDilations) {
     MaxPool2d* maxPool2dDilations = new MaxPool2d();
-    maxPool2dDilations->SetInput({1, 1, 4, 4}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
+    maxPool2dDilations->SetInput({1, 1, 4, 4},
+                                 {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16});
     maxPool2dDilations->SetDilations({2, 2});
     maxPool2dDilations->SetWindowDimensions({2, 2});
     maxPool2dDilations->SetExpectedBuffer({11, 12, 15, 16});
@@ -71,22 +72,22 @@ TEST_F(MaxPool2dTests, MaxPool2dDilations) {
 
 TEST_F(MaxPool2dTests, MaxPool2dPads) {
     MaxPool2d* maxPool2dPads = new MaxPool2d();
-    maxPool2dPads->SetInput({1, 1, 5, 5},
-                            { 1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
-                             14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25});
+    maxPool2dPads->SetInput({1, 1, 5, 5}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
+                                           14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25});
     maxPool2dPads->SetPadding({2, 2, 2, 2});
     maxPool2dPads->SetWindowDimensions({5, 5});
-    maxPool2dPads->SetExpectedBuffer({13, 14, 15, 15, 15, 18, 19, 20, 20, 20, 23, 24, 25,
-                                      25, 25, 23, 24, 25, 25, 25, 23, 24, 25, 25, 25,});
+    maxPool2dPads->SetExpectedBuffer({
+        13, 14, 15, 15, 15, 18, 19, 20, 20, 20, 23, 24, 25,
+        25, 25, 23, 24, 25, 25, 25, 23, 24, 25, 25, 25,
+    });
     maxPool2dPads->SetExpectedShape({1, 1, 5, 5});
     EXPECT_TRUE(utils::Test(maxPool2dPads));
 }
 
 TEST_F(MaxPool2dTests, MaxPool2dStrides) {
     MaxPool2d* maxPool2dStrides = new MaxPool2d();
-    maxPool2dStrides->SetInput({1, 1, 5, 5},
-                            { 1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
-                             14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25});
+    maxPool2dStrides->SetInput({1, 1, 5, 5}, {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
+                                              14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25});
     maxPool2dStrides->SetStrides({2, 2});
     maxPool2dStrides->SetWindowDimensions({2, 2});
     maxPool2dStrides->SetExpectedBuffer({7, 9, 17, 19});
