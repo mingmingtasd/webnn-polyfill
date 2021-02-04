@@ -27,6 +27,7 @@ void ValidationTest::SetUp() {
     ASSERT_TRUE(context != nullptr);
     mContext = webnn::NeuralNetworkContext::Acquire(context);
     mContext.SetUncapturedErrorCallback(ErrorCallback, this);
+    mBuilder = mContext.CreateModelBuilder();
 }
 
 ValidationTest::~ValidationTest() {

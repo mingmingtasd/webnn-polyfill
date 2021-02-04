@@ -42,6 +42,7 @@ class ValidationTest : public testing::Test {
 
   protected:
     webnn::NeuralNetworkContext mContext;
+    webnn::ModelBuilder mBuilder;
 
   private:
     static void ErrorCallback(WebnnErrorType type, const char* message, void* userdata);
