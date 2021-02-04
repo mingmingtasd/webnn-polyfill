@@ -17,7 +17,7 @@ echo "Syncing gclient..."
 
 echo "Building..."
 if not exist "out/Shared" (
-  gn gen out/Shared --ide=vs --target_cpu="x64" --args="is_component_build=true is_debug=false is_clang=false webnn_enable_ie=true"
+  gn gen out/Shared --ide=vs --target_cpu="x64" --args="is_component_build=true is_debug=false is_clang=false webnn_enable_openvino=true"
 )
 
 echo

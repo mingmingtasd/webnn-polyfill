@@ -14,8 +14,8 @@
 #define WEBNN_NATIVE_IE_COMPILATION_IE_H_
 
 #include "webnn_native/Compilation.h"
-#include "webnn_native/ie/ModelIE.h"
-#include "webnn_native/ie/ienn/src/ie_nn_c_api.h"
+#include "webnn_native/openvino/ModelIE.h"
+#include "webnn_native/openvino/ienn/src/ie_nn_c_api.h"
 
 namespace webnn_native { namespace ie {
 
