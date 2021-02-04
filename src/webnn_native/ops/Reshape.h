@@ -22,10 +22,10 @@ namespace webnn_native { namespace op {
       public:
         Reshape(ModelBuilderBase* builder,
                 OperandBase* input,
-                int32_t const* new_shape,
-                size_t new_shape_count)
+                int32_t const* newShape,
+                size_t newShapeCount)
             : OperandBase(builder, {input}) {
-            new_shape_.assign(new_shape, new_shape + new_shape_count);
+            mNewShape.assign(newShape, newShape + newShapeCount);
         }
         ~Reshape() override = default;
 
@@ -34,14 +34,14 @@ namespace webnn_native { namespace op {
         }
         MaybeError ValidateAndInferTypes() override;
         int32_t const* GetNewShape() const {
-            return new_shape_.data();
+            return mNewShape.data();
         }
         size_t GetNewShapeCount() const {
-            return new_shape_.size();
+            return mNewShape.size();
         }
 
       private:
-        std::vector<int32_t> new_shape_;
+        std::vector<int32_t> mNewShape;
     };
 
 }}  // namespace webnn_native::op

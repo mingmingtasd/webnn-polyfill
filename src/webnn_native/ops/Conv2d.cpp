@@ -23,31 +23,31 @@ namespace webnn_native { namespace op {
                    Conv2dOptions const* options)
         : OperandBase(builder, {input, filter}) {
         if (options == nullptr || options->padding == nullptr) {
-            padding_ = std::vector<int32_t>(4, 0);
+            mPadding = std::vector<int32_t>(4, 0);
         } else {
-            padding_.assign(options->padding, options->padding + options->paddingCount);
+            mPadding.assign(options->padding, options->padding + options->paddingCount);
         }
-        options_.padding = padding_.data();
-        options_.paddingCount = padding_.size();
+        mOptions.padding = mPadding.data();
+        mOptions.paddingCount = mPadding.size();
 
         if (options == nullptr || options->strides == nullptr) {
-            stride_ = std::vector<int32_t>(2, 1);
+            mStride = std::vector<int32_t>(2, 1);
         } else {
-            stride_.assign(options->strides, options->strides + options->stridesCount);
+            mStride.assign(options->strides, options->strides + options->stridesCount);
         }
-        options_.strides = stride_.data();
-        options_.stridesCount = stride_.size();
+        mOptions.strides = mStride.data();
+        mOptions.stridesCount = mStride.size();
 
         if (options == nullptr || options->dilations == nullptr) {
-            dilations_ = std::vector<int32_t>(2, 1);
+            mDilations = std::vector<int32_t>(2, 1);
         } else {
-            dilations_.assign(options->dilations, options->dilations + options->dilationsCount);
+            mDilations.assign(options->dilations, options->dilations + options->dilationsCount);
         }
-        options_.dilations = dilations_.data();
-        options_.dilationsCount = dilations_.size();
+        mOptions.dilations = mDilations.data();
+        mOptions.dilationsCount = mDilations.size();
 
-        options_.groups = options->groups;
-        options_.layout = options->layout;
+        mOptions.groups = options->groups;
+        mOptions.layout = options->layout;
     }
 
     MaybeError Conv2d::AddToModel(ModelBase* model) const {
@@ -55,12 +55,12 @@ namespace webnn_native { namespace op {
     }
 
     Conv2dOptions const* Conv2d::GetOptions() const {
-        return &options_;
+        return &mOptions;
     }
 
     MaybeError Conv2d::ValidateAndInferTypes() {
-        auto input = inputs_[0];
-        auto filter = inputs_[1];
+        auto input = mInputs[0];
+        auto filter = mInputs[1];
         if (input->IsError() || filter->IsError()) {
             return DAWN_VALIDATION_ERROR("Argument inputs are invalid.");
         }
@@ -77,20 +77,20 @@ namespace webnn_native { namespace op {
             return DAWN_VALIDATION_ERROR("Argument filter is not a 4D tensor.");
         }
         // padding: a sequence of long of length 4
-        if (options_.paddingCount != 4) {
+        if (mOptions.paddingCount != 4) {
             return DAWN_VALIDATION_ERROR("PaddingCount is incorrect.");
         }
         // strides: a sequence of long of length 2
-        if (options_.stridesCount != 2) {
+        if (mOptions.stridesCount != 2) {
             return DAWN_VALIDATION_ERROR("windowDimensionsCount is incorrect.");
         }
         // dilations: a sequence of long of length 2
-        if (options_.dilationsCount != 2) {
+        if (mOptions.dilationsCount != 2) {
             return DAWN_VALIDATION_ERROR("windowDimensionsCount is incorrect.");
         }
 
-        type_ = input->Type();
-        rank_ = 4;
+        mType = input->Type();
+        mRank = 4;
 
         return {};
     }

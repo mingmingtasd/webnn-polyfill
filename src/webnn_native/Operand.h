@@ -25,7 +25,7 @@ namespace webnn_native {
 
     class OperandBase : public ObjectBase {
       public:
-        explicit OperandBase(ModelBuilderBase* model_builder, std::vector<Ref<OperandBase>> = {});
+        explicit OperandBase(ModelBuilderBase* modelBuilder, std::vector<Ref<OperandBase>> = {});
         virtual ~OperandBase() = default;
 
         // It's used for getting inputs when traversaling model tree.
@@ -34,27 +34,27 @@ namespace webnn_native {
         virtual MaybeError AddToModel(ModelBase* model) const;
 
         webnn::OperandType Type() const {
-            return type_;
+            return mType;
         }
         int32_t Rank() const {
-            return rank_;
+            return mRank;
         }
 
-        static OperandBase* MakeError(ModelBuilderBase* model_builder);
+        static OperandBase* MakeError(ModelBuilderBase* modelBuilder);
         virtual MaybeError ValidateAndInferTypes() {
             UNREACHABLE();
         }
 
       private:
-        OperandBase(ModelBuilderBase* model_builder, ObjectBase::ErrorTag tag);
+        OperandBase(ModelBuilderBase* modelBuilder, ObjectBase::ErrorTag tag);
 
       protected:
         // The inputs of operand.
-        std::vector<Ref<OperandBase>> inputs_;
+        std::vector<Ref<OperandBase>> mInputs;
         // The operand type.
-        webnn::OperandType type_;
+        webnn::OperandType mType;
         // only set rank for dimensions
-        int32_t rank_;
+        int32_t mRank;
     };
 }  // namespace webnn_native
 

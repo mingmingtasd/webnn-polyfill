@@ -39,12 +39,12 @@ namespace webnn_native { namespace op {
         Pool2dType GetType() const;
 
       private:
-        Pool2dOptions options_;
-        std::vector<int32_t> window_dimensions_;
-        std::vector<int32_t> padding_;
-        std::vector<int32_t> stride_;
-        std::vector<int32_t> dilations_;
-        Pool2dType op_type_;
+        Pool2dOptions mOptions;
+        std::vector<int32_t> mWindowDimensions;
+        std::vector<int32_t> mPadding;
+        std::vector<int32_t> mStride;
+        std::vector<int32_t> mDilations;
+        Pool2dType mOpType;
     };
 
 }}  // namespace webnn_native::op

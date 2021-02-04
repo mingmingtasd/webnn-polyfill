@@ -17,17 +17,17 @@
 
 namespace webnn_native {
 
-    OperandBase::OperandBase(ModelBuilderBase* model_builder, std::vector<Ref<OperandBase>> inputs)
-        : ObjectBase(model_builder->GetContext()), inputs_(std::move(inputs)) {
+    OperandBase::OperandBase(ModelBuilderBase* modelBuilder, std::vector<Ref<OperandBase>> inputs)
+        : ObjectBase(modelBuilder->GetContext()), mInputs(std::move(inputs)) {
     }
 
-    OperandBase::OperandBase(ModelBuilderBase* model_builder, ObjectBase::ErrorTag tag)
-        : ObjectBase(model_builder->GetContext(), tag) {
+    OperandBase::OperandBase(ModelBuilderBase* modelBuilder, ObjectBase::ErrorTag tag)
+        : ObjectBase(modelBuilder->GetContext(), tag) {
     }
 
     // static
-    OperandBase* OperandBase::MakeError(ModelBuilderBase* model_builder) {
-        return new OperandBase(model_builder, ObjectBase::kError);
+    OperandBase* OperandBase::MakeError(ModelBuilderBase* modelBuilder) {
+        return new OperandBase(modelBuilder, ObjectBase::kError);
     }
 
     MaybeError OperandBase::AddToModel(ModelBase* model) const {
@@ -35,7 +35,7 @@ namespace webnn_native {
     }
 
     const std::vector<Ref<OperandBase>>& OperandBase::Inputs() const {
-        return inputs_;
+        return mInputs;
     }
 
 }  // namespace webnn_native

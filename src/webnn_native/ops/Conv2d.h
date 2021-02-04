@@ -32,10 +32,10 @@ namespace webnn_native { namespace op {
         Conv2dOptions const* GetOptions() const;
 
       private:
-        Conv2dOptions options_;
-        std::vector<int32_t> padding_;
-        std::vector<int32_t> stride_;
-        std::vector<int32_t> dilations_;
+        Conv2dOptions mOptions;
+        std::vector<int32_t> mPadding;
+        std::vector<int32_t> mStride;
+        std::vector<int32_t> mDilations;
     };
 
 }}  // namespace webnn_native::op
