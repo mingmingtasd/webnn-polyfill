@@ -41,7 +41,7 @@ class ValidationTest : public testing::Test {
     std::string GetLastErrorMessage() const;
 
   protected:
-    webnn::NeuralNetworkContext context;
+    webnn::NeuralNetworkContext mContext;
 
   private:
     static void ErrorCallback(WebnnErrorType type, const char* message, void* userdata);

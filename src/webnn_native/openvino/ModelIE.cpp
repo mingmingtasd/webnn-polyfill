@@ -80,7 +80,7 @@ namespace webnn_native { namespace ie {
     }  // namespace
 
     Model::Model(ModelBuilder* model_builder) : ModelBase(model_builder) {
-        // Load ienn_c_api.dll to compile the model.
+        // Create model.
         IEStatusCode code = IE(ie_create_model)(&ie_model_);
         if (code != IEStatusCode::OK) {
             dawn::ErrorLog() << "Failing to load ienn_c_api.dll.";

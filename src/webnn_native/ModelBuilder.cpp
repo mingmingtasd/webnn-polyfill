@@ -102,30 +102,27 @@ namespace webnn_native {
     }
 
     ModelBase* ModelBuilderBase::CreateModel(NamedOperandsBase const* named_operands) {
-        ModelBase* model = CreateModelImpl();
+        Ref<ModelBase> model = AcquireRef(CreateModelImpl());
         std::vector<const OperandBase*> outputs;
         for (auto& named_output : named_operands->GetRecords()) {
             outputs.push_back(named_output.second);
         }
         std::vector<const OperandBase*> sorted_operands = TopologicalSort(outputs);
         for (auto& op : sorted_operands) {
-            if (GetContext()->ConsumedError(op->AddToModel(model))) {
-                model->Release();
+            if (GetContext()->ConsumedError(op->AddToModel(model.Get()))) {
                 return ModelBase::MakeError(this);
             }
         }
         for (auto& named_output : named_operands->GetRecords()) {
             if (GetContext()->ConsumedError(
                     model->AddOutput(named_output.first, named_output.second))) {
-                model->Release();
                 return ModelBase::MakeError(this);
             }
         }
         if (GetContext()->ConsumedError(model->Finish())) {
-            model->Release();
             return ModelBase::MakeError(this);
         }
-        return model;
+        return model.Detach();
     }
 
     // The implementation derives from nGraph topological_sort in
