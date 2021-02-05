@@ -48,5 +48,9 @@ template("webnn_sample") {
 }
 
 webnn_sample("LeNet") {
-  sources = [ "LeNet.cpp" ]
+  sources = [
+    "LeNet/LeNet.cpp",
+    "LeNet/MnistUbyte.cpp",
+    "LeNet/MnistUbyte.h",
+  ]
 }

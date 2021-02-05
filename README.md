@@ -65,7 +65,7 @@ Run end2end tests, for example `./out/Release/webnn_end2end_tests`.
 
 ### Run examples
 
- * [LeNet](examples/LeNet/README.md)
+ * [LeNet](/examples/LeNet/README.md)
 
 ## License
 
