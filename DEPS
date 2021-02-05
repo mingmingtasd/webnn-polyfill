@@ -14,10 +14,8 @@ deps = {
   'third_party/dawn': {
     'url': '{dawn_git}/dawn.git@bf1c0cf52377b4db2bf3a433dc5056620aad7cdd'
   },
-
-  # FIXME(nhu): Use the offical repo once issue fixed: https://github.com/microsoft/DirectML/issues/77
   'third_party/DirectML': {
-    'url': '{github_git}/huningxin/DirectML.git@700303f715384e865c0531e3148c1bc826c2d48e',
+    'url': '{github_git}/microsoft/DirectML.git@caff934c9c079f1a1deaf3c3b6e750624e391a98',
     'condition': 'checkout_win',
   },
 
