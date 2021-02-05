@@ -480,9 +480,18 @@ namespace webnn_native { namespace dml {
         const Pool2dOptions* options = pool2d->GetOptions();
         ::dml::Span<const uint32_t> strides(reinterpret_cast<const uint32_t*>(options->strides),
                                             options->stridesCount);
-        ::dml::Span<const uint32_t> windowSizes(
-            reinterpret_cast<const uint32_t*>(options->windowDimensions),
-            options->windowDimensionsCount);
+        std::vector<std::uint32_t> windowSizesVector;
+        if (options->windowDimensions != nullptr) {
+            const uint32_t* windowDimensions =
+                reinterpret_cast<const uint32_t*>(options->windowDimensions);
+            windowSizesVector.assign(windowDimensions,
+                                     windowDimensions + options->windowDimensionsCount);
+        } else {
+            const ::dml::TensorDimensions& inputSizes = input.GetOutputDesc().sizes;
+            // FIXME(nhu): deal wtih NHWC layout
+            windowSizesVector = {inputSizes[2], inputSizes[3]};
+        }
+        ::dml::Span<const uint32_t> windowSizes(windowSizesVector);
         ::dml::Span<const uint32_t> dilations(reinterpret_cast<const uint32_t*>(options->dilations),
                                               options->dilationsCount);
         std::vector<const uint32_t> startPaddingVector(
@@ -509,6 +518,7 @@ namespace webnn_native { namespace dml {
         }
         mExpression.insert(std::make_pair(pool2d, output));
         DAWN_DEBUG() << " op: " << OpTypeToString(pool2d->GetType())
+                     << " windowDimensions: " << DmlSpanToString<const uint32_t>(windowSizes)
                      << " strides: " << DmlSpanToString<const uint32_t>(strides)
                      << " dilations: " << DmlSpanToString<const uint32_t>(dilations)
                      << " startPadding: " << DmlSpanToString<const uint32_t>(startPadding)

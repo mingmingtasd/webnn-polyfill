@@ -22,12 +22,16 @@ namespace webnn_native { namespace op {
                    OperandBase* input,
                    Pool2dOptions const* options)
         : OperandBase(builder, {input}), mOpType(opType) {
-        // If windowDimensions not present, the window dimensions will be set in each backend.
         if (options != nullptr && options->windowDimensions != nullptr) {
             mWindowDimensions.assign(options->windowDimensions,
                                       options->windowDimensions + options->windowDimensionsCount);
             mOptions.windowDimensions = mWindowDimensions.data();
             mOptions.windowDimensionsCount = mWindowDimensions.size();
+        } else {
+            // If options or windowDimensions is not present, the backend should assume the window
+            // dimensions to be the height and width dimensions of the input shape.
+            mOptions.windowDimensions = nullptr;
+            mOptions.windowDimensionsCount = 0;
         }
 
         if (options == nullptr || options->padding == nullptr) {
