@@ -56,9 +56,6 @@ DllHandle InternalLoadDll(const char dll_name[]) {
 #elif defined(_WIN32) || defined(_WIN64)
   handle = LoadLibraryA(dll_name);
 #endif
-  if (handle == kInvalidDllHandle) {
-    dawn::ErrorLog() << "Can't load " << dll_name << " : " << GetDllError();
-  }
   return handle;
 }
 

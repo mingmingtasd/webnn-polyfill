@@ -29,7 +29,11 @@ uint32_t product(const std::vector<int32_t>& dims) {
 webnn::NeuralNetworkContext CreateCppNeuralNetworkContext() {
     WebnnProcTable backendProcs = webnn_native::GetProcs();
     webnnProcSetProcs(&backendProcs);
-    return webnn::NeuralNetworkContext::Acquire(webnn_native::CreateNeuralNetworkContext());
+    WebnnNeuralNetworkContext context = webnn_native::CreateNeuralNetworkContext();
+    if (context) {
+        return webnn::NeuralNetworkContext::Acquire(context);
+    }
+    return webnn::NeuralNetworkContext();
 }
 
 webnn::NamedInputs CreateCppNamedInputs() {
@@ -56,7 +60,8 @@ namespace utils {
     void WrappedModel::SetInput(std::vector<int32_t> shape, std::vector<float> buffer) {
         mInputShape = std::move(shape);
         mInputBuffer = std::move(buffer);
-        mInputDesc = {webnn::OperandType::Float32, mInputShape.data(), (uint32_t)mInputShape.size()};
+        mInputDesc = {webnn::OperandType::Float32, mInputShape.data(),
+                      (uint32_t)mInputShape.size()};
     }
 
     webnn::OperandDescriptor* WrappedModel::InputDesc() {
@@ -214,6 +219,8 @@ namespace utils {
     // Wrapped Compilation
     bool Test(WrappedModel* wrappedModel) {
         gWrappedModel = wrappedModel;
+        // TODO(mingming): Move the code of creating context to setup with reusing ValidationTest
+        // class so that end_to_end test body will not run if fail to create context.
         webnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
         context.SetUncapturedErrorCallback(ErrorCallback, nullptr);
 

@@ -19,7 +19,6 @@ LATE_BINDING_SYMBOL_TABLE_DEFINE_END(IESymbolTable)
 
 IESymbolTable* GetIESymbolTable() {
   static IESymbolTable* ienn_symbol_table = new IESymbolTable();
-  ienn_symbol_table->Load();
   return ienn_symbol_table;
 }
 

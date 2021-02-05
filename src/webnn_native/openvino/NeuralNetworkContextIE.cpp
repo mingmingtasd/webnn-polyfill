@@ -12,19 +12,25 @@
 
 #include "webnn_native/openvino/NeuralNetworkContextIE.h"
 
+#include "common/Log.h"
 #include "common/RefCounted.h"
 #include "webnn_native/openvino/ModelBuilderIE.h"
+#include "webnn_native/openvino/ienn_symbol_table/ienn_symbol_table.h"
 
 namespace webnn_native { namespace ie {
 
     NeuralNetworkContextBase* Create() {
-        Ref<NeuralNetworkContextBase> context = AcquireRef(new NeuralNetworkContext());
-        return context.Detach();
+        // Load ienn_c_api library.
+        if (!GetIESymbolTable()->Load()) {
+            dawn::ErrorLog() << "Failed to load the OpenVINO libraries, please make sure the "
+                                "OpenVINO environment variables are set.";
+            return nullptr;
+        }
+        return new NeuralNetworkContext();
     }
 
     ModelBuilderBase* NeuralNetworkContext::CreateModelBuilderImpl() {
-        Ref<ModelBuilderBase> builder = AcquireRef(new ModelBuilder(this));
-        return builder.Detach();
+        return new ModelBuilder(this);
     }
 
 }}  // namespace webnn_native::ie
