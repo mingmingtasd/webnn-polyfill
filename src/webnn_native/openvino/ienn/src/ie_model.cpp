@@ -168,8 +168,27 @@ ie_operand_t* Model::AddConv2d(ie_operand_t* input,
 ie_operand_t* Model::AddPool2d(ie_pool_type type,
                                ie_operand_t* input,
                                ie_pool2d_options_t* options) {
-  Shape window_dimensions = {static_cast<size_t>(options->windowDimensions[0]),
-                             static_cast<size_t>(options->windowDimensions[1])};
+  // Use the height and width dimensions of the input shape as windowDimensions
+  // if it is not present in options.
+  // TODO: Transpose to NCHW if the layout is NHWC.
+  auto input_node = name_node_map_[input->name];
+  Shape window_dimensions;
+  window_dimensions.reserve(2);
+  if (options->windowDimensions == nullptr ||
+      options->windowDimensionsCount == 0) {
+    auto shape = input_node.get_shape();
+    if (shape.size() <= 1 || shape.size() > 4)
+      return nullptr;
+    size_t height_index =
+        shape.size() == 2 ? shape[0] : shape.size() == 3 ? shape[1] : shape[2];
+    window_dimensions.push_back(shape[height_index]);
+    window_dimensions.push_back(shape[height_index + 1]);
+  } else {
+    window_dimensions.push_back(
+        static_cast<size_t>(options->windowDimensions[0]));
+    window_dimensions.push_back(
+        static_cast<size_t>(options->windowDimensions[1]));
+  }
   Shape pad_begin = {static_cast<size_t>(options->padding[0]),
                      static_cast<size_t>(options->padding[2])};
   Shape pad_end = {static_cast<size_t>(options->padding[1]),
@@ -179,7 +198,6 @@ ie_operand_t* Model::AddPool2d(ie_pool_type type,
   Shape dilations = {static_cast<size_t>(options->dilations[0]),
                      static_cast<size_t>(options->dilations[1])};
 
-  auto input_node = name_node_map_[input->name];
   std::shared_ptr<ngraph::Node> pool2d_node;
   switch (type) {
     case ie_pool_type::AVERAGE_POOL:
