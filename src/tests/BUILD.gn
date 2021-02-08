@@ -123,6 +123,13 @@ test("webnn_unittests") {
     "unittests/ErrorTests.cpp",
     "unittests/ObjectBaseTests.cpp",
     "unittests/ResultTests.cpp",
+    "unittests/validation/BinaryValidationTests.cpp",
+    "unittests/validation/Conv2dValidationTests.cpp",
+    "unittests/validation/ErrorScopeValidationTests.cpp",
+    "unittests/validation/PoolValidationTests.cpp",
+    "unittests/validation/ReshapeValidationTests.cpp",
+    "unittests/validation/TransposeValidationTests.cpp",
+    "unittests/validation/UnaryValidationTests.cpp",
     "unittests/validation/ValidationTest.cpp",
     "unittests/validation/ValidationTest.h",
   ]

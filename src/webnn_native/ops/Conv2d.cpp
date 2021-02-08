@@ -46,8 +46,17 @@ namespace webnn_native { namespace op {
         mOptions.dilations = mDilations.data();
         mOptions.dilationsCount = mDilations.size();
 
-        mOptions.groups = options->groups;
-        mOptions.layout = options->layout;
+        if (options == nullptr) {
+            mOptions.groups = 1;
+        } else {
+            mOptions.groups = options->groups;
+        }
+
+        if (options == nullptr) {
+            mOptions.layout = webnn::OperandLayout::Nchw;
+        } else {
+            mOptions.layout = options->layout;
+        }
     }
 
     MaybeError Conv2d::AddToModel(ModelBase* model) const {
