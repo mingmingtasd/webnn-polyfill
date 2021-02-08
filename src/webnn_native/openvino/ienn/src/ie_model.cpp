@@ -179,8 +179,7 @@ ie_operand_t* Model::AddPool2d(ie_pool_type type,
     auto shape = input_node.get_shape();
     if (shape.size() <= 1 || shape.size() > 4)
       return nullptr;
-    size_t height_index =
-        shape.size() == 2 ? shape[0] : shape.size() == 3 ? shape[1] : shape[2];
+    size_t height_index = shape.size() == 2 ? 0 : shape.size() == 3 ? 1 : 2;
     window_dimensions.push_back(shape[height_index]);
     window_dimensions.push_back(shape[height_index + 1]);
   } else {

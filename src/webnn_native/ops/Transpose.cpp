@@ -12,6 +12,8 @@
 
 #include "webnn_native/ops/Transpose.h"
 
+#include <algorithm>
+
 #include "common/Log.h"
 #include "webnn_native/Error.h"
 
