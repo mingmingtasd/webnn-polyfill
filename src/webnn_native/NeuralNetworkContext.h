@@ -43,8 +43,8 @@ namespace webnn_native {
         void HandleError(std::unique_ptr<ErrorData> error);
         virtual ModelBuilderBase* CreateModelBuilderImpl();
 
-        Ref<ErrorScope> root_error_scope_;
-        Ref<ErrorScope> current_error_scope_;
+        Ref<ErrorScope> mRootErrorScope;
+        Ref<ErrorScope> mCurrentErrorScope;
     };
 
 }  // namespace webnn_native

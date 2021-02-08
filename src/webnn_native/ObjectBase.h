@@ -32,7 +32,7 @@ namespace webnn_native {
         ~ObjectBase() override = default;
 
       private:
-        NeuralNetworkContextBase* context_;
+        NeuralNetworkContextBase* mContext;
     };
 
 }  // namespace webnn_native

@@ -101,11 +101,11 @@ namespace webnn_native {
         DAWN_VALIDATE_AND_INFER_TYPES(new op::Transpose(this, input, options));
     }
 
-    ModelBase* ModelBuilderBase::CreateModel(NamedOperandsBase const* named_operands) {
+    ModelBase* ModelBuilderBase::CreateModel(NamedOperandsBase const* namedOperands) {
         Ref<ModelBase> model = AcquireRef(CreateModelImpl());
         std::vector<const OperandBase*> outputs;
-        for (auto& named_output : named_operands->GetRecords()) {
-            outputs.push_back(named_output.second);
+        for (auto& namedOutput : namedOperands->GetRecords()) {
+            outputs.push_back(namedOutput.second);
         }
         std::vector<const OperandBase*> sorted_operands = TopologicalSort(outputs);
         for (auto& op : sorted_operands) {
@@ -113,9 +113,9 @@ namespace webnn_native {
                 return ModelBase::MakeError(this);
             }
         }
-        for (auto& named_output : named_operands->GetRecords()) {
+        for (auto& namedOutput : namedOperands->GetRecords()) {
             if (GetContext()->ConsumedError(
-                    model->AddOutput(named_output.first, named_output.second))) {
+                    model->AddOutput(namedOutput.first, namedOutput.second))) {
                 return ModelBase::MakeError(this);
             }
         }
@@ -144,31 +144,31 @@ namespace webnn_native {
     // limitations under the License.
     //*****************************************************************************
     std::vector<const OperandBase*> ModelBuilderBase::TopologicalSort(
-        std::vector<const OperandBase*>& root_nodes) {
-        std::stack<const OperandBase*> nodes_to_do;
-        std::unordered_set<const OperandBase*> nodes_done;
+        std::vector<const OperandBase*>& rootNodes) {
+        std::stack<const OperandBase*> nodesToDo;
+        std::unordered_set<const OperandBase*> nodesDone;
         std::vector<const OperandBase*> result;
 
-        for (auto& node : root_nodes) {
-            nodes_to_do.push(node);
+        for (auto& node : rootNodes) {
+            nodesToDo.push(node);
         }
-        while (nodes_to_do.size() > 0) {
-            const OperandBase* node = nodes_to_do.top();
-            if (nodes_done.count(node) == 0) {
+        while (nodesToDo.size() > 0) {
+            const OperandBase* node = nodesToDo.top();
+            if (nodesDone.count(node) == 0) {
                 bool can_add = true;
                 for (auto& dep : node->Inputs()) {
-                    if (nodes_done.count(dep.Get()) == 0) {
+                    if (nodesDone.count(dep.Get()) == 0) {
                         can_add = false;
-                        nodes_to_do.push(dep.Get());
+                        nodesToDo.push(dep.Get());
                     }
                 }
                 if (can_add) {
                     result.push_back(node);
-                    nodes_to_do.pop();
-                    nodes_done.insert(node);
+                    nodesToDo.pop();
+                    nodesDone.insert(node);
                 }
             } else {
-                nodes_to_do.pop();
+                nodesToDo.pop();
             }
         }
         return result;

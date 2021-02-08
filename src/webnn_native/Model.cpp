@@ -19,8 +19,7 @@
 
 namespace webnn_native {
 
-    ModelBase::ModelBase(ModelBuilderBase* model_builder)
-        : ObjectBase(model_builder->GetContext()) {
+    ModelBase::ModelBase(ModelBuilderBase* modelBuilder) : ObjectBase(modelBuilder->GetContext()) {
     }
 
     void ModelBase::Compile(WebnnCompileCallback callback,
@@ -33,13 +32,13 @@ namespace webnn_native {
         CompileImpl(callback, userdata, options);
     }
 
-    ModelBase::ModelBase(ModelBuilderBase* model_builder, ObjectBase::ErrorTag tag)
-        : ObjectBase(model_builder->GetContext(), tag) {
+    ModelBase::ModelBase(ModelBuilderBase* modelBuilder, ObjectBase::ErrorTag tag)
+        : ObjectBase(modelBuilder->GetContext(), tag) {
     }
 
     // static
-    ModelBase* ModelBase::MakeError(ModelBuilderBase* model_builder) {
-        return new ModelBase(model_builder, ObjectBase::kError);
+    ModelBase* ModelBase::MakeError(ModelBuilderBase* modelBuilder) {
+        return new ModelBase(modelBuilder, ObjectBase::kError);
     }
 
     MaybeError ModelBase::AddConstant(const op::Constant* constant) {

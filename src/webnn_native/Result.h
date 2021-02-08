@@ -28,22 +28,22 @@ namespace webnn_native {
 
         // Dawn API
         const void* Buffer() const {
-            return buffer_;
+            return mBuffer;
         }
         uint32_t BufferSize() const {
-            return buffer_size_;
+            return mBufferSize;
         }
         const int32_t* Dimensions() const {
-            return dimensions_.data();
+            return mDimensions.data();
         }
         uint32_t DimensionsSize() const {
-            return dimensions_.size();
+            return mDimensions.size();
         }
 
       protected:
-        void* buffer_;
-        uint32_t buffer_size_;
-        std::vector<int32_t> dimensions_;
+        void* mBuffer;
+        uint32_t mBufferSize;
+        std::vector<int32_t> mDimensions;
     };
 }  // namespace webnn_native
 

@@ -17,7 +17,7 @@
 
 namespace webnn_native {
 
-    ResultBase::ResultBase(void* buffer, uint32_t buffer_size, std::vector<int32_t>& dimensions)
-        : buffer_(buffer), buffer_size_(buffer_size), dimensions_(std::move(dimensions)) {
+    ResultBase::ResultBase(void* buffer, uint32_t bufferSize, std::vector<int32_t>& dimensions)
+        : mBuffer(buffer), mBufferSize(bufferSize), mDimensions(std::move(dimensions)) {
     }
 }  // namespace webnn_native
