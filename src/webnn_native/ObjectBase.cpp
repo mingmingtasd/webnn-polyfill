@@ -17,15 +17,15 @@ namespace webnn_native {
     static constexpr uint64_t kNotErrorPayload = 1;
 
     ObjectBase::ObjectBase(NeuralNetworkContextBase* context)
-        : RefCounted(kNotErrorPayload), context_(context) {
+        : RefCounted(kNotErrorPayload), mContext(context) {
     }
 
     ObjectBase::ObjectBase(NeuralNetworkContextBase* context, ErrorTag)
-        : RefCounted(kErrorPayload), context_(context) {
+        : RefCounted(kErrorPayload), mContext(context) {
     }
 
     NeuralNetworkContextBase* ObjectBase::GetContext() const {
-        return context_;
+        return mContext;
     }
 
     bool ObjectBase::IsError() const {

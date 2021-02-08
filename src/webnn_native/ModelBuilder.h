@@ -47,9 +47,8 @@ namespace webnn_native {
         // Create concrete model.
         virtual ModelBase* CreateModelImpl() = 0;
 
-        // Topological sort of nodes needed to compute root_nodes
-        std::vector<const OperandBase*> TopologicalSort(
-            std::vector<const OperandBase*>& root_nodes);
+        // Topological sort of nodes needed to compute rootNodes
+        std::vector<const OperandBase*> TopologicalSort(std::vector<const OperandBase*>& rootNodes);
     };
 
 }  // namespace webnn_native

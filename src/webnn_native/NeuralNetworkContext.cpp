@@ -20,8 +20,8 @@
 namespace webnn_native {
 
     NeuralNetworkContextBase::NeuralNetworkContextBase() {
-        root_error_scope_ = AcquireRef(new ErrorScope());
-        current_error_scope_ = root_error_scope_.Get();
+        mRootErrorScope = AcquireRef(new ErrorScope());
+        mCurrentErrorScope = mRootErrorScope.Get();
     }
 
     ModelBuilderBase* NeuralNetworkContextBase::CreateModelBuilder() {
@@ -36,22 +36,22 @@ namespace webnn_native {
         if (ConsumedError(ValidateErrorFilter(filter))) {
             return;
         }
-        current_error_scope_ = AcquireRef(new ErrorScope(filter, current_error_scope_.Get()));
+        mCurrentErrorScope = AcquireRef(new ErrorScope(filter, mCurrentErrorScope.Get()));
     }
 
     bool NeuralNetworkContextBase::PopErrorScope(webnn::ErrorCallback callback, void* userdata) {
-        if (DAWN_UNLIKELY(current_error_scope_.Get() == root_error_scope_.Get())) {
+        if (DAWN_UNLIKELY(mCurrentErrorScope.Get() == mRootErrorScope.Get())) {
             return false;
         }
-        current_error_scope_->SetCallback(callback, userdata);
-        current_error_scope_ = Ref<ErrorScope>(current_error_scope_->GetParent());
+        mCurrentErrorScope->SetCallback(callback, userdata);
+        mCurrentErrorScope = Ref<ErrorScope>(mCurrentErrorScope->GetParent());
 
         return true;
     }
 
     void NeuralNetworkContextBase::SetUncapturedErrorCallback(webnn::ErrorCallback callback,
                                                               void* userdata) {
-        root_error_scope_->SetCallback(callback, userdata);
+        mRootErrorScope->SetCallback(callback, userdata);
     }
 
     void NeuralNetworkContextBase::HandleError(std::unique_ptr<ErrorData> error) {
@@ -65,7 +65,7 @@ namespace webnn_native {
 
         // Still forward device loss and internal errors to the error scopes so they
         // all reject.
-        current_error_scope_->HandleError(ToWebnnErrorType(error->GetType()), ss.str().c_str());
+        mCurrentErrorScope->HandleError(ToWebnnErrorType(error->GetType()), ss.str().c_str());
     }
 
 }  // namespace webnn_native

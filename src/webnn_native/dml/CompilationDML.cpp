@@ -26,7 +26,7 @@ namespace webnn_native { namespace dml {
       public:
         using ResultBase::Reference;
         ~Result() {
-            free(buffer_);
+            free(mBuffer);
         }
     };
 

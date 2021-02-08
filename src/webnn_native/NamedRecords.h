@@ -28,23 +28,23 @@ namespace webnn_native {
 
         // WebNN API
         void Set(char const* name, const T* record) {
-            records_[std::string(name)] = record;
+            mRecords[std::string(name)] = record;
         }
 
         T* Get(char const* name) const {
-            if (records_.find(std::string(name)) == records_.end()) {
+            if (mRecords.find(std::string(name)) == mRecords.end()) {
                 return nullptr;
             }
-            return const_cast<T*>(records_.at(std::string(name)));
+            return const_cast<T*>(mRecords.at(std::string(name)));
         }
 
         // Other methods
         const std::map<std::string, const T*>& GetRecords() const {
-            return records_;
+            return mRecords;
         }
 
       private:
-        std::map<std::string, const T*> records_;
+        std::map<std::string, const T*> mRecords;
     };
 }  // namespace webnn_native
 

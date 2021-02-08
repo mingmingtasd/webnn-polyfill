@@ -41,7 +41,7 @@ namespace webnn_native { namespace ie {
       public:
         using ResultBase::Reference;
         ~Result() {
-            ie_compilation_free_buffer(&buffer_);
+            ie_compilation_free_buffer(&mBuffer);
         }
     };
 
