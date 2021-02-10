@@ -26,62 +26,62 @@ namespace webnn_native { namespace ie {
 
     namespace {
         ie_operand_descriptor ConvertTo(OperandDescriptor const* desc) {
-            ie_operand_descriptor ie_desc;
-            ie_desc.dimensions = desc->dimensions;
-            ie_desc.dimensionsCount = desc->dimensionsCount;
+            ie_operand_descriptor ieDesc;
+            ieDesc.dimensions = desc->dimensions;
+            ieDesc.dimensionsCount = desc->dimensionsCount;
             switch (desc->type) {
                 case webnn::OperandType::Float32:
-                    ie_desc.type = ie_operand_type::Float32;
+                    ieDesc.type = ie_operand_type::Float32;
                     break;
                 case webnn::OperandType::Int32:
-                    ie_desc.type = ie_operand_type::Int32;
+                    ieDesc.type = ie_operand_type::Int32;
                     break;
                 case webnn::OperandType::Float16:
-                    ie_desc.type = ie_operand_type::Float16;
+                    ieDesc.type = ie_operand_type::Float16;
                     break;
                 case webnn::OperandType::Uint32:
-                    ie_desc.type = ie_operand_type::Uint32;
+                    ieDesc.type = ie_operand_type::Uint32;
                     break;
                 default:
                     UNREACHABLE();
             }
-            return ie_desc;
+            return ieDesc;
         }
 
         ie_conv2d_options Conv2dOptionsForIE(Conv2dOptions const* options) {
-            ie_conv2d_options ie_options;
-            ie_options.padding = options->padding;
-            ie_options.strides = options->strides;
-            ie_options.dilations = options->dilations;
-            ie_options.groups = options->groups;
-            ie_options.layout = static_cast<ie_operand_layout>(options->layout);
-            return ie_options;
+            ie_conv2d_options ieOptions;
+            ieOptions.padding = options->padding;
+            ieOptions.strides = options->strides;
+            ieOptions.dilations = options->dilations;
+            ieOptions.groups = options->groups;
+            ieOptions.layout = static_cast<ie_operand_layout>(options->layout);
+            return ieOptions;
         }
 
         ie_transpose_options TransposeOptionsForIE(TransposeOptions const* options) {
             if (options == nullptr)
                 return {};
-            ie_transpose_options ie_options;
-            ie_options.permutation = options->permutation;
-            ie_options.permutationCount = options->permutationCount;
-            return ie_options;
+            ie_transpose_options ieOptions;
+            ieOptions.permutation = options->permutation;
+            ieOptions.permutationCount = options->permutationCount;
+            return ieOptions;
         }
 
         ie_pool2d_options Pool2dOptionsForIE(Pool2dOptions const* options) {
-            ie_pool2d_options ie_options;
-            ie_options.windowDimensions = options->windowDimensions;
-            ie_options.padding = options->padding;
-            ie_options.strides = options->strides;
-            ie_options.dilations = options->dilations;
-            ie_options.layout = static_cast<ie_operand_layout>(options->layout);
-            return ie_options;
+            ie_pool2d_options ieOptions;
+            ieOptions.windowDimensions = options->windowDimensions;
+            ieOptions.padding = options->padding;
+            ieOptions.strides = options->strides;
+            ieOptions.dilations = options->dilations;
+            ieOptions.layout = static_cast<ie_operand_layout>(options->layout);
+            return ieOptions;
         }
 
     }  // namespace
 
-    Model::Model(ModelBuilder* model_builder) : ModelBase(model_builder) {
+    Model::Model(ModelBuilder* modelBuilder) : ModelBase(modelBuilder) {
         // Create model.
-        IEStatusCode code = IE(ie_create_model)(&ie_model_);
+        IEStatusCode code = IE(ie_create_model)(&mIeModel);
         if (code != IEStatusCode::OK) {
             dawn::ErrorLog() << "Failing to load ienn_c_api.dll.";
             return;
@@ -89,138 +89,136 @@ namespace webnn_native { namespace ie {
     }
 
     Model::~Model() {
-        IE(ie_model_free)(ie_model_);
+        IE(ie_model_free)(mIeModel);
     }
 
     MaybeError Model::AddConstant(const op::Constant* constant) {
-        ie_operand_descriptor ie_desc = ConvertTo(constant->GetOperandDescriptor());
-        ie_operand_t* ie_operand;
-        IEStatusCode code = IE(ie_model_add_constant)(ie_model_, &ie_desc, constant->GetValue(),
-                                                      constant->GetSize(), &ie_operand);
+        ie_operand_descriptor ieDesc = ConvertTo(constant->GetOperandDescriptor());
+        ie_operand_t* ieOperand;
+        IEStatusCode code = IE(ie_model_add_constant)(mIeModel, &ieDesc, constant->GetValue(),
+                                                      constant->GetSize(), &ieOperand);
         DAWN_TRY(CheckStatusCode(code, "IE add constant"));
 
-        operand_id_map_[constant] = std::string(ie_operand->name);
+        mOperandIdMap[constant] = std::string(ieOperand->name);
         return {};
     }
 
     MaybeError Model::AddInput(const op::Input* input) {
-        ie_operand_descriptor ie_desc = ConvertTo(input->GetOperandDescriptor());
-        ie_operand_t* ie_operand;
-        IEStatusCode code = IE(ie_model_add_input)(ie_model_, &ie_desc, &ie_operand);
+        ie_operand_descriptor ieDesc = ConvertTo(input->GetOperandDescriptor());
+        ie_operand_t* ieOperand;
+        IEStatusCode code = IE(ie_model_add_input)(mIeModel, &ieDesc, &ieOperand);
         DAWN_TRY(CheckStatusCode(code, "IE add input"));
 
-        operand_id_map_[input] = std::string(ie_operand->name);
-        input_id_map_[input->GetName()] = std::string(ie_operand->name);
+        mOperandIdMap[input] = std::string(ieOperand->name);
+        mInputIdMap[input->GetName()] = std::string(ieOperand->name);
         return {};
     }
 
     MaybeError Model::AddOutput(const std::string& name, const OperandBase* output) {
-        ie_operand_t ie_operand;
-        ie_operand.name = const_cast<char*>(operand_id_map_[output].c_str());
-        IEStatusCode code = IE(ie_model_add_output)(ie_model_, &ie_operand);
+        ie_operand_t ieOperand;
+        ieOperand.name = const_cast<char*>(mOperandIdMap[output].c_str());
+        IEStatusCode code = IE(ie_model_add_output)(mIeModel, &ieOperand);
         DAWN_TRY(CheckStatusCode(code, "IE add output"));
 
-        output_name_map_[ie_operand.name] = name;
+        mOutputNameMap[ieOperand.name] = name;
         return {};
     }
 
     MaybeError Model::AddBinary(const op::Binary* binary) {
         auto inputs = binary->Inputs();
         ie_operand_t primary;
-        primary.name = const_cast<char*>(operand_id_map_[inputs[0].Get()].c_str());
+        primary.name = const_cast<char*>(mOperandIdMap[inputs[0].Get()].c_str());
         ie_operand_t secondary;
-        secondary.name = const_cast<char*>(operand_id_map_[inputs[1].Get()].c_str());
-        ie_operand_t* ie_operand = nullptr;
+        secondary.name = const_cast<char*>(mOperandIdMap[inputs[1].Get()].c_str());
+        ie_operand_t* ieOperand = nullptr;
         IEStatusCode code = NOT_FOUND;
         if (binary->GetType() == op::BinaryOpType::kMatMul) {
-            code = IE(ie_model_add_mat_mul)(ie_model_, &primary, &secondary, &ie_operand);
+            code = IE(ie_model_add_mat_mul)(mIeModel, &primary, &secondary, &ieOperand);
         } else {
-            code =
-                IE(ie_model_add_binary)(ie_model_, static_cast<ie_binary_type>(binary->GetType()),
-                                        &primary, &secondary, &ie_operand);
+            code = IE(ie_model_add_binary)(mIeModel, static_cast<ie_binary_type>(binary->GetType()),
+                                           &primary, &secondary, &ieOperand);
         }
         DAWN_TRY(CheckStatusCode(code, "IE add binary"));
 
-        operand_id_map_[binary] = std::string(ie_operand->name);
+        mOperandIdMap[binary] = std::string(ieOperand->name);
         return {};
     }
 
     MaybeError Model::AddConv2d(const op::Conv2d* conv2d) {
         auto inputs = conv2d->Inputs();
         ie_operand_t input;
-        input.name = const_cast<char*>(operand_id_map_[inputs[0].Get()].c_str());
+        input.name = const_cast<char*>(mOperandIdMap[inputs[0].Get()].c_str());
         ie_operand_t filter;
-        filter.name = const_cast<char*>(operand_id_map_[inputs[1].Get()].c_str());
-        ie_operand_t* ie_operand;
-        ie_conv2d_options_t ie_options = Conv2dOptionsForIE(conv2d->GetOptions());
+        filter.name = const_cast<char*>(mOperandIdMap[inputs[1].Get()].c_str());
+        ie_operand_t* ieOperand;
+        ie_conv2d_options_t ieOptions = Conv2dOptionsForIE(conv2d->GetOptions());
         IEStatusCode code =
-            IE(ie_model_add_conv2d)(ie_model_, &input, &filter, &ie_options, &ie_operand);
+            IE(ie_model_add_conv2d)(mIeModel, &input, &filter, &ieOptions, &ieOperand);
         DAWN_TRY(CheckStatusCode(code, "IE add conv2d"));
 
-        operand_id_map_[conv2d] = std::string(ie_operand->name);
+        mOperandIdMap[conv2d] = std::string(ieOperand->name);
         return {};
     }
 
     MaybeError Model::AddPool2d(const op::Pool2d* pool2d) {
         auto inputs = pool2d->Inputs();
         ie_operand_t input;
-        input.name = const_cast<char*>(operand_id_map_[inputs[0].Get()].c_str());
-        ie_operand_t* ie_operand;
-        ie_pool2d_options_t ie_options = Pool2dOptionsForIE(pool2d->GetOptions());
-        IEStatusCode code =
-            IE(ie_model_add_pool2d)(ie_model_, static_cast<ie_pool_type>(pool2d->GetType()), &input,
-                                    &ie_options, &ie_operand);
+        input.name = const_cast<char*>(mOperandIdMap[inputs[0].Get()].c_str());
+        ie_operand_t* ieOperand;
+        ie_pool2d_options_t ieOptions = Pool2dOptionsForIE(pool2d->GetOptions());
+        IEStatusCode code = IE(ie_model_add_pool2d)(
+            mIeModel, static_cast<ie_pool_type>(pool2d->GetType()), &input, &ieOptions, &ieOperand);
         DAWN_TRY(CheckStatusCode(code, "IE add pool2d"));
 
-        operand_id_map_[pool2d] = std::string(ie_operand->name);
+        mOperandIdMap[pool2d] = std::string(ieOperand->name);
         return {};
     }
 
     MaybeError Model::AddUnary(const op::Unary* unary) {
         auto inputs = unary->Inputs();
         ie_operand_t input;
-        input.name = const_cast<char*>(operand_id_map_[inputs[0].Get()].c_str());
-        ie_operand_t* ie_operand = nullptr;
+        input.name = const_cast<char*>(mOperandIdMap[inputs[0].Get()].c_str());
+        ie_operand_t* ieOperand = nullptr;
         IEStatusCode code = NOT_FOUND;
         if (unary->GetType() == op::UnaryOpType::kRelu) {
-            code = IE(ie_model_add_relu)(ie_model_, &input, &ie_operand);
+            code = IE(ie_model_add_relu)(mIeModel, &input, &ieOperand);
         } else if (unary->GetType() == op::UnaryOpType::kSoftmax) {
-            code = IE(ie_model_add_softmax)(ie_model_, &input, &ie_operand);
+            code = IE(ie_model_add_softmax)(mIeModel, &input, &ieOperand);
         }
         DAWN_TRY(CheckStatusCode(code, "IE add unary"));
 
-        operand_id_map_[unary] = std::string(ie_operand->name);
+        mOperandIdMap[unary] = std::string(ieOperand->name);
         return {};
     }
 
     MaybeError Model::AddReshape(const op::Reshape* reshape) {
         auto inputs = reshape->Inputs();
         ie_operand_t input;
-        input.name = const_cast<char*>(operand_id_map_[inputs[0].Get()].c_str());
-        ie_operand_t* ie_operand;
-        IEStatusCode code = IE(ie_model_add_reshape)(ie_model_, &input, reshape->GetNewShape(),
-                                                     reshape->GetNewShapeCount(), &ie_operand);
+        input.name = const_cast<char*>(mOperandIdMap[inputs[0].Get()].c_str());
+        ie_operand_t* ieOperand;
+        IEStatusCode code = IE(ie_model_add_reshape)(mIeModel, &input, reshape->GetNewShape(),
+                                                     reshape->GetNewShapeCount(), &ieOperand);
         DAWN_TRY(CheckStatusCode(code, "IE add reshape"));
 
-        operand_id_map_[reshape] = std::string(ie_operand->name);
+        mOperandIdMap[reshape] = std::string(ieOperand->name);
         return {};
     }
 
     MaybeError Model::AddTranspose(const op::Transpose* transpose) {
         auto inputs = transpose->Inputs();
         ie_operand_t input;
-        input.name = const_cast<char*>(operand_id_map_[inputs[0].Get()].c_str());
-        ie_operand_t* ie_operand;
-        ie_transpose_options_t ie_options = TransposeOptionsForIE(transpose->GetOptions());
-        IEStatusCode code = IE(ie_model_add_transpose)(ie_model_, &input, &ie_options, &ie_operand);
+        input.name = const_cast<char*>(mOperandIdMap[inputs[0].Get()].c_str());
+        ie_operand_t* ieOperand;
+        ie_transpose_options_t ieOptions = TransposeOptionsForIE(transpose->GetOptions());
+        IEStatusCode code = IE(ie_model_add_transpose)(mIeModel, &input, &ieOptions, &ieOperand);
         DAWN_TRY(CheckStatusCode(code, "IE add transpose"));
 
-        operand_id_map_[transpose] = std::string(ie_operand->name);
+        mOperandIdMap[transpose] = std::string(ieOperand->name);
         return {};
     }
 
     MaybeError Model::Finish() {
-        IEStatusCode code = IE(ie_model_finish)(ie_model_);
+        IEStatusCode code = IE(ie_model_finish)(mIeModel);
         DAWN_TRY(CheckStatusCode(code, "IE finish creating model"));
         return {};
     }
@@ -233,28 +231,28 @@ namespace webnn_native { namespace ie {
     }
 
     ie_model_t* Model::GetInferenceEngineModel() {
-        return ie_model_;
+        return mIeModel;
     }
 
     size_t Model::GetOutputsNumber() {
-        size_t output_number = 0;
-        IEStatusCode code = IE(ie_model_get_outputs_number)(ie_model_, &output_number);
+        size_t outputNumber = 0;
+        IEStatusCode code = IE(ie_model_get_outputs_number)(mIeModel, &outputNumber);
         if (code != IEStatusCode::OK) {
             dawn::ErrorLog() << "Failing to get output number for IE.";
         }
-        return output_number;
+        return outputNumber;
     }
 
     std::string Model::GetOutputId(size_t index) {
-        char* output_name;
-        IEStatusCode code = IE(ie_model_get_output_name)(ie_model_, index, &output_name);
+        char* outputName;
+        IEStatusCode code = IE(ie_model_get_output_name)(mIeModel, index, &outputName);
         if (code != IEStatusCode::OK) {
             dawn::ErrorLog() << "Failing to get output name for IE.";
             return std::string();
         }
-        std::string name(output_name);
+        std::string name(outputName);
         // The name has been kept in outputs object, so it can be free.
-        IE(ie_model_free_name)(&output_name);
+        IE(ie_model_free_name)(&outputName);
 
         return name;
     }
