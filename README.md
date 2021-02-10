@@ -1,51 +1,69 @@
-# webnn-native
+# WebNN Native
 
-## Get the code
-Create a `.gclient` file with the following content:
-```
-solutions = [
-  { "name"        : ".",
-    "url"         : "https://github.com/otcshare/webnn-native.git",
-    "deps_file"   : "DEPS",
-    "managed"     : False,
-  },
-]
-```
+WebNN Native is a native implementation of the [Web Neural Network API](https://webmachinelearning.github.io/webnn/).
 
-Sync the dependencies.
+It provides several building blocks:
+
+ - **WebNN C/C++ headers** that applications and other building blocks use.
+   - The `webnn.h` that is an one-to-one mapping with the WebNN IDL.
+   - A C++ wrapper for the `webnn.h`
+ - **Backend implementations** that use platforms' ML APIs:
+   - **DirectML** on Windows 10
+   - **OpenVINO** on Windows 10 and Linux
+   - _Other backends are to be added_
+
+WebNN Native shares the code generator and other infrastructure code of [Dawn](https://dawn.googlesource.com/dawn/) project.
+
+## Build and Run
+
+### Install `depot_tools`
+
+WebNN Native uses the Chromium build system and dependency management so you need to [install depot_tools] and add it to the PATH.
+
+[install depot_tools]: http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up
+
+### Get the code
+
+Get the source code as follows:
+
 ```sh
+# Clone the repo as "webnn-native"
+> git clone https://github.com/webmachinelearning/webnn-native.git webnn-native && cd webnn-native
+
+# Bootstrap the gclient configuration
+> cp scripts/standalone.gclient .gclient
+
+# Fetch external dependencies and toolchains with gclient
 > gclient sync
 ```
-## Manually build step by step
+
 ### Setting up the build
-Generate projects with OpenVINO backend
-```sh
-> gn gen out/Default --args="webnn_enable_openvino = true"
-```
 
-Or generate projects with DirectML backend
-```sh
-> gn gen out/Default --args="webnn_enable_dml = true"
-```
+Generate build files using `gn args out/Debug` or `gn args out/Release`.
 
-Or generate projects with default null backend
-```sh
-> gn gen out/Default
-```
-### Build by ninja
-```sh
-> ninja -C out/Default
-```
+A text editor will appear asking build options, the most common option is `is_debug=true/false`; otherwise `gn args out/Release --list` shows all the possible options.
 
-## Build with Batch Scripts under [./build_script](./build_script) folder
-Please refer to [./build_script/README](./build_script/README.md).
+To build with DirectML backend, set build option `webnn_enable_dml=true`.
 
-## Test
-For OpenVINO build, please [set the environment variables](https://docs.openvinotoolkit.org/2021.1/openvino_docs_install_guides_installing_openvino_windows.html#set-the-environment-variables) first.
-```sh
-> <out_dir>/webnn_end2end_tests
-```
-or
-```sh
-> <out_dir>\webnn_end2end_tests.exe
-```
+To build with OpenVINO backend, set build option `webnn_enable_openvino=true`.
+
+### Build
+
+Then use `ninja -C out/Release` or `ninja -C out/Debug` to build WebNN Native.
+
+### Run tests
+
+Run unit tests, for example `./out/Release/webnn_unittests`.
+
+Run end2end tests, for example `./out/Release/webnn_end2end_tests`.
+
+**Notes**:
+ * For OpenVINO backend, please [set the environment variables](https://docs.openvinotoolkit.org/2021.1/openvino_docs_install_guides_installing_openvino_windows.html#set-the-environment-variables) before running the end2end tests.
+
+### Run examples
+
+ * [LeNet](examples/LeNet/README.md)
+
+## License
+
+Apache 2.0 Public License, please see [LICENSE](/LICENSE).
