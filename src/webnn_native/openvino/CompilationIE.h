@@ -34,8 +34,8 @@ namespace webnn_native { namespace ie {
                          void* userdata,
                          NamedOutputsBase* outputs) override;
 
-        Ref<Model> model_;
-        ie_compilation_t* ie_compilation_;
+        Ref<Model> mModel;
+        ie_compilation_t* mIeCompilation;
     };
 
 }}  // namespace webnn_native::ie

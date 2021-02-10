@@ -18,8 +18,8 @@
 namespace webnn_native { namespace ie {
 
     MaybeError CheckStatusCodeImpl(IEStatusCode code, const char* context) {
-        std::ostringstream error_message;
-        error_message << context << " failed with status code " << code;
+        std::ostringstream errorMessage;
+        errorMessage << context << " failed with status code " << code;
 
         switch (code) {
             case IEStatusCode::OK:
@@ -28,9 +28,9 @@ namespace webnn_native { namespace ie {
             case IEStatusCode::PARAMETER_MISMATCH:
             case IEStatusCode::NOT_FOUND:
             case IEStatusCode::OUT_OF_BOUNDS:
-                return DAWN_VALIDATION_ERROR(error_message.str());
+                return DAWN_VALIDATION_ERROR(errorMessage.str());
             default:
-                return DAWN_INTERNAL_ERROR(error_message.str());
+                return DAWN_INTERNAL_ERROR(errorMessage.str());
         }
         return {};
     }

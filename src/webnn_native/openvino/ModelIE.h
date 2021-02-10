@@ -59,14 +59,14 @@ namespace webnn_native { namespace ie {
                          void* userdata,
                          CompilationOptions const* options) override;
 
-        ie_model_t* ie_model_;
+        ie_model_t* mIeModel;
 
         // Map the input name to IE internal id
-        std::map<std::string, std::string> input_id_map_;
+        std::map<std::string, std::string> mInputIdMap;
         // Map the IE internal id to output name
-        std::map<std::string, std::string> output_name_map_;
+        std::map<std::string, std::string> mOutputNameMap;
         // Map the operand to IE internal id
-        std::map<const OperandBase*, std::string> operand_id_map_;
+        std::map<const OperandBase*, std::string> mOperandIdMap;
     };
 
 }}  // namespace webnn_native::ie
