@@ -18,8 +18,21 @@
 namespace webnn_native { namespace dml {
 
     NeuralNetworkContextBase* Create() {
-        Ref<NeuralNetworkContextBase> context = AcquireRef(new NeuralNetworkContext());
-        return context.Detach();
+        NeuralNetworkContext* context = new NeuralNetworkContext();
+        if (FAILED(context->CreateDevice())) {
+            dawn::ErrorLog() << "Failed to create DirectML device.";
+            return nullptr;
+        }
+        return context;
+    }
+
+    HRESULT NeuralNetworkContext::CreateDevice() {
+#if defined(_DEBUG)
+        mDevice.reset(new ::pydml::Device(true, true));
+#else
+        mDevice.reset(new ::pydml::Device(true, false));
+#endif
+        return mDevice->Init();
     }
 
     ModelBuilderBase* NeuralNetworkContext::CreateModelBuilderImpl() {

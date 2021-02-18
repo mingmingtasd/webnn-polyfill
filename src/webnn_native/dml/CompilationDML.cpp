@@ -37,30 +37,18 @@ namespace webnn_native { namespace dml {
         }
         // TODO(nhu): investigate other execution flag,
         // e.g. DML_EXECUTION_FLAG_ALLOW_HALF_PRECISION_COMPUTATION
-        mCompiledModel.reset(new pydml::CompiledModel(*(mModel->mGraph),
-        // FIXME(nhu): workaround https://github.com/microsoft/DirectML/issues/70
-#if defined(_DEBUG)
-                                                      DML_EXECUTION_FLAG_DISABLE_META_COMMANDS,
-#else
-                                                      DML_EXECUTION_FLAG_NONE,
-#endif
-                                                      outputs));
+        mCompiledModel.reset(
+            new pydml::CompiledModel(*(mModel->mGraph), DML_EXECUTION_FLAG_NONE, outputs));
     }
 
     void Compilation::ComputeImpl(NamedInputsBase* inputs,
                                   WebnnComputeCallback callback,
                                   void* userdata,
                                   NamedOutputsBase* outputs) {
-        // FIXME(nhu): implement async
         for (auto& input : inputs->GetRecords()) {
             ::pydml::Binding* inputBinding = mModel->mInputs.at(input.first);
             inputBinding->data.buffer = const_cast<void*>(input.second->buffer);
             inputBinding->data.size = input.second->size;
-            DAWN_DEBUG() << " set input name: " << input.first << ", buffer "
-                         << input.second->buffer << ", buffer size: " << input.second->size
-                         << ", type: " << DmlTensorDataTypeToString(inputBinding->desc.dataType)
-                         << ", dimensions: "
-                         << DmlTensorDimensionsToString(inputBinding->desc.sizes);
         }
         std::vector<pydml::Binding*> inputBindings;
         for (auto& binding : mModel->mBindings) {
@@ -79,8 +67,12 @@ namespace webnn_native { namespace dml {
                 outputExpressions.push_back(&(output.second));
             }
         }
-        std::vector<pydml::TensorData*> outputTensors =
-            mModel->mDevice->Compute(mCompiledModel->op.Get(), inputBindings, outputExpressions);
+        std::vector<pydml::TensorData*> outputTensors;
+        if (FAILED(mModel->mDevice->DispatchOperator(mCompiledModel->op.Get(), inputBindings,
+                                                     outputExpressions, outputTensors))) {
+            callback(WebnnComputeStatus_Error, nullptr, "Failed to dispatch operator", userdata);
+            return;
+        }
 
         Ref<NamedResultsBase> results = AcquireRef(new NamedResultsBase());
         for (size_t i = 0; i < outputNames.size(); ++i) {
@@ -102,14 +94,10 @@ namespace webnn_native { namespace dml {
                     memcpy(output->buffer, outputBuffer, bufferLength);
                 }
             }
-            DAWN_DEBUG() << " set output name: " << outputName << ", buffer: " << outputBuffer
-                         << ", buffer size: " << bufferLength
-                         << ", type: " << DmlTensorDataTypeToString(tensor->Desc()->dataType)
-                         << ", dimensions: " << DmlTensorDimensionsToString(tensor->Desc()->sizes);
             delete tensor;
         }
-        WebnnComputeStatus status = WebnnComputeStatus_Success;
-        callback(status, reinterpret_cast<WebnnNamedResults>(results.Detach()), nullptr, userdata);
+        callback(WebnnComputeStatus_Success, reinterpret_cast<WebnnNamedResults>(results.Detach()),
+                 nullptr, userdata);
         return;
     }
 

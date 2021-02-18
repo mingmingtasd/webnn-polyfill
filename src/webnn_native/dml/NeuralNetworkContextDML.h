@@ -14,6 +14,7 @@
 #define WEBNN_NATIVE_DML_NEURAL_NETWORK_CONTEXT_DML_H_
 
 #include "webnn_native/NeuralNetworkContext.h"
+#include "webnn_native/dml/deps/src/precomp.h"
 
 namespace webnn_native { namespace dml {
 
@@ -24,7 +25,14 @@ namespace webnn_native { namespace dml {
 
         ModelBuilderBase* CreateModelBuilderImpl() override;
 
+        HRESULT CreateDevice();
+
+        ::pydml::Device* GetDevice() {
+            return mDevice.get();
+        }
+
       private:
+        std::unique_ptr<::pydml::Device> mDevice;
     };
 
 }}  // namespace webnn_native::dml

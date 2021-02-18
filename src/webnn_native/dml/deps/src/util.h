@@ -12,11 +12,13 @@
 
 #define FAILED(hr) (((HRESULT)(hr)) < 0)
 
-inline void ThrowIfFailed(HRESULT hr)
-{
-    if (FAILED(hr))
-        dawn::ErrorLog() << "HRESULT " << std::hex << hr;
-    DAWN_ASSERT (!FAILED(hr));
+#define ReturnIfFailed(hr) \
+{ \
+    if (FAILED(hr)) \
+    { \
+        dawn::ErrorLog() << "HRESULT " << std::hex << hr; \
+        return hr; \
+    } \
 }
 
 inline void ThrowIfNull(void* p)
@@ -112,15 +114,15 @@ struct DmlBufferArrayBinding
     }
 };
 
-inline Microsoft::WRL::ComPtr<ID3D12Resource> CreateCommittedResource(
+inline HRESULT CreateCommittedResource(
     ID3D12Device* device,
     const D3D12_RESOURCE_DESC& resourceDesc,
     const D3D12_HEAP_PROPERTIES& heapProperties,
-    D3D12_RESOURCE_STATES initialState
+    D3D12_RESOURCE_STATES initialState,
+    Microsoft::WRL::ComPtr<ID3D12Resource>& resource
     )
 {
-    Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-    ThrowIfFailed(device->CreateCommittedResource(
+    ReturnIfFailed(device->CreateCommittedResource(
         &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &resourceDesc,
@@ -129,12 +131,13 @@ inline Microsoft::WRL::ComPtr<ID3D12Resource> CreateCommittedResource(
         IID_GRAPHICS_PPV_ARGS(resource.GetAddressOf())
         ));
 
-    return resource;
+    return S_OK;
 }
 
-inline Microsoft::WRL::ComPtr<ID3D12Resource> CreateCpuCustomBuffer(
+inline HRESULT CreateCpuCustomBuffer(
     ID3D12Device* device,
     UINT64 sizeInBytes,
+    Microsoft::WRL::ComPtr<ID3D12Resource>& resource,
     D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
     )
 {
@@ -150,13 +153,15 @@ inline Microsoft::WRL::ComPtr<ID3D12Resource> CreateCpuCustomBuffer(
         device,
         CD3DX12_RESOURCE_DESC::Buffer(sizeInBytes, flags),
         heapProperties,
-        D3D12_RESOURCE_STATE_UNORDERED_ACCESS
+        D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+        resource
         );
 }
 
-inline Microsoft::WRL::ComPtr<ID3D12Resource> CreateDefaultBuffer(
+inline HRESULT CreateDefaultBuffer(
     ID3D12Device* device,
     UINT64 sizeInBytes,
+    Microsoft::WRL::ComPtr<ID3D12Resource>& resource,
     D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
     )
 {
@@ -164,21 +169,23 @@ inline Microsoft::WRL::ComPtr<ID3D12Resource> CreateDefaultBuffer(
         device,
         CD3DX12_RESOURCE_DESC::Buffer(sizeInBytes, flags),
         CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-        D3D12_RESOURCE_STATE_UNORDERED_ACCESS
+        D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+        resource
         );
 }
 
-inline Microsoft::WRL::ComPtr<ID3D12Resource> CreateReadBackBuffer(ID3D12Device* device, UINT64 sizeInBytes)
+inline HRESULT CreateReadBackBuffer(ID3D12Device* device, UINT64 sizeInBytes, Microsoft::WRL::ComPtr<ID3D12Resource>& resource)
 {
     return CreateCommittedResource(
         device,
         CD3DX12_RESOURCE_DESC::Buffer(sizeInBytes),
         CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_READBACK),
-        D3D12_RESOURCE_STATE_COPY_DEST
+        D3D12_RESOURCE_STATE_COPY_DEST,
+        resource
         );
 }
 
-void FillGpuBuffer(
+HRESULT FillGpuBuffer(
     ID3D12GraphicsCommandList* commandList,
     ID3D12DescriptorHeap* descriptorHeapCpuVisible,
     ID3D12DescriptorHeap* descriptorHeapGpuVisible,
@@ -187,7 +194,7 @@ void FillGpuBuffer(
     uint32_t value
     );
 
-void WaitForQueueToComplete(ID3D12CommandQueue* queue);
+HRESULT WaitForQueueToComplete(ID3D12CommandQueue* queue);
 
 inline std::string UintVectorToString(std::vector<uint32_t> const& v)
 {
@@ -220,10 +227,7 @@ T RoundUpToPow2(T value)
 {
     static_assert(std::is_integral_v<T>);
 
-    if (value >= std::numeric_limits<T>::max() / 2)
-    {
-        ThrowIfFailed(E_INVALIDARG); // overflow
-    }
+    DAWN_ASSERT(value < std::numeric_limits<T>::max() / 2);
 
     T pow2 = 1;
     while (pow2 < value)

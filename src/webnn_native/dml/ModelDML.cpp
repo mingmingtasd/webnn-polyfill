@@ -16,6 +16,7 @@
 #include "common/Log.h"
 #include "webnn_native/ErrorData.h"
 #include "webnn_native/dml/CompilationDML.h"
+#include "webnn_native/dml/NeuralNetworkContextDML.h"
 
 namespace webnn_native { namespace dml {
 
@@ -171,17 +172,6 @@ namespace webnn_native { namespace dml {
             return std::to_string(type);
         }
 
-        std::string OpTypeToString(op::Pool2dType type) {
-            if (type == op::Pool2dType::kAveragePool2d) {
-                return "averagePool2d";
-            } else if (type == op::Pool2dType::kL2Pool2d) {
-                return "l2Pool2d";
-            } else if (type == op::Pool2dType::kMaxPool2d) {
-                return "maxPool2d";
-            }
-            return std::to_string(type);
-        }
-
     }  // namespace
 
     std::string DmlTensorDimensionsToString(const ::dml::TensorDimensions& dimensions) {
@@ -239,11 +229,7 @@ namespace webnn_native { namespace dml {
     }
 
     Model::Model(ModelBuilder* modelBuilder) : ModelBase(modelBuilder) {
-#if defined(_DEBUG)
-        mDevice.reset(new ::pydml::Device(true, true));
-#else
-        mDevice.reset(new ::pydml::Device(true, false));
-#endif
+        mDevice = reinterpret_cast<NeuralNetworkContext*>(modelBuilder->GetContext())->GetDevice();
         mGraph.reset(new ::dml::Graph(mDevice->GetDevice()));
     }
 
@@ -266,11 +252,6 @@ namespace webnn_native { namespace dml {
         std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(
             dmlConstant, const_cast<void*>(constant->GetValue()), constant->GetSize()));
         mBindings.push_back(std::move(binding));
-        DAWN_DEBUG() << " impl: " << dmlConstant.Impl() << " value: " << constant->GetValue()
-                     << " size: " << constant->GetSize() << ", type: "
-                     << DmlTensorDataTypeToString(dmlConstant.GetOutputDesc().dataType)
-                     << ", dimensions: "
-                     << DmlTensorDimensionsToString(dmlConstant.GetOutputDesc().sizes);
         return {};
     }
 
@@ -291,10 +272,6 @@ namespace webnn_native { namespace dml {
         std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(dmlInput, nullptr, 0));
         mBindings.push_back(std::move(binding));
         mInputs.insert(std::make_pair(input->GetName(), mBindings.back().get()));
-        DAWN_DEBUG() << " impl: " << dmlInput.Impl() << ", name: " << input->GetName()
-                     << ", type: " << DmlTensorDataTypeToString(dmlInput.GetOutputDesc().dataType)
-                     << ", dimensions: "
-                     << DmlTensorDimensionsToString(dmlInput.GetOutputDesc().sizes);
         return {};
     }
 
@@ -302,7 +279,6 @@ namespace webnn_native { namespace dml {
         DAWN_ASSERT(mExpression.find(output) != mExpression.end());
         ::dml::Expression dmlOutput = mExpression.at(output);
         mOutputs.insert(std::make_pair(name, dmlOutput));
-        DAWN_DEBUG() << " impl: " << dmlOutput.Impl() << ", name: " << name;
         return {};
     }
 
@@ -409,16 +385,6 @@ namespace webnn_native { namespace dml {
             c = ::dml::Reinterpret(c, cNewDims, cNewStrides);
         }
         mExpression.insert(std::make_pair(binary, c));
-        DAWN_DEBUG() << " op: " << OpTypeToString(binary->GetType()) << ", a: {impl: " << a.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(a.GetOutputDesc().dataType)
-                     << ", dimensions: " << DmlTensorDimensionsToString(a.GetOutputDesc().sizes)
-                     << "}, b: {impl: " << b.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(b.GetOutputDesc().dataType)
-                     << ", dimensions: " << DmlTensorDimensionsToString(b.GetOutputDesc().sizes)
-                     << "}, c: {impl: " << c.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(c.GetOutputDesc().dataType)
-                     << ", dimensions: " << DmlTensorDimensionsToString(c.GetOutputDesc().sizes)
-                     << "}";
         return {};
     }
 
@@ -454,21 +420,6 @@ namespace webnn_native { namespace dml {
             // groupCount
             options->groups);
         mExpression.insert(std::make_pair(conv2d, output));
-        DAWN_DEBUG() << " strides: " << DmlSpanToString<const uint32_t>(strides)
-                     << " dilations: " << DmlSpanToString<const uint32_t>(dilations)
-                     << " startPadding: " << DmlSpanToString<const uint32_t>(startPadding)
-                     << " endPadding: " << DmlSpanToString<const uint32_t>(endPadding)
-                     << " groups: " << options->groups << ", input: {impl: " << input.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(input.GetOutputDesc().dataType)
-                     << ", dimensions: " << DmlTensorDimensionsToString(input.GetOutputDesc().sizes)
-                     << "}, filter: {impl: " << filter.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(filter.GetOutputDesc().dataType)
-                     << ", dimensions: "
-                     << DmlTensorDimensionsToString(filter.GetOutputDesc().sizes)
-                     << "}, output: {impl: " << output.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(output.GetOutputDesc().dataType)
-                     << ", dimensions: "
-                     << DmlTensorDimensionsToString(output.GetOutputDesc().sizes) << "}";
         return {};
     }
 
@@ -517,19 +468,6 @@ namespace webnn_native { namespace dml {
             return DAWN_INTERNAL_ERROR("l2Pool2d is not supported.");
         }
         mExpression.insert(std::make_pair(pool2d, output));
-        DAWN_DEBUG() << " op: " << OpTypeToString(pool2d->GetType())
-                     << " windowDimensions: " << DmlSpanToString<const uint32_t>(windowSizes)
-                     << " strides: " << DmlSpanToString<const uint32_t>(strides)
-                     << " dilations: " << DmlSpanToString<const uint32_t>(dilations)
-                     << " startPadding: " << DmlSpanToString<const uint32_t>(startPadding)
-                     << " endPadding: " << DmlSpanToString<const uint32_t>(endPadding)
-                     << ", input: {impl: " << input.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(input.GetOutputDesc().dataType)
-                     << ", dimensions: " << DmlTensorDimensionsToString(input.GetOutputDesc().sizes)
-                     << "}, output: {impl: " << output.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(output.GetOutputDesc().dataType)
-                     << ", dimensions: "
-                     << DmlTensorDimensionsToString(output.GetOutputDesc().sizes) << "}";
         return {};
     }
 
@@ -573,14 +511,6 @@ namespace webnn_native { namespace dml {
 
         ::dml::Expression output = ::dml::Reinterpret(input, newSizes, ::dml::NullOpt);
         mExpression.insert(std::make_pair(reshape, output));
-        DAWN_DEBUG() << " new sizes: " << DmlTensorDimensionsToString(newSizes)
-                     << ", input: {impl: " << input.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(input.GetOutputDesc().dataType)
-                     << ", dimensions: " << DmlTensorDimensionsToString(input.GetOutputDesc().sizes)
-                     << "}, output: {impl: " << output.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(output.GetOutputDesc().dataType)
-                     << ", dimensions: "
-                     << DmlTensorDimensionsToString(output.GetOutputDesc().sizes) << "}";
         return {};
     }
 
@@ -639,15 +569,6 @@ namespace webnn_native { namespace dml {
         ::dml::Expression output =
             ::dml::Identity(::dml::Reinterpret(input, transposedSizes, transposedStrides));
         mExpression.insert(std::make_pair(transpose, output));
-
-        DAWN_DEBUG() << " permutation: " << DmlTensorDimensionsToString(permutation)
-                     << ", input: {impl: " << input.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(input.GetOutputDesc().dataType)
-                     << ", dimensions: " << DmlTensorDimensionsToString(input.GetOutputDesc().sizes)
-                     << "}, output: {impl: " << output.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(output.GetOutputDesc().dataType)
-                     << ", dimensions: "
-                     << DmlTensorDimensionsToString(output.GetOutputDesc().sizes) << "}";
         return {};
     }
 
@@ -668,14 +589,6 @@ namespace webnn_native { namespace dml {
             return DAWN_UNIMPLEMENTED_ERROR(errorMessage);
         }
         mExpression.insert(std::make_pair(unary, output));
-        DAWN_DEBUG() << " op: " << OpTypeToString(unary->GetType())
-                     << ", input: {impl: " << input.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(input.GetOutputDesc().dataType)
-                     << ", dimensions: " << DmlTensorDimensionsToString(input.GetOutputDesc().sizes)
-                     << "}, output: {impl: " << output.Impl()
-                     << ", type: " << DmlTensorDataTypeToString(output.GetOutputDesc().dataType)
-                     << ", dimensions: "
-                     << DmlTensorDimensionsToString(output.GetOutputDesc().sizes) << "}";
         return {};
     }
 
@@ -698,8 +611,17 @@ namespace webnn_native { namespace dml {
                             CompilationOptions const* options) {
         // FIXME(nhu): implement async
         WebnnCompileStatus status = WebnnCompileStatus_Success;
-        callback(status, reinterpret_cast<WebnnCompilation>(new Compilation(this)), nullptr,
-                 userdata);
+        Compilation* compilation = new Compilation(this);
+        std::vector<pydml::Binding*> inputBindings;
+        for (auto& binding : mBindings) {
+            inputBindings.push_back(binding.get());
+        }
+        if (FAILED(
+                mDevice->InitializeOperator(compilation->GetCompiledOperator(), inputBindings))) {
+            callback(WebnnCompileStatus_Error, nullptr, "Failed to initialize operator", userdata);
+        } else {
+            callback(status, reinterpret_cast<WebnnCompilation>(compilation), nullptr, userdata);
+        }
     }
 
 }}  // namespace webnn_native::dml

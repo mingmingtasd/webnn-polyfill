@@ -13,11 +13,7 @@ namespace pydml
     public:
         explicit Device(bool useGpu = true, bool useDebugLayer = false);
 
-        std::vector<pydml::TensorData*> Compute(
-            IDMLCompiledOperator* op,
-            std::vector<pydml::Binding*>& inputs,
-            std::vector<dml::Expression*>& outputs
-            );
+        HRESULT Init();
 
         inline bool UseGpu() const
         {
@@ -29,36 +25,40 @@ namespace pydml
             return m_dmlDevice.Get();
         }
 
-    protected:
-        void InitializeOperator(
+        HRESULT InitializeOperator(
             IDMLCompiledOperator* op,
-            std::vector<pydml::Binding*>& inputs
+            const std::vector<pydml::Binding*>& inputs
             );
 
-        std::vector<pydml::TensorData*> DispatchOperator(
+        HRESULT DispatchOperator(
             IDMLCompiledOperator* op,
-            std::vector<pydml::Binding*>& inputs,
-            std::vector<dml::Expression*>& outputs
+            const std::vector<pydml::Binding*>& inputs,
+            const std::vector<dml::Expression*>& outputs,
+            std::vector<pydml::TensorData*>& outputData
             );
+
+    protected:
+        
 
         void RecordOutputReadBack(uint64_t outputsResourceSize);
 
-        std::vector<pydml::TensorData*> DownloadFromReadBackHeap(
+        HRESULT DownloadFromReadBackHeap(
             uint64_t outputsResourceSize, 
-            std::vector<dml::Expression*>& outputs,
-            std::vector<DmlBufferBinding>& outputBindings
+            const std::vector<dml::Expression*>& outputs,
+            const std::vector<DmlBufferBinding>& outputBindings,
+            std::vector<pydml::TensorData*>& outputData
             );
 
-        void EnsureUploadHeapSize(uint64_t requestedSizeInBytes);
-        void EnsureReadBackHeapSize(uint64_t requestedSizeInBytes);
-        void EnsureCpuOrDefaultBufferSize(uint64_t requestedSizeInBytes, _Inout_ Microsoft::WRL::ComPtr<ID3D12Resource>& buffer);
-        void EnsureCpuBufferSize(uint64_t requestedSizeInBytes, _Inout_ Microsoft::WRL::ComPtr<ID3D12Resource>& buffer);
-        void EnsureDefaultBufferSize(uint64_t requestedSizeInBytes, _Inout_ Microsoft::WRL::ComPtr<ID3D12Resource>& buffer);
-        void EnsureDescriptorHeapSize(uint32_t requestedSizeInDescriptors);
+        HRESULT EnsureUploadHeapSize(uint64_t requestedSizeInBytes);
+        HRESULT EnsureReadBackHeapSize(uint64_t requestedSizeInBytes);
+        HRESULT EnsureCpuOrDefaultBufferSize(uint64_t requestedSizeInBytes, _Inout_ Microsoft::WRL::ComPtr<ID3D12Resource>& buffer);
+        HRESULT EnsureCpuBufferSize(uint64_t requestedSizeInBytes, _Inout_ Microsoft::WRL::ComPtr<ID3D12Resource>& buffer);
+        HRESULT EnsureDefaultBufferSize(uint64_t requestedSizeInBytes, _Inout_ Microsoft::WRL::ComPtr<ID3D12Resource>& buffer);
+        HRESULT EnsureDescriptorHeapSize(uint32_t requestedSizeInDescriptors);
 
-        void ClearGpuBuffers(dml::Span<ID3D12Resource*> buffers);
+        HRESULT ClearGpuBuffers(dml::Span<ID3D12Resource*> buffers);
 
-        void ExecuteCommandListAndWait();
+        HRESULT ExecuteCommandListAndWait();
 
         Microsoft::WRL::ComPtr<ID3D12Device> m_d3d12Device;
         Microsoft::WRL::ComPtr<ID3D12CommandQueue> m_commandQueue;
@@ -88,5 +88,6 @@ namespace pydml
 
         bool m_useCpuCustomHeapResources = false;
         bool m_useGpu = true;
+        bool m_useDebugLayer = false;
     };
 }
