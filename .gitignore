@@ -15,7 +15,7 @@ third_party/llvm-build
 third_party/markupsafe/
 third_party/dawn
 third_party/DirectML
-third_party/microsoft.ai.directml.1.4.0
+third_party/microsoft.ai.directml*
 tools
 out
 

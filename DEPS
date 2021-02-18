@@ -15,7 +15,7 @@ deps = {
     'url': '{dawn_git}/dawn.git@bf1c0cf52377b4db2bf3a433dc5056620aad7cdd'
   },
   'third_party/DirectML': {
-    'url': '{github_git}/microsoft/DirectML.git@caff934c9c079f1a1deaf3c3b6e750624e391a98',
+    'url': '{github_git}/microsoft/DirectML.git@e1b29b20a21bd2fb669a0c774f9870f8e9731da6',
     'condition': 'checkout_win',
   },
 

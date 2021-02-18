@@ -37,14 +37,8 @@ namespace webnn_native { namespace dml {
         }
         // TODO(nhu): investigate other execution flag,
         // e.g. DML_EXECUTION_FLAG_ALLOW_HALF_PRECISION_COMPUTATION
-        mCompiledModel.reset(new pydml::CompiledModel(*(mModel->mGraph),
-        // FIXME(nhu): workaround https://github.com/microsoft/DirectML/issues/70
-#if defined(_DEBUG)
-                                                      DML_EXECUTION_FLAG_DISABLE_META_COMMANDS,
-#else
-                                                      DML_EXECUTION_FLAG_NONE,
-#endif
-                                                      outputs));
+        mCompiledModel.reset(
+            new pydml::CompiledModel(*(mModel->mGraph), DML_EXECUTION_FLAG_NONE, outputs));
     }
 
     void Compilation::ComputeImpl(NamedInputsBase* inputs,
