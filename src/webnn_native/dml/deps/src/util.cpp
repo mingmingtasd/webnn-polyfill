@@ -8,7 +8,7 @@
 
 using Microsoft::WRL::ComPtr;
 
-void FillGpuBuffer(
+HRESULT FillGpuBuffer(
     ID3D12GraphicsCommandList* commandList,
     ID3D12DescriptorHeap* descriptorHeapCpuVisible,
     ID3D12DescriptorHeap* descriptorHeapGpuVisible,
@@ -17,7 +17,7 @@ void FillGpuBuffer(
     uint32_t value)
 {
     ComPtr<ID3D12Device> device;
-    ThrowIfFailed(commandList->GetDevice(IID_GRAPHICS_PPV_ARGS(device.GetAddressOf())));
+    ReturnIfFailed(commandList->GetDevice(IID_GRAPHICS_PPV_ARGS(device.GetAddressOf())));
 
     uint32_t incrementSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
@@ -45,14 +45,16 @@ void FillGpuBuffer(
         values,
         0,
         nullptr);
+    return S_OK;
 }
 
-void WaitForQueueToComplete(ID3D12CommandQueue* queue)
+HRESULT WaitForQueueToComplete(ID3D12CommandQueue* queue)
 {
     ComPtr<ID3D12Device> device;
-    ThrowIfFailed(queue->GetDevice(IID_GRAPHICS_PPV_ARGS(device.GetAddressOf())));
+    ReturnIfFailed(queue->GetDevice(IID_GRAPHICS_PPV_ARGS(device.GetAddressOf())));
     ComPtr<ID3D12Fence> fence;
-    ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_GRAPHICS_PPV_ARGS(fence.GetAddressOf())));
-    ThrowIfFailed(queue->Signal(fence.Get(), 1));
-    ThrowIfFailed(fence->SetEventOnCompletion(1, nullptr));
+    ReturnIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_GRAPHICS_PPV_ARGS(fence.GetAddressOf())));
+    ReturnIfFailed(queue->Signal(fence.Get(), 1));
+    ReturnIfFailed(fence->SetEventOnCompletion(1, nullptr));
+    return S_OK;
 }

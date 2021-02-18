@@ -39,18 +39,12 @@ namespace webnn_native { namespace dml {
         // e.g. DML_EXECUTION_FLAG_ALLOW_HALF_PRECISION_COMPUTATION
         mCompiledModel.reset(
             new pydml::CompiledModel(*(mModel->mGraph), DML_EXECUTION_FLAG_NONE, outputs));
-        std::vector<pydml::Binding*> inputBindings;
-        for (auto& binding : mModel->mBindings) {
-            inputBindings.push_back(binding.get());
-        }
-        mModel->mDevice->InitializeOperator(mCompiledModel->op.Get(), inputBindings);
     }
 
     void Compilation::ComputeImpl(NamedInputsBase* inputs,
                                   WebnnComputeCallback callback,
                                   void* userdata,
                                   NamedOutputsBase* outputs) {
-        // FIXME(nhu): implement async
         for (auto& input : inputs->GetRecords()) {
             ::pydml::Binding* inputBinding = mModel->mInputs.at(input.first);
             inputBinding->data.buffer = const_cast<void*>(input.second->buffer);
@@ -73,8 +67,12 @@ namespace webnn_native { namespace dml {
                 outputExpressions.push_back(&(output.second));
             }
         }
-        std::vector<pydml::TensorData*> outputTensors =
-            mModel->mDevice->DispatchOperator(mCompiledModel->op.Get(), inputBindings, outputExpressions);
+        std::vector<pydml::TensorData*> outputTensors;
+        if (FAILED(mModel->mDevice->DispatchOperator(mCompiledModel->op.Get(), inputBindings,
+                                                     outputExpressions, outputTensors))) {
+            callback(WebnnComputeStatus_Error, nullptr, "Failed to dispatch operator", userdata);
+            return;
+        }
 
         Ref<NamedResultsBase> results = AcquireRef(new NamedResultsBase());
         for (size_t i = 0; i < outputNames.size(); ++i) {
@@ -98,8 +96,8 @@ namespace webnn_native { namespace dml {
             }
             delete tensor;
         }
-        WebnnComputeStatus status = WebnnComputeStatus_Success;
-        callback(status, reinterpret_cast<WebnnNamedResults>(results.Detach()), nullptr, userdata);
+        callback(WebnnComputeStatus_Success, reinterpret_cast<WebnnNamedResults>(results.Detach()),
+                 nullptr, userdata);
         return;
     }
 

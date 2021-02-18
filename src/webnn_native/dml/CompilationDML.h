@@ -27,6 +27,10 @@ namespace webnn_native { namespace dml {
         explicit Compilation(const Ref<Model>& model);
         ~Compilation() override = default;
 
+        IDMLCompiledOperator* GetCompiledOperator() {
+            return mCompiledModel->op.Get();
+        }
+
       private:
         void ComputeImpl(NamedInputsBase* inputs,
                          WebnnComputeCallback callback,

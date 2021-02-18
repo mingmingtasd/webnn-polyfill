@@ -16,6 +16,7 @@
 #include "common/Log.h"
 #include "webnn_native/ErrorData.h"
 #include "webnn_native/dml/CompilationDML.h"
+#include "webnn_native/dml/NeuralNetworkContextDML.h"
 
 namespace webnn_native { namespace dml {
 
@@ -228,11 +229,7 @@ namespace webnn_native { namespace dml {
     }
 
     Model::Model(ModelBuilder* modelBuilder) : ModelBase(modelBuilder) {
-#if defined(_DEBUG)
-        mDevice.reset(new ::pydml::Device(true, true));
-#else
-        mDevice.reset(new ::pydml::Device(true, false));
-#endif
+        mDevice = reinterpret_cast<NeuralNetworkContext*>(modelBuilder->GetContext())->GetDevice();
         mGraph.reset(new ::dml::Graph(mDevice->GetDevice()));
     }
 
@@ -614,8 +611,17 @@ namespace webnn_native { namespace dml {
                             CompilationOptions const* options) {
         // FIXME(nhu): implement async
         WebnnCompileStatus status = WebnnCompileStatus_Success;
-        callback(status, reinterpret_cast<WebnnCompilation>(new Compilation(this)), nullptr,
-                 userdata);
+        Compilation* compilation = new Compilation(this);
+        std::vector<pydml::Binding*> inputBindings;
+        for (auto& binding : mBindings) {
+            inputBindings.push_back(binding.get());
+        }
+        if (FAILED(
+                mDevice->InitializeOperator(compilation->GetCompiledOperator(), inputBindings))) {
+            callback(WebnnCompileStatus_Error, nullptr, "Failed to initialize operator", userdata);
+        } else {
+            callback(status, reinterpret_cast<WebnnCompilation>(compilation), nullptr, userdata);
+        }
     }
 
 }}  // namespace webnn_native::dml
