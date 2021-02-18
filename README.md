@@ -12,7 +12,10 @@ It provides several building blocks:
    - **OpenVINO** on Windows 10 and Linux
    - _Other backends are to be added_
 
-WebNN Native shares the code generator and other infrastructure code of [Dawn](https://dawn.googlesource.com/dawn/) project.
+WebNN Native uses the code of other open source projects:
+
+ * The code generator and infrastructure code of [Dawn](https://dawn.googlesource.com/dawn/) project.
+ * The DirectMLX and device wrapper of [DirectML](https://github.com/microsoft/DirectML) project.
 
 ## Build and Run
 
