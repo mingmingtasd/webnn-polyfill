@@ -50,11 +50,6 @@ namespace webnn_native { namespace dml {
             ::pydml::Binding* inputBinding = mModel->mInputs.at(input.first);
             inputBinding->data.buffer = const_cast<void*>(input.second->buffer);
             inputBinding->data.size = input.second->size;
-            DAWN_DEBUG() << " set input name: " << input.first << ", buffer "
-                         << input.second->buffer << ", buffer size: " << input.second->size
-                         << ", type: " << DmlTensorDataTypeToString(inputBinding->desc.dataType)
-                         << ", dimensions: "
-                         << DmlTensorDimensionsToString(inputBinding->desc.sizes);
         }
         std::vector<pydml::Binding*> inputBindings;
         for (auto& binding : mModel->mBindings) {
@@ -96,10 +91,6 @@ namespace webnn_native { namespace dml {
                     memcpy(output->buffer, outputBuffer, bufferLength);
                 }
             }
-            DAWN_DEBUG() << " set output name: " << outputName << ", buffer: " << outputBuffer
-                         << ", buffer size: " << bufferLength
-                         << ", type: " << DmlTensorDataTypeToString(tensor->Desc()->dataType)
-                         << ", dimensions: " << DmlTensorDimensionsToString(tensor->Desc()->sizes);
             delete tensor;
         }
         WebnnComputeStatus status = WebnnComputeStatus_Success;
