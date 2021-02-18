@@ -29,7 +29,6 @@ namespace pydml
             return m_dmlDevice.Get();
         }
 
-    protected:
         void InitializeOperator(
             IDMLCompiledOperator* op,
             std::vector<pydml::Binding*>& inputs
@@ -40,6 +39,9 @@ namespace pydml
             std::vector<pydml::Binding*>& inputs,
             std::vector<dml::Expression*>& outputs
             );
+
+    protected:
+        
 
         void RecordOutputReadBack(uint64_t outputsResourceSize);
 

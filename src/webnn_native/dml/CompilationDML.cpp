@@ -39,6 +39,11 @@ namespace webnn_native { namespace dml {
         // e.g. DML_EXECUTION_FLAG_ALLOW_HALF_PRECISION_COMPUTATION
         mCompiledModel.reset(
             new pydml::CompiledModel(*(mModel->mGraph), DML_EXECUTION_FLAG_NONE, outputs));
+        std::vector<pydml::Binding*> inputBindings;
+        for (auto& binding : mModel->mBindings) {
+            inputBindings.push_back(binding.get());
+        }
+        mModel->mDevice->InitializeOperator(mCompiledModel->op.Get(), inputBindings);
     }
 
     void Compilation::ComputeImpl(NamedInputsBase* inputs,
@@ -69,7 +74,7 @@ namespace webnn_native { namespace dml {
             }
         }
         std::vector<pydml::TensorData*> outputTensors =
-            mModel->mDevice->Compute(mCompiledModel->op.Get(), inputBindings, outputExpressions);
+            mModel->mDevice->DispatchOperator(mCompiledModel->op.Get(), inputBindings, outputExpressions);
 
         Ref<NamedResultsBase> results = AcquireRef(new NamedResultsBase());
         for (size_t i = 0; i < outputNames.size(); ++i) {
