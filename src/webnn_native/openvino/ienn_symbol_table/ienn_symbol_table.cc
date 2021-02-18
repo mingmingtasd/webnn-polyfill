@@ -12,6 +12,8 @@
 
 #include "ienn_symbol_table.h"
 
+#include <memory>
+
 namespace webnn_native {
 
 // The ie_nn_c_api symbols.
@@ -26,8 +28,9 @@ IE_SYMBOLS_LIST
 LATE_BINDING_SYMBOL_TABLE_DEFINE_END(IESymbolTable)
 
 IESymbolTable* GetIESymbolTable() {
-  static IESymbolTable* ienn_symbol_table = new IESymbolTable();
-  return ienn_symbol_table;
+  static std::unique_ptr<IESymbolTable> ienn_symbol_table =
+      std::make_unique<IESymbolTable>();
+  return ienn_symbol_table.get();
 }
 
 }  // namespace webnn_native

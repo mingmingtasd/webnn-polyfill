@@ -31,6 +31,8 @@ webnn::NamedOperands CreateCppNamedOperands();
 
 webnn::NamedOutputs CreateCppNamedOutputs();
 
+void DumpMemoryLeaks();
+
 bool Expected(float output, float expected);
 
 namespace utils {
