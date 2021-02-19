@@ -119,6 +119,7 @@ void CompilationCallback(WebnnCompileStatus status,
 }
 
 int main(int argc, const char* argv[]) {
+    DumpMemoryLeaks();
     webnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
     webnn::ModelBuilder builder = context.CreateModelBuilder();
 
