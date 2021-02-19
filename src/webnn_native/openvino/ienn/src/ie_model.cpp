@@ -124,9 +124,22 @@ ie_operand_t* Model::AddMatMul(ie_operand_t* a, ie_operand_t* b) {
   }
   auto matmul_node = std::make_shared<op::v0::MatMul>(
       primary_node, secondary_node, false, false);
-
   std::string node_name = matmul_node->get_name();
   name_node_map_[node_name] = matmul_node->output(0);
+  // "max_size - 2" is out of range for unsigned int type when max_size is 1D
+  // input shape in openvino implementation[1] that is traked with issue [2],
+  // although nGraph has unsqueeze to 2D [3].
+  // Here is a workaround to convert 2D output to scalar node.
+  // [1]
+  // https://github.com/openvinotoolkit/openvino/blob/releases/2021/1/inference-engine/src/transformations/src/transformations/convert_opset1_to_legacy/convert_matmul_to_fc_or_gemm.cpp#L61,
+  // [2] https://github.com/openvinotoolkit/openvino/issues/4373
+  // [3]
+  // https://github.com/openvinotoolkit/openvino/blob/master/ngraph/core/src/op/matmul.cpp#L85
+  if (primary_shape.size() == 1 && secondary_shape.size() == 1) {
+    auto scalar_node = Reshape(matmul_node->output(0), {1});
+    node_name = scalar_node.get_node()->get_name();
+    name_node_map_[node_name] = scalar_node;
+  }
   return CreateOperand(node_name);
 }
 
