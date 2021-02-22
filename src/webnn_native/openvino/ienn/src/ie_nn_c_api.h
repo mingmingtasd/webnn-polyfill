@@ -14,18 +14,18 @@
 #endif
 
 #if defined(__GNUC__) && (__GNUC__ < 4)
-#define BUILD_NETWORK_C_WRAPPER(...) IENN_C_EXTERN __VA_ARGS__
+#define NEURAL_NETWORK_C_API(...) IENN_C_EXTERN __VA_ARGS__
 #else
 #if defined(_WIN32)
 #ifdef IENN_c_wraper_EXPORTS
-#define BUILD_NETWORK_C_WRAPPER(...) \
+#define NEURAL_NETWORK_C_API(...) \
   IENN_C_EXTERN __declspec(dllexport) __VA_ARGS__ __cdecl
 #else
-#define BUILD_NETWORK_C_WRAPPER(...) \
+#define NEURAL_NETWORK_C_API(...) \
   IENN_C_EXTERN __declspec(dllimport) __VA_ARGS__ __cdecl
 #endif
 #else
-#define BUILD_NETWORK_C_WRAPPER(...) \
+#define NEURAL_NETWORK_C_API(...) \
   IENN_C_EXTERN __attribute__((visibility("default"))) __VA_ARGS__
 #endif
 #endif
@@ -142,19 +142,16 @@ typedef struct dimensions {
  * @brief Create model. Use the ie_model_free() method to
  *  free the model memory.
  * @ingroup model
- * @param ie_operand_t The output operand.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
-ie_create_model(ie_model_t** model);
+NEURAL_NETWORK_C_API(IEStatusCode) ie_create_model(ie_model_t** model);
 
 /**
  * @brief Releases memory occupied by model.
  * @ingroup model
- * @param operand A pointer to the operand to free memory.
+ * @param operand A pointer to the model to free memory.
  */
-BUILD_NETWORK_C_WRAPPER(void)
-ie_model_free(ie_model_t* model);
+NEURAL_NETWORK_C_API(void) ie_model_free(ie_model_t* model);
 
 /**
  * @brief Add Constant node to nGraph. Use the ie_operand_free() method to
@@ -165,7 +162,7 @@ ie_model_free(ie_model_t* model);
  * @param size The size of the value.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_constant(ie_model_t* Compilation,
                       ie_operand_descriptor_t const* desc,
                       void const* value,
@@ -180,7 +177,7 @@ ie_model_add_constant(ie_model_t* Compilation,
  * @param ie_operand_descriptor_t A pointer to the Operand Descriptor.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_input(ie_model_t* model,
                    ie_operand_descriptor_t const* desc,
                    ie_operand_t** operand);
@@ -192,7 +189,7 @@ ie_model_add_input(ie_model_t* model,
  * @param operand Get the name of node to create output node.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_output(ie_model_t* model, ie_operand_t* operand);
 
 /**
@@ -203,7 +200,7 @@ ie_model_add_output(ie_model_t* model, ie_operand_t* operand);
  * @param ie_operand_t The secondary operand.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_mat_mul(ie_model_t* model,
                      ie_operand_t* a,
                      ie_operand_t* b,
@@ -217,7 +214,7 @@ ie_model_add_mat_mul(ie_model_t* model,
  * @param ie_operand_t The secondary operand.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_binary(ie_model_t* model,
                     ie_binary_type type,
                     ie_operand_t* a,
@@ -232,7 +229,7 @@ ie_model_add_binary(ie_model_t* model,
  * @param ie_operand_t The filter operand.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_conv2d(ie_model_t* model,
                     ie_operand_t* input,
                     ie_operand_t* filter,
@@ -247,7 +244,7 @@ ie_model_add_conv2d(ie_model_t* model,
  * @param ie_operand_t The filter operand.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_pool2d(ie_model_t* model,
                     ie_pool_type type,
                     ie_operand_t* input,
@@ -261,7 +258,7 @@ ie_model_add_pool2d(ie_model_t* model,
  * @param ie_operand_t The input operand.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_relu(ie_model_t* model,
                   ie_operand_t* input,
                   ie_operand_t** operand);
@@ -273,7 +270,7 @@ ie_model_add_relu(ie_model_t* model,
  * @param ie_operand_t The input operand.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_reshape(ie_model_t* model,
                      ie_operand_t* input,
                      int32_t const* new_shape,
@@ -287,7 +284,7 @@ ie_model_add_reshape(ie_model_t* model,
  * @param ie_operand_t The input operand.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_softmax(ie_model_t* model,
                      ie_operand_t* input,
                      ie_operand_t** operand);
@@ -299,7 +296,7 @@ ie_model_add_softmax(ie_model_t* model,
  * @param ie_operand_t The input operand.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_transpose(ie_model_t* model,
                        ie_operand_t* input,
                        ie_transpose_options* options,
@@ -310,7 +307,7 @@ ie_model_add_transpose(ie_model_t* model,
  * @ingroup Operand
  * @param operand A pointer to the operand to free memory.
  */
-BUILD_NETWORK_C_WRAPPER(void) ie_operand_free(ie_operand_t* operand);
+NEURAL_NETWORK_C_API(void) ie_operand_free(ie_operand_t* operand);
 
 /**
  * @brief Start to load the network to plugin.
@@ -318,8 +315,7 @@ BUILD_NETWORK_C_WRAPPER(void) ie_operand_free(ie_operand_t* operand);
  * @param compliation A pointer to the specified ie_model_t.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
-ie_model_finish(ie_model_t* compliation);
+NEURAL_NETWORK_C_API(IEStatusCode) ie_model_finish(ie_model_t* compliation);
 
 /**
  * @brief Get outputs number.
@@ -327,7 +323,7 @@ ie_model_finish(ie_model_t* compliation);
  * @param compliation A pointer to the specified ie_model_t.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_get_outputs_number(const ie_model_t* model, size_t* size_result);
 
 /**
@@ -336,7 +332,7 @@ ie_model_get_outputs_number(const ie_model_t* model, size_t* size_result);
  * @param compliation A pointer to the specified ie_model_t.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_get_output_name(const ie_model_t* model,
                          const size_t number,
                          char** name);
@@ -347,8 +343,7 @@ ie_model_get_output_name(const ie_model_t* model,
  * @param compliation A pointer to the specified ie_model_t.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
-ie_model_free_name(char** name);
+NEURAL_NETWORK_C_API(IEStatusCode) ie_model_free_name(char** name);
 
 /**
  * @brief Create compilation. Use the ie_compilation_free() method to
@@ -357,7 +352,7 @@ ie_model_free_name(char** name);
  * @param ie_model_t The model need to be compiled.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_create_compilation(ie_model_t* model, ie_compilation_t** compilation);
 
 /**
@@ -365,8 +360,7 @@ ie_create_compilation(ie_model_t* model, ie_compilation_t** compilation);
  * @ingroup compilation
  * @param operand A pointer to the operand to free memory.
  */
-BUILD_NETWORK_C_WRAPPER(void)
-ie_compilation_free(ie_compilation_t* compilation);
+NEURAL_NETWORK_C_API(void) ie_compilation_free(ie_compilation_t* compilation);
 
 /**
  * @brief Set input data to compute.
@@ -374,7 +368,7 @@ ie_compilation_free(ie_compilation_t* compilation);
  * @param compliation A pointer to the specified ie_execution_t.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_compilation_set_input(ie_compilation_t* compilation,
                          ie_operand_t* operand,
                          const void* buffer,
@@ -386,7 +380,7 @@ ie_compilation_set_input(ie_compilation_t* compilation,
  * @param compliation A pointer to the specified ie_execution_t.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_compilation_get_output(ie_compilation_t* compilation,
                           ie_operand_t* operand,
                           void* buffer,
@@ -398,7 +392,7 @@ ie_compilation_get_output(ie_compilation_t* compilation,
  * @param ie_compilation_t the compilation.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_compilation_compute(ie_compilation_t* compilation);
 
 /**
@@ -407,7 +401,7 @@ ie_compilation_compute(ie_compilation_t* compilation);
  * @param compliation A pointer to the specified ie_compilation_t.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_compilation_get_buffer(const ie_compilation_t* compilation,
                           const char* name,
                           void** buffer,
@@ -419,8 +413,7 @@ ie_compilation_get_buffer(const ie_compilation_t* compilation,
  * @param compliation A pointer to the specified ie_compilation_t.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
-ie_compilation_free_buffer(void** buffer);
+NEURAL_NETWORK_C_API(IEStatusCode) ie_compilation_free_buffer(void** buffer);
 
 /**
  * @brief Get output dimensions with name.
@@ -428,7 +421,7 @@ ie_compilation_free_buffer(void** buffer);
  * @param compliation A pointer to the specified ie_compilation_t.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_compilation_get_dimensions(const ie_compilation_t* compilation,
                               const char* name,
                               ie_dimensions_t* dimensions);
@@ -439,7 +432,7 @@ ie_compilation_get_dimensions(const ie_compilation_t* compilation,
  * @param compliation A pointer to the specified ie_compilation_t.
  * @return Status code of the operation: OK(0) for success.
  */
-BUILD_NETWORK_C_WRAPPER(IEStatusCode)
+NEURAL_NETWORK_C_API(IEStatusCode)
 ie_compilation_free_dimensions(ie_dimensions_t* dimensions);
 
 #endif  // IE_NN_C_API_H
