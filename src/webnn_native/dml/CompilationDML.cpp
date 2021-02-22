@@ -24,7 +24,9 @@ namespace webnn_native { namespace dml {
 
     class Result : public ResultBase {
       public:
-        using ResultBase::Reference;
+        explicit Result(void* buffer, uint32_t buffer_size, std::vector<int32_t>& dimensions)
+            : ResultBase(buffer, buffer_size, dimensions) {
+        }
         ~Result() {
             free(mBuffer);
         }
@@ -85,8 +87,7 @@ namespace webnn_native { namespace dml {
                 // convert from uint32_t to int32_t.
                 dimensions.push_back(static_cast<int32_t>(size));
             }
-            Ref<ResultBase> result =
-                AcquireRef(new Result::ResultBase(outputBuffer, bufferLength, dimensions));
+            Ref<ResultBase> result = AcquireRef(new Result(outputBuffer, bufferLength, dimensions));
             results->Set(outputName.c_str(), result.Detach());
             if (outputs != nullptr) {
                 const Output* output = outputs->GetRecords().at(outputName);
