@@ -41,7 +41,6 @@ class Compilation {
   StatusCode GetDimensions(const char* name, ie_dimensions_t* dimensions);
 
  private:
-  InferRequest* GetInferenceRequest();
   prefer_t preference_;
 
   std::unique_ptr<InferRequest> infer_request_;

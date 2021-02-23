@@ -3,11 +3,11 @@
 
 #include "ie_nn_c_api.h"
 
+#include <inference_engine.hpp>
 #include <map>
 #include <memory>
 #include <vector>
 
-#include <inference_engine.hpp>
 #include "ie_compilation.h"
 #include "ie_model.h"
 #include "utils.h"
@@ -28,6 +28,7 @@ std::map<IE::StatusCode, IEStatusCode> status_map = {
     {IE::StatusCode::REQUEST_BUSY, IEStatusCode::REQUEST_BUSY},
     {IE::StatusCode::RESULT_NOT_READY, IEStatusCode::RESULT_NOT_READY},
     {IE::StatusCode::UNEXPECTED, IEStatusCode::UNEXPECTED}};
+
 #define BEGINE_TRY try {
 #define END_CATCH                                          \
   }                                                        \
