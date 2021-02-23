@@ -17,13 +17,11 @@ namespace webnn_native { namespace null {
 
     // NeuralNetworkContext
     NeuralNetworkContextBase* Create() {
-        Ref<NeuralNetworkContextBase> context = AcquireRef(new NeuralNetworkContext());
-        return context.Detach();
+        return new NeuralNetworkContext();
     }
 
     ModelBuilderBase* NeuralNetworkContext::CreateModelBuilderImpl() {
-        Ref<ModelBuilderBase> builder = AcquireRef(new ModelBuilder(this));
-        return builder.Detach();
+        return new ModelBuilder(this);
     }
 
     // ModelBuilder
@@ -31,8 +29,7 @@ namespace webnn_native { namespace null {
     }
 
     ModelBase* ModelBuilder::CreateModelImpl() {
-        Ref<ModelBase> model = AcquireRef(new Model(this));
-        return model.Detach();
+        return new Model(this);
     }
 
     // Model

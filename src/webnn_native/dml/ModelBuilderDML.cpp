@@ -22,8 +22,7 @@ namespace webnn_native { namespace dml {
     }
 
     ModelBase* ModelBuilder::CreateModelImpl() {
-        Ref<ModelBase> model = AcquireRef(new Model(this));
-        return model.Detach();
+        return new Model(this);
     }
 
 }}  // namespace webnn_native::dml

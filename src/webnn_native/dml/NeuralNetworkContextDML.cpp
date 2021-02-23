@@ -36,8 +36,7 @@ namespace webnn_native { namespace dml {
     }
 
     ModelBuilderBase* NeuralNetworkContext::CreateModelBuilderImpl() {
-        Ref<ModelBuilderBase> builder = AcquireRef(new ModelBuilder(this));
-        return builder.Detach();
+        return new ModelBuilder(this);
     }
 
 }}  // namespace webnn_native::dml
