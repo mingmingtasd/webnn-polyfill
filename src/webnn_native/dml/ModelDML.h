@@ -57,7 +57,7 @@ namespace webnn_native { namespace dml {
                          void* userdata,
                          CompilationOptions const* options) override;
 
-        ::pydml::Device* mDevice;
+        std::shared_ptr<::pydml::Device> mDevice;
         std::unique_ptr<::dml::Graph> mGraph;
         std::map<const OperandBase*, ::dml::Expression> mExpression;
         std::vector<std::unique_ptr<::pydml::Binding>> mBindings;
