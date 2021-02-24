@@ -12,11 +12,97 @@
 
 #include <stdlib.h>
 #include <chrono>
+#include <iomanip>
+#include <iostream>
 #include <memory>
+#include <numeric>
 #include <vector>
 
-#include "SampleUtils.h"
+#include "MnistUbyte.h"
 #include "common/Log.h"
+#include "examples/SampleUtils.h"
+
+std::string gImagePath, gModelPath;
+void* gInputData;
+size_t gInputLength;
+const size_t WEIGHTS_LENGTH = 1724336;
+const size_t TOP_NUMBER = 3;
+
+void SelectTopKData(std::vector<float> outputData,
+                    std::vector<size_t>& topKIndex,
+                    std::vector<float>& topKData) {
+    std::vector<size_t> indexes(outputData.size());
+    std::iota(std::begin(indexes), std::end(indexes), 0);
+    std::partial_sort(
+        std::begin(indexes), std::begin(indexes) + TOP_NUMBER, std::end(indexes),
+        [&outputData](unsigned l, unsigned r) { return outputData[l] > outputData[r]; });
+    sort(outputData.rbegin(), outputData.rend());
+
+    for (size_t i = 0; i < TOP_NUMBER; ++i) {
+        topKIndex[i] = indexes[i];
+        topKData[i] = outputData[i];
+    }
+}
+
+void PrintResult(webnn::Result output) {
+    const float* outputBuffer = static_cast<const float*>(output.Buffer());
+    std::vector<float> outputData(outputBuffer, outputBuffer + output.BufferSize() / sizeof(float));
+    std::vector<size_t> topKIndex(TOP_NUMBER);
+    std::vector<float> topKData(TOP_NUMBER);
+    SelectTopKData(outputData, topKIndex, topKData);
+
+    std::cout << std::endl << "Top " << TOP_NUMBER << " results:" << std::endl << std::endl;
+    std::cout << "#"
+              << "   "
+              << "Label"
+              << " "
+              << "Probability" << std::endl
+              << std::endl;
+    std::cout.precision(2);
+    for (size_t i = 0; i < TOP_NUMBER; ++i) {
+        std::cout << i << "   ";
+        std::cout << std::left << std::setw(5) << std::fixed << topKIndex[i] << " ";
+        std::cout << std::left << std::fixed << 100 * topKData[i] << "%" << std::endl;
+    }
+}
+
+void ShowUsage() {
+    std::cout << std::endl;
+    std::cout << "LeNet Example [OPTION]" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << std::endl;
+    std::cout << "    -h                      "
+              << "Print a usage message." << std::endl;
+    std::cout << "    -i \"<path>\"             "
+              << "Required. Path to image." << std::endl;
+    std::cout << "    -m \"<path>\"             "
+              << "Required. Path to a .bin file with weights for the trained model." << std::endl;
+    std::cout << std::endl;
+}
+
+bool ParseAndCheckArgs(int argc, const char* argv[]) {
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp("-h", argv[i]) == 0) {
+            return false;
+        }
+        if (strcmp("-i", argv[i]) == 0 && i + 1 < argc) {
+            gImagePath = argv[i + 1];
+        } else if (strcmp("-m", argv[i]) == 0 && i + 1 < argc) {
+            gModelPath = argv[i + 1];
+        }
+    }
+
+    bool paramValid = true;
+    if (gImagePath.empty()) {
+        paramValid = false;
+        dawn::ErrorLog() << "Input is required but not set. Please set -i option.";
+    }
+    if (gModelPath.empty()) {
+        paramValid = false;
+        dawn::ErrorLog() << "Model is required but not set. Please set -m option.";
+    }
+    return paramValid;
+}
 
 // The Compilation should be released unitl ComputeCallback.
 webnn::Compilation gCompilation;
@@ -31,25 +117,11 @@ void ComputeCallback(WebnnComputeStatus status,
     }
     end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> elapsedTime = end - start;
-    dawn::InfoLog() << "inference time: " << elapsedTime.count() << " ms";
+    dawn::InfoLog() << "Compute done, inference time: " << elapsedTime.count() << " ms";
 
     webnn::NamedResults outputs = outputs.Acquire(impl);
     webnn::Result output = outputs.Get("output");
-
-    std::vector<float> expectedData = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0};
-    bool expected = true;
-    for (size_t i = 0; i < output.BufferSize() / sizeof(float); ++i) {
-        float outputData = static_cast<const float*>(output.Buffer())[i];
-        if (!Expected(outputData, expectedData[i])) {
-            dawn::ErrorLog() << "The output doesn't output as expected for " << outputData
-                             << " != " << expectedData[i] << " index = " << i;
-            expected = false;
-            break;
-        }
-    }
-    if (expected) {
-        dawn::InfoLog() << "The output output as expected.";
-    }
+    PrintResult(output);
 }
 
 void CompilationCallback(WebnnCompileStatus status,
@@ -61,56 +133,9 @@ void CompilationCallback(WebnnCompileStatus status,
         return;
     }
     gCompilation = gCompilation.Acquire(impl);
-
-    std::vector<float> inputBuffer = {
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   1,   3,   5,   4,   3,   3,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   4,   47,  119, 210,
-        164, 119, 116, 10,  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   2,   99,  233, 250, 253, 252, 250, 246, 72,  3,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   24,  224,
-        253, 254, 253, 254, 253, 230, 72,  2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   3,   105, 240, 253, 226, 253, 254, 250, 136, 3,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   8,   201, 251, 213, 253, 254, 248, 41,  1,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   2,   86,  201, 251, 254, 254, 249,
-        48,  1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   5,   35,  207, 253, 254, 252, 164, 4,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   7,   92,  139, 249, 254,
-        254, 250, 112, 3,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   1,   43,  206, 245, 251, 254, 254, 254, 248, 43,  1,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   2,   80,  239, 253, 254,
-        254, 254, 254, 251, 143, 3,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   5,   111, 239, 250, 250, 250, 253, 252, 168, 4,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   4,
-        74,  90,  91,  98,  234, 251, 170, 5,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   2,   2,   2,   7,   134, 250, 214, 34,
-        1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   16,  245, 253, 208, 31,  0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   4,   2,   0,   0,   0,   0,   0,   4,   137, 251, 250,
-        117, 3,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   25,  168,
-        91,  4,   1,   0,   1,   3,   34,  233, 253, 245, 40,  1,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   4,   156, 247, 210, 69,  39,  7,   54,  93,  201, 252,
-        250, 138, 11,  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,
-        60,  195, 248, 248, 218, 180, 235, 249, 253, 251, 205, 19,  0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   5,   133, 111, 247, 249, 250, 253, 254,
-        253, 226, 11,  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   3,   12,  115, 118, 164, 245, 247, 229, 57,  1,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   3,   3,   4,
-        6,   6,   6,   1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-        0,   0,   0,   0,   0,   0,   0,   0,   0,   0};
-
     webnn::Input a;
-    a.buffer = inputBuffer.data();
-    a.size = inputBuffer.size() * sizeof(float);
+    a.buffer = gInputData;
+    a.size = gInputLength;
     webnn::NamedInputs inputs = CreateCppNamedInputs();
     inputs.Set("input", &a);
 
@@ -120,15 +145,40 @@ void CompilationCallback(WebnnCompileStatus status,
 
 int main(int argc, const char* argv[]) {
     DumpMemoryLeaks();
+    if (!ParseAndCheckArgs(argc, argv)) {
+        ShowUsage();
+        return -1;
+    }
     webnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
     webnn::ModelBuilder builder = context.CreateModelBuilder();
 
-    FILE* fp = fopen("lenet.bin", "rb");
-    const int32_t length = 1724336;
-    void* dataBuffer = malloc(length);
-    size_t size = fread(dataBuffer, sizeof(char), length, fp);
-    dawn::InfoLog() << "size: " << size;
+    MnistUbyte reader(gImagePath);
+    if (!reader.DataInitialized()) {
+        dawn::ErrorLog() << "The input image is invalid.";
+        return -1;
+    }
+    if (reader.Size() != 28 * 28) {
+        dawn::ErrorLog() << "The expected size of the input image is 28 * 28, but got "
+                         << reader.Size();
+        return -1;
+    }
+    std::vector<float> inputBuffer(reader.GetData().get(), reader.GetData().get() + reader.Size());
+    gInputData = inputBuffer.data();
+    gInputLength = inputBuffer.size() * sizeof(float);
+    FILE* fp = fopen(gModelPath.c_str(), "rb");
+    if (!fp) {
+        dawn::ErrorLog() << "Failed to open weights file at " << gModelPath;
+        return -1;
+    }
+    void* dataBuffer = malloc(WEIGHTS_LENGTH);
+    size_t size = fread(dataBuffer, sizeof(char), WEIGHTS_LENGTH, fp);
     fclose(fp);
+    if (size != WEIGHTS_LENGTH) {
+        dawn::ErrorLog() << "The expected size of weights file is " << WEIGHTS_LENGTH
+                         << ", but got " << size;
+        free(dataBuffer);
+        return -1;
+    }
 
     uint32_t byteOffset = 0;
     std::vector<int32_t> inputShape = {1, 1, 28, 28};
