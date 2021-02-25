@@ -16,7 +16,6 @@
 #include <chrono>
 
 #include "common/Log.h"
-#include "examples/SampleUtils.h"
 
 const size_t WEIGHTS_LENGTH = 1724336;
 
@@ -189,7 +188,7 @@ bool LeNet::Compile(webnn::CompilationOptions const* options) {
             lenet->OnCompileDone(status, impl, message);
         },
         this, options);
-    // FIXME: wait for LeNet::CompilationCallback sets the mCompilation.
+    mCompileAsync.Wait();
     if (!mCompilation) {
         return false;
     }
@@ -219,7 +218,7 @@ webnn::Result LeNet::Compute(const void* inputData, size_t inputLength) {
             lenet->OnComputeDone(status, impl, message);
         },
         this, nullptr);
-    // FIXME: wait for LeNet::ComputeCallback sets the mOutputs.
+    mComputeAsync.Wait();
     if (!mResults) {
         return webnn::Result();
     }
@@ -238,17 +237,19 @@ void LeNet::OnError(WebnnErrorType type, char const* message) {
 void LeNet::OnCompileDone(WebnnCompileStatus status, WebnnCompilation impl, char const* message) {
     if (status != WebnnCompileStatus_Success) {
         dawn::ErrorLog() << "Compile failed: " << message;
-        return;
+    } else {
+        mCompilation = mCompilation.Acquire(impl);
     }
-    mCompilation = mCompilation.Acquire(impl);
+    mCompileAsync.Finish();
     return;
 }
 
 void LeNet::OnComputeDone(WebnnComputeStatus status, WebnnNamedResults impl, char const* message) {
     if (status != WebnnComputeStatus_Success) {
         dawn::ErrorLog() << "Compute failed: " << message;
-        return;
+    } else {
+        mResults = mResults.Acquire(impl);
     }
-    mResults = mResults.Acquire(impl);
+    mComputeAsync.Finish();
     return;
 }

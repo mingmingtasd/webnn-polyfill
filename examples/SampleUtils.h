@@ -81,11 +81,11 @@ namespace utils {
 
     bool Test(WrappedModel* model);
 
-    class ComputeSync {
+    class Async {
       public:
-        ComputeSync() : mDone(false) {
+        Async() : mDone(false) {
         }
-        ~ComputeSync() = default;
+        ~Async() = default;
         void Wait();
         void Finish();
 
