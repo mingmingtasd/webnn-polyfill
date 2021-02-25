@@ -31,7 +31,7 @@ namespace webnn_native {
     }
 
     MaybeError OperandBase::AddToModel(ModelBase* model) const {
-        UNREACHABLE();
+        return DAWN_VALIDATION_ERROR("Operand is invalid.");
     }
 
     const std::vector<Ref<OperandBase>>& OperandBase::Inputs() const {

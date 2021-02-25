@@ -20,7 +20,9 @@
 
 const size_t WEIGHTS_LENGTH = 1724336;
 
-LeNet::LeNet() : mWeightsData(new char[WEIGHTS_LENGTH]) {
+LeNet::LeNet() : mWeightsData(new char[WEIGHTS_LENGTH]), mValidationFailed(false) {
+    mContext = CreateCppNeuralNetworkContext();
+    mContext.SetUncapturedErrorCallback(LeNet::UncapturedErrorCallback, this);
 }
 
 bool LeNet::Load(const std::string& weigthsPath) {
@@ -38,9 +40,9 @@ bool LeNet::Load(const std::string& weigthsPath) {
         return false;
     }
 
-    webnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
-    webnn::ModelBuilder builder = context.CreateModelBuilder();
+    webnn::ModelBuilder builder = mContext.CreateModelBuilder();
 
+    mContext.PushErrorScope(webnn::ErrorFilter::Validation);
     uint32_t byteOffset = 0;
     std::vector<int32_t> inputShape = {1, 1, 28, 28};
     webnn::OperandDescriptor inputDesc = {webnn::OperandType::Float32, inputShape.data(),
@@ -165,28 +167,38 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::NamedOperands namedOperands = CreateCppNamedOperands();
     namedOperands.Set("output", softmax);
     mModel = builder.CreateModel(namedOperands);
-    if (mModel) {
-        return true;
-    } else {
+    mContext.PopErrorScope(LeNet::ValidationErrorCallback, this);
+    // FIXME: wait for LeNet::ValidationErrorCallback sets mValidationFailed.
+    if (mValidationFailed) {
+        mModel = webnn::Model();
         return false;
     }
+    return true;
 }
 
 bool LeNet::Compile(webnn::CompilationOptions const* options) {
+    if (!mModel) {
+        dawn::ErrorLog() << "Model is not ready.";
+        return false;
+    }
     std::chrono::time_point<std::chrono::high_resolution_clock> startTime =
         std::chrono::high_resolution_clock::now();
     mModel.Compile(LeNet::CompilationCallback, this, options);
+    // FIXME: wait for LeNet::CompilationCallback sets the mCompilation.
+    if (!mCompilation) {
+        return false;
+    }
     std::chrono::duration<double, std::milli> elapsedTime =
         std::chrono::high_resolution_clock::now() - startTime;
     dawn::InfoLog() << "Compile Time: " << elapsedTime.count() << " ms";
-    if (mCompilation) {
-        return true;
-    } else {
-        return false;
-    }
+    return true;
 }
 
 webnn::Result LeNet::Compute(const void* inputData, size_t inputLength) {
+    if (!mCompilation) {
+        dawn::ErrorLog() << "Compilation is not ready.";
+        return webnn::Result();
+    }
     webnn::Input input;
     input.buffer = inputData;
     input.size = inputLength;
@@ -195,10 +207,28 @@ webnn::Result LeNet::Compute(const void* inputData, size_t inputLength) {
     std::chrono::time_point<std::chrono::high_resolution_clock> startTime =
         std::chrono::high_resolution_clock::now();
     mCompilation.Compute(inputs, LeNet::ComputeCallback, this, nullptr);
+    // FIXME: wait for LeNet::ComputeCallback sets the mOutputs.
+    if (!mOutputs) {
+        return webnn::Result();
+    }
     std::chrono::duration<double, std::milli> elapsedTime =
         std::chrono::high_resolution_clock::now() - startTime;
     dawn::InfoLog() << "Compute time: " << elapsedTime.count() << " ms";
     return mOutputs.Get("output");
+}
+
+void LeNet::UncapturedErrorCallback(WebnnErrorType type, char const* message, void* userData) {
+    dawn::ErrorLog() << "UncapturedError type is " << type << ", message is " << message;
+    DAWN_ASSERT(type == WebnnErrorType_NoError);
+}
+
+void LeNet::ValidationErrorCallback(WebnnErrorType type, char const* message, void* userData) {
+    LeNet* lenet = reinterpret_cast<LeNet*>(userData);
+    DAWN_ASSERT(lenet);
+    if (type != WebnnErrorType_NoError) {
+        dawn::ErrorLog() << "ValidationError type is " << type << ", message is " << message;
+        lenet->mValidationFailed = true;
+    }
 }
 
 void LeNet::CompilationCallback(WebnnCompileStatus status,

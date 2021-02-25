@@ -21,7 +21,7 @@ Options:
 ## Example Output
 
 ```sh
-> out\openvino\LeNet.exe -m examples\LeNet\lenet.bin -i examples\LeNet\images\9.idx
+> out\Release\LeNet.exe -m examples\LeNet\lenet.bin -i examples\LeNet\images\9.idx
 Info: Compile Time: 46.3714 ms
 Info: Compute time: 1.571 ms
 
