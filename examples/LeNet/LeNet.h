@@ -37,8 +37,7 @@ class LeNet {
     webnn::Model mModel;
     webnn::Compilation mCompilation;
     webnn::NamedResults mResults;
-    // Need to keep the weights data during the life cycle of LeNet.
-    std::unique_ptr<char> mWeightsData;
+
     utils::Async mCompileAsync;
     utils::Async mComputeAsync;
 };

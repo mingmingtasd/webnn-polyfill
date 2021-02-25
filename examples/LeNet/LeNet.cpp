@@ -19,7 +19,7 @@
 
 const size_t WEIGHTS_LENGTH = 1724336;
 
-LeNet::LeNet() : mWeightsData(new char[WEIGHTS_LENGTH]) {
+LeNet::LeNet() {
     mContext = CreateCppNeuralNetworkContext();
     mContext.SetUncapturedErrorCallback(
         [](WebnnErrorType type, char const* message, void* userData) {
@@ -37,7 +37,8 @@ bool LeNet::Load(const std::string& weigthsPath) {
         return false;
     }
 
-    size_t size = fread(mWeightsData.get(), sizeof(char), WEIGHTS_LENGTH, fp);
+    std::unique_ptr<char> weightsData(new char[WEIGHTS_LENGTH]);
+    size_t size = fread(weightsData.get(), sizeof(char), WEIGHTS_LENGTH, fp);
     fclose(fp);
     if (size != WEIGHTS_LENGTH) {
         dawn::ErrorLog() << "The expected size of weights file is " << WEIGHTS_LENGTH
@@ -55,7 +56,7 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::Operand input = builder.Input("input", &inputDesc);
 
     std::vector<int32_t> conv2d1FilterShape = {20, 1, 5, 5};
-    float* conv2d1FilterData = reinterpret_cast<float*>(mWeightsData.get() + byteOffset);
+    float* conv2d1FilterData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
     byteOffset += product(conv2d1FilterShape) * sizeof(float);
     webnn::OperandDescriptor conv2d1FilterDesc = {webnn::OperandType::Float32,
                                                   conv2d1FilterShape.data(),
@@ -66,7 +67,7 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::Operand conv1 = builder.Conv2d(input, conv2d1FilterConstant, &conv2d1Options);
 
     std::vector<int32_t> add1BiasShape = {1, 20, 1, 1};
-    float* add1BiasData = reinterpret_cast<float*>(mWeightsData.get() + byteOffset);
+    float* add1BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
     byteOffset += product(add1BiasShape) * sizeof(float);
     webnn::OperandDescriptor add1BiasDesc = {webnn::OperandType::Float32, add1BiasShape.data(),
                                              (uint32_t)add1BiasShape.size()};
@@ -86,7 +87,7 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::Operand pool1 = builder.MaxPool2d(add1, &options);
 
     std::vector<int32_t> conv2d2FilterShape = {50, 20, 5, 5};
-    float* conv2d2FilterData = reinterpret_cast<float*>(mWeightsData.get() + byteOffset);
+    float* conv2d2FilterData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
     byteOffset += product(conv2d2FilterShape) * sizeof(float);
     webnn::OperandDescriptor conv2d2FilterDesc = {webnn::OperandType::Float32,
                                                   conv2d2FilterShape.data(),
@@ -97,7 +98,7 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::Operand conv2 = builder.Conv2d(pool1, conv2d2FilterConstant, &conv2d2Options);
 
     std::vector<int32_t> add2BiasShape = {1, 50, 1, 1};
-    float* add2BiasData = reinterpret_cast<float*>(mWeightsData.get() + byteOffset);
+    float* add2BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
     byteOffset += product(add2BiasShape) * sizeof(float);
     webnn::OperandDescriptor add2BiasDesc = {webnn::OperandType::Float32, add2BiasShape.data(),
                                              (uint32_t)add2BiasShape.size()};
@@ -122,7 +123,7 @@ bool LeNet::Load(const std::string& weigthsPath) {
     byteOffset += 2 * 8;
 
     std::vector<int32_t> matmulShape = {500, 800};
-    float* matmulData = reinterpret_cast<float*>(mWeightsData.get() + byteOffset);
+    float* matmulData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
     byteOffset += product(matmulShape) * sizeof(float);
     webnn::OperandDescriptor matmulDataDesc = {webnn::OperandType::Float32, matmulShape.data(),
                                                (uint32_t)matmulShape.size()};
@@ -133,7 +134,7 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::Operand matmul1 = builder.Matmul(reshape1, matmul1WeightsTransposed);
 
     std::vector<int32_t> add3BiasShape = {1, 500};
-    float* add3BiasData = reinterpret_cast<float*>(mWeightsData.get() + byteOffset);
+    float* add3BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
     byteOffset += product(add3BiasShape) * sizeof(float);
     webnn::OperandDescriptor add3BiasDesc = {webnn::OperandType::Float32, add3BiasShape.data(),
                                              (uint32_t)add3BiasShape.size()};
@@ -147,7 +148,7 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::Operand reshape2 = builder.Reshape(relu, newShape2.data(), newShape2.size());
 
     std::vector<int32_t> matmulShape2 = {10, 500};
-    float* matmulData2 = reinterpret_cast<float*>(mWeightsData.get() + byteOffset);
+    float* matmulData2 = reinterpret_cast<float*>(weightsData.get() + byteOffset);
     byteOffset += product(matmulShape2) * sizeof(float);
     webnn::OperandDescriptor matmulData2Desc = {webnn::OperandType::Float32, matmulShape2.data(),
                                                 (uint32_t)matmulShape2.size()};
@@ -158,7 +159,7 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::Operand matmul2 = builder.Matmul(reshape2, matmul1WeightsTransposed2);
 
     std::vector<int32_t> add4BiasShape = {1, 10};
-    float* add4BiasData = reinterpret_cast<float*>(mWeightsData.get() + byteOffset);
+    float* add4BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
     byteOffset += product(add4BiasShape) * sizeof(float);
     webnn::OperandDescriptor add4BiasDesc = {webnn::OperandType::Float32, add4BiasShape.data(),
                                              (uint32_t)add4BiasShape.size()};
