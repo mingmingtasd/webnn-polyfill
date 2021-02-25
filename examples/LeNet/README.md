@@ -7,7 +7,7 @@ This example leverages the network topology of [the LeNet example of Caffe*](htt
 ## Usage
 
 ```sh
-> out\Release\LeNet.exe -h
+> out/Release/LeNet -h
 
 LeNet [OPTIONs]
 
@@ -21,9 +21,9 @@ Options:
 ## Example Output
 
 ```sh
-> out\Release\LeNet.exe -m examples\LeNet\lenet.bin -i examples\LeNet\images\9.idx
-Info: Compilation Time: 46.3714 ms
-Info: Execution Time: 1.571 ms
+> out/Release/LeNet -m examples/LeNet/lenet.bin -i examples/LeNet/images/9.idx
+Info: Compilation Time: 27.3588 ms
+Info: Execution Time: 0.919068 ms
 
 Prediction Result:
 #   Label Probability
@@ -34,4 +34,4 @@ Prediction Result:
 Info: Done.
 ```
 
-You can find other example [images](/examples/LeNet/images).
+You can also try other example [images](/examples/LeNet/images).
