@@ -22,8 +22,8 @@ Options:
 
 ```sh
 > out\Release\LeNet.exe -m examples\LeNet\lenet.bin -i examples\LeNet\images\9.idx
-Info: Compile Time: 46.3714 ms
-Info: Compute time: 1.571 ms
+Info: Compilation Time: 46.3714 ms
+Info: Execution Time: 1.571 ms
 
 Prediction Result:
 #   Label Probability

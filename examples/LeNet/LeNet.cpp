@@ -190,7 +190,7 @@ bool LeNet::Compile(webnn::CompilationOptions const* options) {
     }
     std::chrono::duration<double, std::milli> elapsedTime =
         std::chrono::high_resolution_clock::now() - startTime;
-    dawn::InfoLog() << "Compile Time: " << elapsedTime.count() << " ms";
+    dawn::InfoLog() << "Compilation Time: " << elapsedTime.count() << " ms";
     return true;
 }
 
@@ -213,7 +213,7 @@ webnn::Result LeNet::Compute(const void* inputData, size_t inputLength) {
     }
     std::chrono::duration<double, std::milli> elapsedTime =
         std::chrono::high_resolution_clock::now() - startTime;
-    dawn::InfoLog() << "Compute time: " << elapsedTime.count() << " ms";
+    dawn::InfoLog() << "Execution Time: " << elapsedTime.count() << " ms";
     return mOutputs.Get("output");
 }
 
