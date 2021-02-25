@@ -39,9 +39,58 @@ namespace webnn_native { namespace null {
     void Model::CompileImpl(WebnnCompileCallback callback,
                             void* userdata,
                             CompilationOptions const* options) {
+        Compilation* compilation = new Compilation();
+        compilation->Compile(callback, userdata, options);
+    }
+
+    MaybeError Model::AddConstant(const op::Constant* constant) {
+        return {};
+    }
+
+    MaybeError Model::AddInput(const op::Input* input) {
+        return {};
+    }
+
+    MaybeError Model::AddOutput(const std::string& name, const OperandBase* output) {
+        return {};
+    }
+
+    MaybeError Model::AddBinary(const op::Binary* binary) {
+        return {};
+    }
+
+    MaybeError Model::AddConv2d(const op::Conv2d* conv2d) {
+        return {};
+    }
+
+    MaybeError Model::AddPool2d(const op::Pool2d* pool2d) {
+        return {};
+    }
+
+    MaybeError Model::AddReshape(const op::Reshape* relu) {
+        return {};
+    }
+
+    MaybeError Model::AddTranspose(const op::Transpose* transpose) {
+        return {};
+    }
+
+    MaybeError Model::AddUnary(const op::Unary* unary) {
+        return {};
+    }
+
+    MaybeError Model::Finish() {
+        return {};
     }
 
     // Compilation
+    void Compilation::Compile(WebnnCompileCallback callback,
+                              void* userdata,
+                              CompilationOptions const* options) {
+        callback(WebnnCompileStatus_Success, reinterpret_cast<WebnnCompilation>(this), nullptr,
+                 userdata);
+    }
+
     void Compilation::ComputeImpl(NamedInputsBase* inputs,
                                   WebnnComputeCallback callback,
                                   void* userdata,

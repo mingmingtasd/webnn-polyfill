@@ -126,6 +126,7 @@ test("webnn_unittests") {
     "unittests/validation/BinaryValidationTests.cpp",
     "unittests/validation/Conv2dValidationTests.cpp",
     "unittests/validation/ErrorScopeValidationTests.cpp",
+    "unittests/validation/ModelValidationTests.cpp",
     "unittests/validation/PoolValidationTests.cpp",
     "unittests/validation/ReshapeValidationTests.cpp",
     "unittests/validation/TransposeValidationTests.cpp",
