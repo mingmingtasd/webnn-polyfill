@@ -20,9 +20,15 @@
 
 const size_t WEIGHTS_LENGTH = 1724336;
 
-LeNet::LeNet() : mWeightsData(new char[WEIGHTS_LENGTH]), mValidationFailed(false) {
+LeNet::LeNet() : mWeightsData(new char[WEIGHTS_LENGTH]) {
     mContext = CreateCppNeuralNetworkContext();
-    mContext.SetUncapturedErrorCallback(LeNet::UncapturedErrorCallback, this);
+    mContext.SetUncapturedErrorCallback(
+        [](WebnnErrorType type, char const* message, void* userData) {
+            LeNet* lenet = reinterpret_cast<LeNet*>(userData);
+            DAWN_ASSERT(lenet);
+            lenet->OnError(type, message);
+        },
+        this);
 }
 
 bool LeNet::Load(const std::string& weigthsPath) {
@@ -42,7 +48,6 @@ bool LeNet::Load(const std::string& weigthsPath) {
 
     webnn::ModelBuilder builder = mContext.CreateModelBuilder();
 
-    mContext.PushErrorScope(webnn::ErrorFilter::Validation);
     uint32_t byteOffset = 0;
     std::vector<int32_t> inputShape = {1, 1, 28, 28};
     webnn::OperandDescriptor inputDesc = {webnn::OperandType::Float32, inputShape.data(),
@@ -167,12 +172,6 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::NamedOperands namedOperands = CreateCppNamedOperands();
     namedOperands.Set("output", softmax);
     mModel = builder.CreateModel(namedOperands);
-    mContext.PopErrorScope(LeNet::ValidationErrorCallback, this);
-    // FIXME: wait for LeNet::ValidationErrorCallback sets mValidationFailed.
-    if (mValidationFailed) {
-        mModel = webnn::Model();
-        return false;
-    }
     return true;
 }
 
@@ -183,7 +182,13 @@ bool LeNet::Compile(webnn::CompilationOptions const* options) {
     }
     std::chrono::time_point<std::chrono::high_resolution_clock> startTime =
         std::chrono::high_resolution_clock::now();
-    mModel.Compile(LeNet::CompilationCallback, this, options);
+    mModel.Compile(
+        [](WebnnCompileStatus status, WebnnCompilation impl, char const* message, void* userData) {
+            LeNet* lenet = reinterpret_cast<LeNet*>(userData);
+            DAWN_ASSERT(lenet);
+            lenet->OnCompileDone(status, impl, message);
+        },
+        this, options);
     // FIXME: wait for LeNet::CompilationCallback sets the mCompilation.
     if (!mCompilation) {
         return false;
@@ -206,55 +211,44 @@ webnn::Result LeNet::Compute(const void* inputData, size_t inputLength) {
     inputs.Set("input", &input);
     std::chrono::time_point<std::chrono::high_resolution_clock> startTime =
         std::chrono::high_resolution_clock::now();
-    mCompilation.Compute(inputs, LeNet::ComputeCallback, this, nullptr);
+    mCompilation.Compute(
+        inputs,
+        [](WebnnComputeStatus status, WebnnNamedResults impl, char const* message, void* userData) {
+            LeNet* lenet = reinterpret_cast<LeNet*>(userData);
+            DAWN_ASSERT(lenet);
+            lenet->OnComputeDone(status, impl, message);
+        },
+        this, nullptr);
     // FIXME: wait for LeNet::ComputeCallback sets the mOutputs.
-    if (!mOutputs) {
+    if (!mResults) {
         return webnn::Result();
     }
     std::chrono::duration<double, std::milli> elapsedTime =
         std::chrono::high_resolution_clock::now() - startTime;
     dawn::InfoLog() << "Execution Time: " << elapsedTime.count() << " ms";
-    return mOutputs.Get("output");
+    return mResults.Get("output");
 }
 
-void LeNet::UncapturedErrorCallback(WebnnErrorType type, char const* message, void* userData) {
-    dawn::ErrorLog() << "UncapturedError type is " << type << ", message is " << message;
-    DAWN_ASSERT(type == WebnnErrorType_NoError);
-}
-
-void LeNet::ValidationErrorCallback(WebnnErrorType type, char const* message, void* userData) {
-    LeNet* lenet = reinterpret_cast<LeNet*>(userData);
-    DAWN_ASSERT(lenet);
+void LeNet::OnError(WebnnErrorType type, char const* message) {
     if (type != WebnnErrorType_NoError) {
-        dawn::ErrorLog() << "ValidationError type is " << type << ", message is " << message;
-        lenet->mValidationFailed = true;
+        dawn::ErrorLog() << "Error type is " << type << ", message is " << message;
     }
 }
 
-void LeNet::CompilationCallback(WebnnCompileStatus status,
-                                WebnnCompilation impl,
-                                char const* message,
-                                void* userData) {
-    LeNet* lenet = reinterpret_cast<LeNet*>(userData);
-    DAWN_ASSERT(lenet);
+void LeNet::OnCompileDone(WebnnCompileStatus status, WebnnCompilation impl, char const* message) {
     if (status != WebnnCompileStatus_Success) {
         dawn::ErrorLog() << "Compile failed: " << message;
         return;
     }
-    lenet->mCompilation = lenet->mCompilation.Acquire(impl);
+    mCompilation = mCompilation.Acquire(impl);
     return;
 }
 
-void LeNet::ComputeCallback(WebnnComputeStatus status,
-                            WebnnNamedResults impl,
-                            char const* message,
-                            void* userData) {
-    LeNet* lenet = reinterpret_cast<LeNet*>(userData);
-    DAWN_ASSERT(lenet);
+void LeNet::OnComputeDone(WebnnComputeStatus status, WebnnNamedResults impl, char const* message) {
     if (status != WebnnComputeStatus_Success) {
         dawn::ErrorLog() << "Compute failed: " << message;
         return;
     }
-    lenet->mOutputs = lenet->mOutputs.Acquire(impl);
+    mResults = mResults.Acquire(impl);
     return;
 }

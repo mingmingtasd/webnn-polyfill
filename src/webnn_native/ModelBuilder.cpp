@@ -109,7 +109,7 @@ namespace webnn_native {
         }
         std::vector<const OperandBase*> sorted_operands = TopologicalSort(outputs);
         for (auto& op : sorted_operands) {
-            if (GetContext()->ConsumedError(op->AddToModel(model.Get()))) {
+            if (op->IsError() || GetContext()->ConsumedError(op->AddToModel(model.Get()))) {
                 return ModelBase::MakeError(this);
             }
         }

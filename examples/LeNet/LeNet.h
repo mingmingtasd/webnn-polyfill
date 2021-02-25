@@ -25,23 +25,16 @@ class LeNet {
     bool Compile(webnn::CompilationOptions const* options = nullptr);
     webnn::Result Compute(const void* inputData, size_t inputLength);
 
-  private:
-    static void UncapturedErrorCallback(WebnnErrorType type, char const* message, void* userData);
-    static void ValidationErrorCallback(WebnnErrorType type, char const* message, void* userData);
-    static void CompilationCallback(WebnnCompileStatus status,
-                                    WebnnCompilation impl,
-                                    char const* message,
-                                    void* userData);
-    static void ComputeCallback(WebnnComputeStatus status,
-                                WebnnNamedResults impl,
-                                char const* message,
-                                void* userData);
+    // Callbacks
+    void OnError(WebnnErrorType type, char const* message);
+    void OnCompileDone(WebnnCompileStatus status, WebnnCompilation impl, char const* message);
+    void OnComputeDone(WebnnComputeStatus status, WebnnNamedResults impl, char const* message);
 
+  private:
     webnn::NeuralNetworkContext mContext;
     webnn::Model mModel;
     webnn::Compilation mCompilation;
-    webnn::NamedResults mOutputs;
-    // Need to keep the weights data during life cycle of LeNet.
+    webnn::NamedResults mResults;
+    // Need to keep the weights data during the life cycle of LeNet.
     std::unique_ptr<char> mWeightsData;
-    bool mValidationFailed;
 };
