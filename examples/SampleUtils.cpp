@@ -150,7 +150,7 @@ namespace utils {
     webnn::Compilation gCompilation;
     WrappedModel* gWrappedModel;
 
-    void ComputeSync::Wait() {
+    void Async::Wait() {
         // Wait for async callback.
         std::unique_lock<std::mutex> lock(mMutex);
         bool& done = mDone;
@@ -158,7 +158,7 @@ namespace utils {
         mDone = false;
     }
 
-    void ComputeSync::Finish() {
+    void Async::Finish() {
         std::lock_guard<std::mutex> lock(mMutex);
         mDone = true;
         mCondVar.notify_one();

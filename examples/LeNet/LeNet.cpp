@@ -10,175 +10,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "examples/LeNet/LeNet.h"
+
 #include <stdlib.h>
 #include <chrono>
-#include <iomanip>
-#include <iostream>
-#include <memory>
-#include <numeric>
-#include <vector>
 
-#include "MnistUbyte.h"
 #include "common/Log.h"
-#include "examples/SampleUtils.h"
 
-std::string gImagePath, gModelPath;
-void* gInputData;
-size_t gInputLength;
 const size_t WEIGHTS_LENGTH = 1724336;
-const size_t TOP_NUMBER = 3;
 
-void SelectTopKData(std::vector<float> outputData,
-                    std::vector<size_t>& topKIndex,
-                    std::vector<float>& topKData) {
-    std::vector<size_t> indexes(outputData.size());
-    std::iota(std::begin(indexes), std::end(indexes), 0);
-    std::partial_sort(
-        std::begin(indexes), std::begin(indexes) + TOP_NUMBER, std::end(indexes),
-        [&outputData](unsigned l, unsigned r) { return outputData[l] > outputData[r]; });
-    sort(outputData.rbegin(), outputData.rend());
-
-    for (size_t i = 0; i < TOP_NUMBER; ++i) {
-        topKIndex[i] = indexes[i];
-        topKData[i] = outputData[i];
-    }
+LeNet::LeNet() {
+    mContext = CreateCppNeuralNetworkContext();
+    mContext.SetUncapturedErrorCallback(
+        [](WebnnErrorType type, char const* message, void* userData) {
+            LeNet* lenet = reinterpret_cast<LeNet*>(userData);
+            DAWN_ASSERT(lenet);
+            lenet->OnError(type, message);
+        },
+        this);
 }
 
-void PrintResult(webnn::Result output) {
-    const float* outputBuffer = static_cast<const float*>(output.Buffer());
-    std::vector<float> outputData(outputBuffer, outputBuffer + output.BufferSize() / sizeof(float));
-    std::vector<size_t> topKIndex(TOP_NUMBER);
-    std::vector<float> topKData(TOP_NUMBER);
-    SelectTopKData(outputData, topKIndex, topKData);
-
-    std::cout << std::endl << "Top " << TOP_NUMBER << " results:" << std::endl << std::endl;
-    std::cout << "#"
-              << "   "
-              << "Label"
-              << " "
-              << "Probability" << std::endl
-              << std::endl;
-    std::cout.precision(2);
-    for (size_t i = 0; i < TOP_NUMBER; ++i) {
-        std::cout << i << "   ";
-        std::cout << std::left << std::setw(5) << std::fixed << topKIndex[i] << " ";
-        std::cout << std::left << std::fixed << 100 * topKData[i] << "%" << std::endl;
-    }
-}
-
-void ShowUsage() {
-    std::cout << std::endl;
-    std::cout << "LeNet Example [OPTION]" << std::endl;
-    std::cout << "Options:" << std::endl;
-    std::cout << std::endl;
-    std::cout << "    -h                      "
-              << "Print a usage message." << std::endl;
-    std::cout << "    -i \"<path>\"             "
-              << "Required. Path to image." << std::endl;
-    std::cout << "    -m \"<path>\"             "
-              << "Required. Path to a .bin file with weights for the trained model." << std::endl;
-    std::cout << std::endl;
-}
-
-bool ParseAndCheckArgs(int argc, const char* argv[]) {
-    for (int i = 1; i < argc; ++i) {
-        if (strcmp("-h", argv[i]) == 0) {
-            return false;
-        }
-        if (strcmp("-i", argv[i]) == 0 && i + 1 < argc) {
-            gImagePath = argv[i + 1];
-        } else if (strcmp("-m", argv[i]) == 0 && i + 1 < argc) {
-            gModelPath = argv[i + 1];
-        }
-    }
-
-    bool paramValid = true;
-    if (gImagePath.empty()) {
-        paramValid = false;
-        dawn::ErrorLog() << "Input is required but not set. Please set -i option.";
-    }
-    if (gModelPath.empty()) {
-        paramValid = false;
-        dawn::ErrorLog() << "Model is required but not set. Please set -m option.";
-    }
-    return paramValid;
-}
-
-// The Compilation should be released unitl ComputeCallback.
-webnn::Compilation gCompilation;
-std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
-void ComputeCallback(WebnnComputeStatus status,
-                     WebnnNamedResults impl,
-                     char const* message,
-                     void* userData) {
-    if (status != WebnnComputeStatus_Success) {
-        dawn::ErrorLog() << message;
-        return;
-    }
-    end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> elapsedTime = end - start;
-    dawn::InfoLog() << "Compute done, inference time: " << elapsedTime.count() << " ms";
-
-    webnn::NamedResults outputs = outputs.Acquire(impl);
-    webnn::Result output = outputs.Get("output");
-    PrintResult(output);
-}
-
-void CompilationCallback(WebnnCompileStatus status,
-                         WebnnCompilation impl,
-                         char const* message,
-                         void* userData) {
-    if (status != WebnnCompileStatus_Success) {
-        dawn::ErrorLog() << message;
-        return;
-    }
-    gCompilation = gCompilation.Acquire(impl);
-    webnn::Input a;
-    a.buffer = gInputData;
-    a.size = gInputLength;
-    webnn::NamedInputs inputs = CreateCppNamedInputs();
-    inputs.Set("input", &a);
-
-    start = std::chrono::high_resolution_clock::now();
-    gCompilation.Compute(inputs, ComputeCallback, nullptr, nullptr);
-}
-
-int main(int argc, const char* argv[]) {
-    DumpMemoryLeaks();
-    if (!ParseAndCheckArgs(argc, argv)) {
-        ShowUsage();
-        return -1;
-    }
-    webnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
-    webnn::ModelBuilder builder = context.CreateModelBuilder();
-
-    MnistUbyte reader(gImagePath);
-    if (!reader.DataInitialized()) {
-        dawn::ErrorLog() << "The input image is invalid.";
-        return -1;
-    }
-    if (reader.Size() != 28 * 28) {
-        dawn::ErrorLog() << "The expected size of the input image is 28 * 28, but got "
-                         << reader.Size();
-        return -1;
-    }
-    std::vector<float> inputBuffer(reader.GetData().get(), reader.GetData().get() + reader.Size());
-    gInputData = inputBuffer.data();
-    gInputLength = inputBuffer.size() * sizeof(float);
-    FILE* fp = fopen(gModelPath.c_str(), "rb");
+bool LeNet::Load(const std::string& weigthsPath) {
+    FILE* fp = fopen(weigthsPath.c_str(), "rb");
     if (!fp) {
-        dawn::ErrorLog() << "Failed to open weights file at " << gModelPath;
-        return -1;
+        dawn::ErrorLog() << "Failed to open weights file at " << weigthsPath << ".";
+        return false;
     }
-    void* dataBuffer = malloc(WEIGHTS_LENGTH);
-    size_t size = fread(dataBuffer, sizeof(char), WEIGHTS_LENGTH, fp);
+
+    std::unique_ptr<char> weightsData(new char[WEIGHTS_LENGTH]);
+    size_t size = fread(weightsData.get(), sizeof(char), WEIGHTS_LENGTH, fp);
     fclose(fp);
     if (size != WEIGHTS_LENGTH) {
         dawn::ErrorLog() << "The expected size of weights file is " << WEIGHTS_LENGTH
                          << ", but got " << size;
-        free(dataBuffer);
-        return -1;
+        return false;
     }
+
+    webnn::ModelBuilder builder = mContext.CreateModelBuilder();
 
     uint32_t byteOffset = 0;
     std::vector<int32_t> inputShape = {1, 1, 28, 28};
@@ -188,8 +56,8 @@ int main(int argc, const char* argv[]) {
     webnn::Operand input = builder.Input("input", &inputDesc);
 
     std::vector<int32_t> conv2d1FilterShape = {20, 1, 5, 5};
-    float* conv2d1FilterData = static_cast<float*>(dataBuffer) + byteOffset;
-    byteOffset += product(conv2d1FilterShape);
+    float* conv2d1FilterData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    byteOffset += product(conv2d1FilterShape) * sizeof(float);
     webnn::OperandDescriptor conv2d1FilterDesc = {webnn::OperandType::Float32,
                                                   conv2d1FilterShape.data(),
                                                   (uint32_t)conv2d1FilterShape.size()};
@@ -199,8 +67,8 @@ int main(int argc, const char* argv[]) {
     webnn::Operand conv1 = builder.Conv2d(input, conv2d1FilterConstant, &conv2d1Options);
 
     std::vector<int32_t> add1BiasShape = {1, 20, 1, 1};
-    float* add1BiasData = static_cast<float*>(dataBuffer) + byteOffset;
-    byteOffset += product(add1BiasShape);
+    float* add1BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    byteOffset += product(add1BiasShape) * sizeof(float);
     webnn::OperandDescriptor add1BiasDesc = {webnn::OperandType::Float32, add1BiasShape.data(),
                                              (uint32_t)add1BiasShape.size()};
     webnn::Operand add1BiasConstant =
@@ -218,14 +86,9 @@ int main(int argc, const char* argv[]) {
     options.paddingCount = 4;
     webnn::Operand pool1 = builder.MaxPool2d(add1, &options);
 
-    std::vector<int32_t> conv2d2FilterShape = {
-        50,
-        20,
-        5,
-        5,
-    };
-    float* conv2d2FilterData = static_cast<float*>(dataBuffer) + byteOffset;
-    byteOffset += product(conv2d2FilterShape);
+    std::vector<int32_t> conv2d2FilterShape = {50, 20, 5, 5};
+    float* conv2d2FilterData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    byteOffset += product(conv2d2FilterShape) * sizeof(float);
     webnn::OperandDescriptor conv2d2FilterDesc = {webnn::OperandType::Float32,
                                                   conv2d2FilterShape.data(),
                                                   (uint32_t)conv2d2FilterShape.size()};
@@ -235,8 +98,8 @@ int main(int argc, const char* argv[]) {
     webnn::Operand conv2 = builder.Conv2d(pool1, conv2d2FilterConstant, &conv2d2Options);
 
     std::vector<int32_t> add2BiasShape = {1, 50, 1, 1};
-    float* add2BiasData = static_cast<float*>(dataBuffer) + byteOffset;
-    byteOffset += product(add2BiasShape);
+    float* add2BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    byteOffset += product(add2BiasShape) * sizeof(float);
     webnn::OperandDescriptor add2BiasDesc = {webnn::OperandType::Float32, add2BiasShape.data(),
                                              (uint32_t)add2BiasShape.size()};
     webnn::Operand add2BiasConstant =
@@ -256,12 +119,12 @@ int main(int argc, const char* argv[]) {
 
     std::vector<int32_t> newShape = {1, -1};
     webnn::Operand reshape1 = builder.Reshape(pool2, newShape.data(), newShape.size());
-    // skip the new shape
-    byteOffset += 4;
+    // skip the new shape, 2 int64 values
+    byteOffset += 2 * 8;
 
     std::vector<int32_t> matmulShape = {500, 800};
-    float* matmulData = static_cast<float*>(dataBuffer) + byteOffset;
-    byteOffset += product(matmulShape);
+    float* matmulData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    byteOffset += product(matmulShape) * sizeof(float);
     webnn::OperandDescriptor matmulDataDesc = {webnn::OperandType::Float32, matmulShape.data(),
                                                (uint32_t)matmulShape.size()};
     webnn::Operand matmulWeights =
@@ -271,8 +134,8 @@ int main(int argc, const char* argv[]) {
     webnn::Operand matmul1 = builder.Matmul(reshape1, matmul1WeightsTransposed);
 
     std::vector<int32_t> add3BiasShape = {1, 500};
-    float* add3BiasData = static_cast<float*>(dataBuffer) + byteOffset;
-    byteOffset += product(add3BiasShape);
+    float* add3BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    byteOffset += product(add3BiasShape) * sizeof(float);
     webnn::OperandDescriptor add3BiasDesc = {webnn::OperandType::Float32, add3BiasShape.data(),
                                              (uint32_t)add3BiasShape.size()};
     webnn::Operand add3BiasConstant =
@@ -285,8 +148,8 @@ int main(int argc, const char* argv[]) {
     webnn::Operand reshape2 = builder.Reshape(relu, newShape2.data(), newShape2.size());
 
     std::vector<int32_t> matmulShape2 = {10, 500};
-    float* matmulData2 = static_cast<float*>(dataBuffer) + byteOffset;
-    byteOffset += product(matmulShape2);
+    float* matmulData2 = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    byteOffset += product(matmulShape2) * sizeof(float);
     webnn::OperandDescriptor matmulData2Desc = {webnn::OperandType::Float32, matmulShape2.data(),
                                                 (uint32_t)matmulShape2.size()};
     webnn::Operand matmulWeights2 =
@@ -296,8 +159,8 @@ int main(int argc, const char* argv[]) {
     webnn::Operand matmul2 = builder.Matmul(reshape2, matmul1WeightsTransposed2);
 
     std::vector<int32_t> add4BiasShape = {1, 10};
-    float* add4BiasData = static_cast<float*>(dataBuffer) + byteOffset;
-    byteOffset += product(add4BiasShape);
+    float* add4BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    byteOffset += product(add4BiasShape) * sizeof(float);
     webnn::OperandDescriptor add4BiasDesc = {webnn::OperandType::Float32, add4BiasShape.data(),
                                              (uint32_t)add4BiasShape.size()};
     webnn::Operand add4BiasConstant =
@@ -308,10 +171,86 @@ int main(int argc, const char* argv[]) {
 
     webnn::NamedOperands namedOperands = CreateCppNamedOperands();
     namedOperands.Set("output", softmax);
-    webnn::Model model = builder.CreateModel(namedOperands);
-    model.Compile(CompilationCallback, nullptr);
+    mModel = builder.CreateModel(namedOperands);
+    return true;
+}
 
-    free(dataBuffer);
-    // Release backend resources in main thread.
-    gCompilation = nullptr;
+bool LeNet::Compile(webnn::CompilationOptions const* options) {
+    if (!mModel) {
+        dawn::ErrorLog() << "Model is not ready.";
+        return false;
+    }
+    std::chrono::time_point<std::chrono::high_resolution_clock> startTime =
+        std::chrono::high_resolution_clock::now();
+    mModel.Compile(
+        [](WebnnCompileStatus status, WebnnCompilation impl, char const* message, void* userData) {
+            LeNet* lenet = reinterpret_cast<LeNet*>(userData);
+            DAWN_ASSERT(lenet);
+            lenet->OnCompileDone(status, impl, message);
+        },
+        this, options);
+    mCompileAsync.Wait();
+    if (!mCompilation) {
+        return false;
+    }
+    std::chrono::duration<double, std::milli> elapsedTime =
+        std::chrono::high_resolution_clock::now() - startTime;
+    dawn::InfoLog() << "Compilation Time: " << elapsedTime.count() << " ms";
+    return true;
+}
+
+webnn::Result LeNet::Compute(const void* inputData, size_t inputLength) {
+    if (!mCompilation) {
+        dawn::ErrorLog() << "Compilation is not ready.";
+        return webnn::Result();
+    }
+    webnn::Input input;
+    input.buffer = inputData;
+    input.size = inputLength;
+    webnn::NamedInputs inputs = CreateCppNamedInputs();
+    inputs.Set("input", &input);
+    std::chrono::time_point<std::chrono::high_resolution_clock> startTime =
+        std::chrono::high_resolution_clock::now();
+    mCompilation.Compute(
+        inputs,
+        [](WebnnComputeStatus status, WebnnNamedResults impl, char const* message, void* userData) {
+            LeNet* lenet = reinterpret_cast<LeNet*>(userData);
+            DAWN_ASSERT(lenet);
+            lenet->OnComputeDone(status, impl, message);
+        },
+        this, nullptr);
+    mComputeAsync.Wait();
+    if (!mResults) {
+        return webnn::Result();
+    }
+    std::chrono::duration<double, std::milli> elapsedTime =
+        std::chrono::high_resolution_clock::now() - startTime;
+    dawn::InfoLog() << "Execution Time: " << elapsedTime.count() << " ms";
+    return mResults.Get("output");
+}
+
+void LeNet::OnError(WebnnErrorType type, char const* message) {
+    if (type != WebnnErrorType_NoError) {
+        dawn::ErrorLog() << "Error type is " << type << ", message is " << message;
+    }
+}
+
+void LeNet::OnCompileDone(WebnnCompileStatus status, WebnnCompilation impl, char const* message) {
+    if (status != WebnnCompileStatus_Success) {
+        dawn::ErrorLog() << "Compile failed: " << message;
+    } else {
+        mCompilation = mCompilation.Acquire(impl);
+    }
+    mCompileAsync.Finish();
+    return;
+}
+
+void LeNet::OnComputeDone(WebnnComputeStatus status, WebnnNamedResults impl, char const* message) {
+    if (status != WebnnComputeStatus_Success) {
+        dawn::ErrorLog() << "Compute failed: " << message;
+    } else {
+        mResults = mResults.Acquire(impl);
+    }
+    mComputeAsync.Finish();
+    return;
 }

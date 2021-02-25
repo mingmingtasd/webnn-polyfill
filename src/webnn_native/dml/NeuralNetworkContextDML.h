@@ -27,12 +27,12 @@ namespace webnn_native { namespace dml {
 
         HRESULT CreateDevice();
 
-        ::pydml::Device* GetDevice() {
-            return mDevice.get();
+        std::shared_ptr<::pydml::Device> GetDevice() {
+            return mDevice;
         }
 
       private:
-        std::unique_ptr<::pydml::Device> mDevice;
+        std::shared_ptr<::pydml::Device> mDevice;
     };
 
 }}  // namespace webnn_native::dml

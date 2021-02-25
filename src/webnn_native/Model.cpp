@@ -26,7 +26,7 @@ namespace webnn_native {
                             void* userdata,
                             CompilationOptions const* options) {
         if (DAWN_UNLIKELY(this->IsError())) {
-            callback(WebnnCompileStatus_Error, nullptr, "Object is an error", userdata);
+            callback(WebnnCompileStatus_Error, nullptr, "This Model object is an error", userdata);
             return;
         }
         CompileImpl(callback, userdata, options);

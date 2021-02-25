@@ -249,8 +249,11 @@ namespace webnn_native { namespace dml {
         ::dml::Expression dmlConstant =
             ::dml::InputTensor(*mGraph, mBindings.size(), dmlTensorDesc);
         mExpression.insert(std::make_pair(constant, dmlConstant));
+        std::unique_ptr<char> buffer(new char[constant->GetSize()]);
+        memcpy(buffer.get(), constant->GetValue(), constant->GetSize());
         std::unique_ptr<::pydml::Binding> binding(new ::pydml::Binding(
-            dmlConstant, const_cast<void*>(constant->GetValue()), constant->GetSize()));
+            dmlConstant, static_cast<void*>(buffer.get()), constant->GetSize()));
+        mConstantBuffers.push_back(std::move(buffer));
         mBindings.push_back(std::move(binding));
         return {};
     }

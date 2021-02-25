@@ -31,7 +31,7 @@ namespace webnn_native {
     }
 
     MaybeError OperandBase::AddToModel(ModelBase* model) const {
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
     }
 
     const std::vector<Ref<OperandBase>>& OperandBase::Inputs() const {
