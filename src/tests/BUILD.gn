@@ -162,6 +162,8 @@ source_set("webnn_end2end_tests_sources") {
   sources = [
     "${webnn_root}/examples/SampleUtils.cpp",
     "${webnn_root}/examples/SampleUtils.h",
+    "WebnnTest.cpp",
+    "WebnnTest.h",
     "end2end/AddTests.cpp",
     "end2end/AveragePool2dTests.cpp",
     "end2end/Conv2dTests.cpp",

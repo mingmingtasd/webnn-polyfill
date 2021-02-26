@@ -10,10 +10,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "examples/SampleUtils.h"
-#include "gtest/gtest.h"
+#include "src/tests/WebnnTest.h"
 
-class AddTests : public testing::Test {};
+class AddTests : public WebnnTest {};
 
 class AddModel : public utils::WrappedModel {
   public:
@@ -26,8 +25,7 @@ class AddModel : public utils::WrappedModel {
 };
 
 TEST_F(AddTests, Add) {
-    webnn::NeuralNetworkContext context = CreateCppNeuralNetworkContext();
-    webnn::ModelBuilder builder = context.CreateModelBuilder();
+    webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
     webnn::Operand a = utils::BuildInput(builder, "a", {3, 4, 5});
     std::vector<float> bData(
         {-0.5781865,  -0.49248728, -0.2162451,  -0.13176449, -0.52118045, 1.9125274,   0.6508799,
