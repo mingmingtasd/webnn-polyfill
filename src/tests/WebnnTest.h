@@ -26,7 +26,6 @@ void InitWebnnEnd2EndTestEnvironment();
 class WebnnTestEnvironment : public testing::Environment {
   public:
     void SetUp() override;
-    void TearDown() override;
 
     const webnn::NeuralNetworkContext& GetContext();
 

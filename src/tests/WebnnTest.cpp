@@ -35,10 +35,6 @@ void WebnnTestEnvironment::SetUp() {
     DAWN_ASSERT(mContext);
 }
 
-void WebnnTestEnvironment::TearDown() {
-    mContext.Release();
-}
-
 const webnn::NeuralNetworkContext& WebnnTestEnvironment::GetContext() {
     return mContext;
 }
