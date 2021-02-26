@@ -1,5 +1,3 @@
-// Copyright 2017 The Dawn Authors
-//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,11 +10,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tests/WebnnTest.h"
+#ifndef TESTS_WEBNN_TEST_H_
+#define TESTS_WEBNN_TEST_H_
 
-int main(int argc, char** argv) {
-    DumpMemoryLeaks();
-    InitWebnnEnd2EndTestEnvironment();
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+#include "examples/SampleUtils.h"
+#include "gtest/gtest.h"
+
+class WebnnTest : public testing::Test {
+  protected:
+    const webnn::NeuralNetworkContext& GetContext();
+};
+
+void InitWebnnEnd2EndTestEnvironment();
+
+class WebnnTestEnvironment : public testing::Environment {
+  public:
+    void SetUp() override;
+
+    const webnn::NeuralNetworkContext& GetContext();
+
+  protected:
+    webnn::NeuralNetworkContext mContext;
+};
+
+#endif  // TESTS_WEBNN_TEST_H_
