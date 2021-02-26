@@ -19,6 +19,7 @@
 #include <mutex>
 #include <vector>
 
+#include "common/Log.h"
 #include "common/RefCounted.h"
 
 uint32_t product(const std::vector<int32_t>& dims);
@@ -36,6 +37,57 @@ void DumpMemoryLeaks();
 bool Expected(float output, float expected);
 
 namespace utils {
+
+    webnn::Operand BuildInput(const webnn::ModelBuilder& builder,
+                              std::string name,
+                              const std::vector<int32_t>& dimensions,
+                              webnn::OperandType type = webnn::OperandType::Float32);
+
+    webnn::Operand BuildConstant(const webnn::ModelBuilder& builder,
+                                 const std::vector<int32_t>& dimensions,
+                                 const void* value,
+                                 size_t size,
+                                 webnn::OperandType type = webnn::OperandType::Float32);
+
+    typedef struct {
+        const std::string& name;
+        const webnn::Operand& operand;
+    } NamedOutput;
+
+    webnn::Model CreateModel(const webnn::ModelBuilder& builder,
+                             const std::vector<NamedOutput>& outputs);
+
+    webnn::Compilation AwaitCompile(const webnn::Model& model,
+                                    webnn::CompilationOptions const* options = nullptr);
+
+    typedef struct {
+        const std::string& name;
+        const webnn::Input& input;
+    } NamedInput;
+
+    webnn::NamedResults AwaitCompute(const webnn::Compilation& compilation,
+                                     const std::vector<NamedInput>& inputs);
+
+    bool CheckShape(const webnn::Result& result, const std::vector<int32_t>& expectedShape);
+
+    template <class T>
+    bool CheckValue(const webnn::Result& result, const std::vector<T>& expectedValue) {
+        size_t size = result.BufferSize() / sizeof(T);
+        if (size != expectedValue.size()) {
+            dawn::ErrorLog() << "The size of output data is expected as " << expectedValue.size()
+                             << ", but got " << size;
+            return false;
+        }
+        for (size_t i = 0; i < result.BufferSize() / sizeof(T); ++i) {
+            T value = static_cast<const T*>(result.Buffer())[i];
+            if (!Expected(value, expectedValue[i])) {
+                dawn::ErrorLog() << "The output value at index " << i << " is expected as "
+                                 << expectedValue[i] << ", but got " << value;
+                return false;
+            }
+        }
+        return true;
+    }
 
     class WrappedModel : public RefCounted {
       public:

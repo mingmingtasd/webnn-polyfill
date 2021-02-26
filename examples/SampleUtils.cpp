@@ -73,6 +73,111 @@ bool Expected(float output, float expected) {
 
 namespace utils {
 
+    webnn::Operand BuildInput(const webnn::ModelBuilder& builder,
+                              std::string name,
+                              const std::vector<int32_t>& dimensions,
+                              webnn::OperandType type) {
+        webnn::OperandDescriptor desc = {type, dimensions.data(), (uint32_t)dimensions.size()};
+        return builder.Input(name.c_str(), &desc);
+    }
+
+    webnn::Operand BuildConstant(const webnn::ModelBuilder& builder,
+                                 const std::vector<int32_t>& dimensions,
+                                 const void* value,
+                                 size_t size,
+                                 webnn::OperandType type) {
+        webnn::OperandDescriptor desc = {type, dimensions.data(), (uint32_t)dimensions.size()};
+        return builder.Constant(&desc, value, size);
+    }
+
+    webnn::Model CreateModel(const webnn::ModelBuilder& builder,
+                             const std::vector<NamedOutput>& outputs) {
+        webnn::NamedOperands namedOperands = CreateCppNamedOperands();
+        for (auto& output : outputs) {
+            namedOperands.Set(output.name.c_str(), output.operand);
+        }
+        return builder.CreateModel(namedOperands);
+    }
+
+    typedef struct {
+        Async& async;
+        webnn::Compilation& compilation;
+    } CompilationUserData;
+
+    webnn::Compilation AwaitCompile(const webnn::Model& model,
+                                    webnn::CompilationOptions const* options) {
+        Async async;
+        webnn::Compilation compilation;
+        CompilationUserData userData = {async, compilation};
+        model.Compile(
+            [](WebnnCompileStatus status, WebnnCompilation impl, char const* message,
+               void* userData) {
+                CompilationUserData* data = reinterpret_cast<CompilationUserData*>(userData);
+                DAWN_ASSERT(data);
+                if (status != WebnnCompileStatus_Success) {
+                    dawn::ErrorLog() << "Compile failed: " << message;
+                } else {
+                    data->compilation = data->compilation.Acquire(impl);
+                }
+                data->async.Finish();
+                return;
+            },
+            &userData, options);
+        async.Wait();
+        return compilation;
+    }
+
+    typedef struct {
+        Async& async;
+        webnn::NamedResults& results;
+    } ComputeUserData;
+
+    webnn::NamedResults AwaitCompute(const webnn::Compilation& compilation,
+                                     const std::vector<NamedInput>& inputs) {
+        Async async;
+        webnn::NamedResults results;
+        ComputeUserData userData = {async, results};
+        webnn::NamedInputs namedInputs = CreateCppNamedInputs();
+        for (auto& input : inputs) {
+            namedInputs.Set(input.name.c_str(), &input.input);
+        }
+        compilation.Compute(
+            namedInputs,
+            [](WebnnComputeStatus status, WebnnNamedResults impl, char const* message,
+               void* userData) {
+                ComputeUserData* data = reinterpret_cast<ComputeUserData*>(userData);
+                DAWN_ASSERT(data);
+                if (status != WebnnComputeStatus_Success) {
+                    dawn::ErrorLog() << "Compute failed: " << message;
+                } else {
+                    data->results = data->results.Acquire(impl);
+                }
+                data->async.Finish();
+                return;
+            },
+            &userData, nullptr);
+        async.Wait();
+        return results;
+    }
+
+    bool CheckShape(const webnn::Result& result, const std::vector<int32_t>& expectedShape) {
+        if (expectedShape.size() != result.DimensionsSize()) {
+            dawn::ErrorLog() << "The output rank is expected as " << expectedShape.size()
+                             << ", but got " << result.DimensionsSize();
+            return false;
+        } else {
+            for (size_t i = 0; i < result.DimensionsSize(); ++i) {
+                int32_t dimension = result.Dimensions()[i];
+                if (!Expected(expectedShape[i], dimension)) {
+                    dawn::ErrorLog() << "The output dimension of axis " << i << " is expected as "
+                                     << expectedShape[i] << ", but got " << dimension;
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     WrappedModel::WrappedModel() : mOutputExpected(true) {
     }
 
