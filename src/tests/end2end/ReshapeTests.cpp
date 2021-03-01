@@ -14,9 +14,9 @@
 
 class ReshapeTests : public WebnnTest {
   public:
-    void testReshape(const std::vector<int32_t>& oldShape,
+    void TestReshape(const std::vector<int32_t>& oldShape,
                      const std::vector<int32_t>& newShape,
-                     const std::vector<int32_t>& expectedShape = {}) {
+                     const std::vector<int32_t>& expectedShape) {
         const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
         const webnn::Operand a = utils::BuildInput(builder, "a", oldShape);
         const webnn::Operand b = builder.Reshape(a, newShape.data(), newShape.size());
@@ -26,40 +26,35 @@ class ReshapeTests : public WebnnTest {
                                               13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
         const webnn::Input input = {inputData.data(), inputData.size() * sizeof(float)};
         const webnn::Result result = utils::AwaitCompute(compiledModel, {{"a", input}}).Get("b");
-        if (expectedShape.empty()) {
-            EXPECT_TRUE(utils::CheckShape(result, newShape));
-        } else {
-            EXPECT_TRUE(utils::CheckShape(result, expectedShape));
-        }
-
+        EXPECT_TRUE(utils::CheckShape(result, expectedShape));
         EXPECT_TRUE(utils::CheckValue(result, inputData));
     }
 };
 
 TEST_F(ReshapeTests, ReshapeReorderedAllDims) {
-    testReshape({2, 3, 4}, {4, 2, 3});
+    TestReshape({2, 3, 4}, {4, 2, 3}, {4, 2, 3});
 }
 
 TEST_F(ReshapeTests, ReshapeReorderedLastDims) {
-    testReshape({2, 3, 4}, {2, 4, 3});
+    TestReshape({2, 3, 4}, {2, 4, 3}, {2, 4, 3});
 }
 
 TEST_F(ReshapeTests, ReshapeReducedDims) {
-    testReshape({2, 3, 4}, {2, 12});
+    TestReshape({2, 3, 4}, {2, 12}, {2, 12});
 }
 
 TEST_F(ReshapeTests, ReshapeExtendedDims) {
-    testReshape({2, 3, 4}, {2, 3, 2, 2});
+    TestReshape({2, 3, 4}, {2, 3, 2, 2}, {2, 3, 2, 2});
 }
 
 TEST_F(ReshapeTests, ReshapeOneDim) {
-    testReshape({2, 3, 4}, {24});
+    TestReshape({2, 3, 4}, {24}, {24});
 }
 
 TEST_F(ReshapeTests, ReshapeNegativeDim) {
-    testReshape({2, 3, 4}, {2, -1, 2}, {2, 6, 2});
+    TestReshape({2, 3, 4}, {2, -1, 2}, {2, 6, 2});
 }
 
 TEST_F(ReshapeTests, ReshapeNegativeDim1) {
-    testReshape({2, 3, 4}, {-1, 2, 3, 4}, {1, 2, 3, 4});
+    TestReshape({2, 3, 4}, {-1, 2, 3, 4}, {1, 2, 3, 4});
 }
