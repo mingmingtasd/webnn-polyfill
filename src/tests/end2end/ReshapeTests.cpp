@@ -19,12 +19,12 @@ class ReshapeTests : public WebnnTest {
                      const std::vector<int32_t>& expectedShape = {}) {
         const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
         const webnn::Operand a = utils::BuildInput(builder, "a", oldShape);
-        const std::vector<float> data = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
-                                         13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
         const webnn::Operand b = builder.Reshape(a, newShape.data(), newShape.size());
         const webnn::Model model = utils::CreateModel(builder, {{"b", b}});
         const webnn::Compilation compiledModel = utils::AwaitCompile(model);
-        const webnn::Input input = {data.data(), data.size() * sizeof(float)};
+        const std::vector<float> inputData = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                              13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
+        const webnn::Input input = {inputData.data(), inputData.size() * sizeof(float)};
         const webnn::Result result = utils::AwaitCompute(compiledModel, {{"a", input}}).Get("b");
         if (expectedShape.empty()) {
             EXPECT_TRUE(utils::CheckShape(result, newShape));
@@ -32,7 +32,7 @@ class ReshapeTests : public WebnnTest {
             EXPECT_TRUE(utils::CheckShape(result, expectedShape));
         }
 
-        EXPECT_TRUE(utils::CheckValue(result, data));
+        EXPECT_TRUE(utils::CheckValue(result, inputData));
     }
 };
 
