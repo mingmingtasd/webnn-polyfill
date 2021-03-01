@@ -151,14 +151,14 @@
   "pool2d options": {
     "category": "structure",
     "members": [
-      {"name": "window dimensions count", "type": "uint32_t", "default": 2},
-      {"name": "window dimensions", "type": "int32_t", "annotation": "const*", "length": "window dimensions count"},
-      {"name": "padding count", "type": "uint32_t", "default": 4},
-      {"name": "padding", "type": "int32_t", "annotation": "const*", "length": "padding count"},
-      {"name": "strides count", "type": "uint32_t", "default": 2},
-      {"name": "strides", "type": "int32_t", "annotation": "const*", "length": "strides count"},
-      {"name": "dilations count", "type": "uint32_t", "default": 2},
-      {"name": "dilations", "type": "int32_t", "annotation": "const*", "length": "dilations count"},
+      {"name": "window dimensions count", "type": "uint32_t", "default": 0},
+      {"name": "window dimensions", "type": "int32_t", "annotation": "const*", "length": "window dimensions count", "optional": true},
+      {"name": "padding count", "type": "uint32_t", "default": 0},
+      {"name": "padding", "type": "int32_t", "annotation": "const*", "length": "padding count", "optional": true},
+      {"name": "strides count", "type": "uint32_t", "default": 0},
+      {"name": "strides", "type": "int32_t", "annotation": "const*", "length": "strides count", "optional": true},
+      {"name": "dilations count", "type": "uint32_t", "default": 0},
+      {"name": "dilations", "type": "int32_t", "annotation": "const*", "length": "dilations count", "optional": true},
       {"name": "layout", "type": "operand layout", "default": "nchw"}
     ]
   },
