@@ -138,12 +138,12 @@
   "conv2d options": {
     "category": "structure",
     "members": [
-      {"name": "padding count", "type": "uint32_t", "default": 4},
-      {"name": "padding", "type": "int32_t", "annotation": "const*", "length": "padding count"},
-      {"name": "strides count", "type": "uint32_t", "default": 2},
-      {"name": "strides", "type": "int32_t", "annotation": "const*", "length": "strides count"},
-      {"name": "dilations count", "type": "uint32_t", "default": 2},
-      {"name": "dilations", "type": "int32_t", "annotation": "const*", "length": "dilations count"},
+      {"name": "padding count", "type": "uint32_t", "default": 0},
+      {"name": "padding", "type": "int32_t", "annotation": "const*", "length": "padding count", "optional": true},
+      {"name": "strides count", "type": "uint32_t", "default": 0},
+      {"name": "strides", "type": "int32_t", "annotation": "const*", "length": "strides count", "optional": true},
+      {"name": "dilations count", "type": "uint32_t", "default": 0},
+      {"name": "dilations", "type": "int32_t", "annotation": "const*", "length": "dilations count", "optional": true},
       {"name": "groups", "type": "int32_t", "default": 1},
       {"name": "layout", "type": "operand layout", "default": "nchw"}
     ]
@@ -166,7 +166,7 @@
     "category": "structure",
     "members": [
       {"name": "permutation count", "type": "uint32_t", "default": 0},
-      {"name": "permutation", "type": "int32_t", "annotation": "const*", "length": "permutation count"}
+      {"name": "permutation", "type": "int32_t", "annotation": "const*", "length": "permutation count", "optional": true}
     ]
   },
   "model builder": {
@@ -250,8 +250,8 @@
         "returns": "operand",
         "args": [
           {"name": "input", "type": "operand"},
-          {"name": "new shape", "type": "int32_t", "annotation": "const*"},
-          {"name": "new shape count", "type": "uint32_t", "default": 0}
+          {"name": "new shape", "type": "int32_t", "annotation": "const*", "length": "new shape count"},
+          {"name": "new shape count", "type": "uint32_t"}
         ]
       },
       {
