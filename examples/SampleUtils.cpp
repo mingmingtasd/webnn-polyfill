@@ -99,44 +99,40 @@ namespace utils {
         return builder.CreateModel(namedOperands);
     }
 
-    typedef struct {
-        Async& async;
-        webnn::Compilation& compilation;
-    } CompilationUserData;
-
     webnn::Compilation AwaitCompile(const webnn::Model& model,
                                     webnn::CompilationOptions const* options) {
-        Async async;
-        webnn::Compilation compilation;
-        CompilationUserData userData = {async, compilation};
+        typedef struct {
+            Async async;
+            webnn::Compilation compilation;
+        } CompilationData;
+
+        CompilationData compilationData;
         model.Compile(
             [](WebnnCompileStatus status, WebnnCompilation impl, char const* message,
                void* userData) {
-                CompilationUserData* data = reinterpret_cast<CompilationUserData*>(userData);
-                DAWN_ASSERT(data);
+                CompilationData* compilationDataPtr = reinterpret_cast<CompilationData*>(userData);
+                DAWN_ASSERT(compilationDataPtr);
                 if (status != WebnnCompileStatus_Success) {
                     dawn::ErrorLog() << "Compile failed: " << message;
                 } else {
-                    data->compilation = data->compilation.Acquire(impl);
+                    compilationDataPtr->compilation = compilationDataPtr->compilation.Acquire(impl);
                 }
-                data->async.Finish();
+                compilationDataPtr->async.Finish();
                 return;
             },
-            &userData, options);
-        async.Wait();
-        return compilation;
+            &compilationData, options);
+        compilationData.async.Wait();
+        return compilationData.compilation;
     }
-
-    typedef struct {
-        Async& async;
-        webnn::NamedResults& results;
-    } ComputeUserData;
 
     webnn::NamedResults AwaitCompute(const webnn::Compilation& compilation,
                                      const std::vector<NamedInput>& inputs) {
-        Async async;
-        webnn::NamedResults results;
-        ComputeUserData userData = {async, results};
+        typedef struct {
+            Async async;
+            webnn::NamedResults results;
+        } ComputeData;
+
+        ComputeData computeData;
         webnn::NamedInputs namedInputs = CreateCppNamedInputs();
         for (auto& input : inputs) {
             namedInputs.Set(input.name.c_str(), &input.input);
@@ -145,19 +141,19 @@ namespace utils {
             namedInputs,
             [](WebnnComputeStatus status, WebnnNamedResults impl, char const* message,
                void* userData) {
-                ComputeUserData* data = reinterpret_cast<ComputeUserData*>(userData);
-                DAWN_ASSERT(data);
+                ComputeData* computeDataPtr = reinterpret_cast<ComputeData*>(userData);
+                DAWN_ASSERT(computeDataPtr);
                 if (status != WebnnComputeStatus_Success) {
                     dawn::ErrorLog() << "Compute failed: " << message;
                 } else {
-                    data->results = data->results.Acquire(impl);
+                    computeDataPtr->results = computeDataPtr->results.Acquire(impl);
                 }
-                data->async.Finish();
+                computeDataPtr->async.Finish();
                 return;
             },
-            &userData, nullptr);
-        async.Wait();
-        return results;
+            &computeData, nullptr);
+        computeData.async.Wait();
+        return computeData.results;
     }
 
     bool CheckShape(const webnn::Result& result, const std::vector<int32_t>& expectedShape) {
