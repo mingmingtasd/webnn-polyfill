@@ -19,8 +19,8 @@ class ReshapeTests : public WebnnTest {
                      const std::vector<int32_t>& expectedShape = std::vector<int32_t>()) {
         const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
         const webnn::Operand a = utils::BuildInput(builder, "a", oldShape);
-        const std::vector<float> data({1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
-                                       13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24});
+        const std::vector<float> data = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                         13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
         const webnn::Operand b = builder.Reshape(a, newShape.data(), newShape.size());
         const webnn::Model model = utils::CreateModel(builder, {{"b", b}});
         const webnn::Compilation compiledModel = utils::AwaitCompile(model);

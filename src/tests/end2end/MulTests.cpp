@@ -94,10 +94,10 @@ TEST_F(MulTests, MulTwoInputs) {
         0.78826934, -0.18788454, 0.38178417,  0.9748209,   1.0242884,   0.7939937,   0.24449475,
         -1.3840157, 1.9665064,   0.35833818,  -0.87076694, -0.76727265, 0.6157508,   -0.5558823,
         0.18417479, -0.93904793, -0.00859687, 0.5034271};
-    webnn::Input input = {dataA.data(), dataA.size() * sizeof(float)};
-    webnn::Input input1 = {dataB.data(), dataB.size() * sizeof(float)};
+    webnn::Input inputA = {dataA.data(), dataA.size() * sizeof(float)};
+    webnn::Input inputB = {dataB.data(), dataB.size() * sizeof(float)};
     webnn::Result result =
-        utils::AwaitCompute(compiledModel, {{"a", input}, {"b", input1}}).Get("c");
+        utils::AwaitCompute(compiledModel, {{"a", inputA}, {"b", inputB}}).Get("c");
     EXPECT_TRUE(utils::CheckShape(result, {3, 4, 5}));
     std::vector<float> expectedData = {
         1.1491189e+00,  9.4631165e-03,  1.6490275e+00,  -2.4890469e-02, 8.1811851e-01,
