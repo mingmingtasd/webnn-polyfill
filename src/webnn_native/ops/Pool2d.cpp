@@ -24,7 +24,7 @@ namespace webnn_native { namespace op {
         : OperandBase(builder, {input}), mOpType(opType) {
         if (options != nullptr && options->windowDimensions != nullptr) {
             mWindowDimensions.assign(options->windowDimensions,
-                                      options->windowDimensions + options->windowDimensionsCount);
+                                     options->windowDimensions + options->windowDimensionsCount);
             mOptions.windowDimensions = mWindowDimensions.data();
             mOptions.windowDimensionsCount = mWindowDimensions.size();
         } else {
