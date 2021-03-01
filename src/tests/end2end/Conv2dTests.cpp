@@ -82,3 +82,26 @@ TEST_F(Conv2dTests, Conv2dWithStrides2AndPadding) {
         {12., 27., 24., 63., 108., 81., 123., 198., 141., 112., 177., 124.});
     EXPECT_TRUE(utils::CheckValue(result, expectedValue));
 }
+
+TEST_F(Conv2dTests, Conv2dWithStrides2AndAsymetricPadding) {
+    const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
+    const webnn::Operand input = utils::BuildInput(builder, "input", {1, 1, 5, 5});
+    const std::vector<float> filterData(8, 1);
+    const webnn::Operand filter = utils::BuildConstant(builder, {1, 1, 4, 2}, filterData.data(),
+                                                       filterData.size() * sizeof(float));
+    utils::Conv2dOptions options;
+    options.padding = {1, 2, 0, 1};
+    options.strides = {2, 2};
+    const webnn::Operand output = builder.Conv2d(input, filter, options.AsPtr());
+    const webnn::Model model = utils::CreateModel(builder, {{"output", output}});
+    const webnn::Compilation compiledModel = utils::AwaitCompile(model);
+    const std::vector<float> inputData = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                          13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
+    const webnn::Result result =
+        utils::AwaitCompute(compiledModel,
+                            {{"input", {inputData.data(), inputData.size() * sizeof(float)}}})
+            .Get("output");
+    EXPECT_TRUE(utils::CheckShape(result, {1, 1, 3, 3}));
+    const std::vector<float> expectedValue({33, 45, 27, 104, 120, 66, 72, 80, 43});
+    EXPECT_TRUE(utils::CheckValue(result, expectedValue));
+}
