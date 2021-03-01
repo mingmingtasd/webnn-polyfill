@@ -78,12 +78,13 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::Pool2dOptions options = {};
     std::vector<int32_t> windowDimensions = {2, 2};
     options.windowDimensions = windowDimensions.data();
+    options.windowDimensionsCount = windowDimensions.size();
     std::vector<int32_t> strides = {2, 2};
     options.strides = strides.data();
-    options.stridesCount = 2;
+    options.stridesCount = strides.size();
     std::vector<int32_t> padding = {0, 0, 0, 0};
     options.padding = padding.data();
-    options.paddingCount = 4;
+    options.paddingCount = padding.size();
     webnn::Operand pool1 = builder.MaxPool2d(add1, &options);
 
     std::vector<int32_t> conv2d2FilterShape = {50, 20, 5, 5};
@@ -109,12 +110,13 @@ bool LeNet::Load(const std::string& weigthsPath) {
     webnn::Pool2dOptions options2 = {};
     std::vector<int32_t> windowDimensions2 = {2, 2};
     options2.windowDimensions = windowDimensions2.data();
+    options2.windowDimensionsCount = windowDimensions2.size();
     std::vector<int32_t> strides2 = {2, 2};
     options2.strides = strides2.data();
-    options2.stridesCount = 2;
+    options2.stridesCount = strides2.size();
     std::vector<int32_t> padding2 = {0, 0, 0, 0};
     options2.padding = padding2.data();
-    options2.paddingCount = 4;
+    options2.paddingCount = padding2.size();
     webnn::Operand pool2 = builder.MaxPool2d(add2, &options2);
 
     std::vector<int32_t> newShape = {1, -1};
