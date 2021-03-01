@@ -49,6 +49,69 @@ namespace utils {
                                  size_t size,
                                  webnn::OperandType type = webnn::OperandType::Float32);
 
+    struct Conv2dOptions {
+      public:
+        std::vector<int32_t> padding;
+        std::vector<int32_t> strides;
+        std::vector<int32_t> dilations;
+        int32_t groups = 1;
+        webnn::OperandLayout layout = webnn::OperandLayout::Nchw;
+
+        const webnn::Conv2dOptions* AsPtr() {
+            if (!padding.empty()) {
+                mOptions.paddingCount = padding.size();
+                mOptions.padding = padding.data();
+            }
+            if (!strides.empty()) {
+                mOptions.stridesCount = strides.size();
+                mOptions.strides = strides.data();
+            }
+            if (!dilations.empty()) {
+                mOptions.dilationsCount = dilations.size();
+                mOptions.dilations = dilations.data();
+            }
+            mOptions.groups = groups;
+            mOptions.layout = layout;
+            return &mOptions;
+        }
+
+      private:
+        webnn::Conv2dOptions mOptions;
+    };
+
+    struct Pool2dOptions {
+      public:
+        std::vector<int32_t> windowDimensions;
+        std::vector<int32_t> padding;
+        std::vector<int32_t> strides;
+        std::vector<int32_t> dilations;
+        webnn::OperandLayout layout = webnn::OperandLayout::Nchw;
+
+        const webnn::Pool2dOptions* AsPtr() {
+            if (!windowDimensions.empty()) {
+                mOptions.windowDimensionsCount = windowDimensions.size();
+                mOptions.windowDimensions = windowDimensions.data();
+            }
+            if (!padding.empty()) {
+                mOptions.paddingCount = padding.size();
+                mOptions.padding = padding.data();
+            }
+            if (!strides.empty()) {
+                mOptions.stridesCount = strides.size();
+                mOptions.strides = strides.data();
+            }
+            if (!dilations.empty()) {
+                mOptions.dilationsCount = dilations.size();
+                mOptions.dilations = dilations.data();
+            }
+            mOptions.layout = layout;
+            return &mOptions;
+        }
+
+      private:
+        webnn::Pool2dOptions mOptions;
+    };
+
     typedef struct {
         const std::string& name;
         const webnn::Operand& operand;

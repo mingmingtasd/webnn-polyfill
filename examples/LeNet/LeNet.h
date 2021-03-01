@@ -27,17 +27,9 @@ class LeNet {
     bool Compile(webnn::CompilationOptions const* options = nullptr);
     webnn::Result Compute(const void* inputData, size_t inputLength);
 
-    // Callbacks
-    void OnError(WebnnErrorType type, char const* message);
-    void OnCompileDone(WebnnCompileStatus status, WebnnCompilation impl, char const* message);
-    void OnComputeDone(WebnnComputeStatus status, WebnnNamedResults impl, char const* message);
-
   private:
     webnn::NeuralNetworkContext mContext;
     webnn::Model mModel;
     webnn::Compilation mCompilation;
     webnn::NamedResults mResults;
-
-    utils::Async mCompileAsync;
-    utils::Async mComputeAsync;
 };
