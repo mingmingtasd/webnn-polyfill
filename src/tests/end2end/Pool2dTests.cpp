@@ -14,41 +14,10 @@
 
 class Pool2dTests : public WebnnTest {};
 
-struct Pool2dOptions {
-    std::vector<int32_t> windowDimensions;
-    std::vector<int32_t> padding;
-    std::vector<int32_t> strides;
-    std::vector<int32_t> dilations;
-    webnn::OperandLayout layout = webnn::OperandLayout::Nchw;
-
-    webnn::Pool2dOptions mOptions;
-
-    const webnn::Pool2dOptions* AsPtr() {
-        if (!windowDimensions.empty()) {
-            mOptions.windowDimensionsCount = windowDimensions.size();
-            mOptions.windowDimensions = windowDimensions.data();
-        }
-        if (!padding.empty()) {
-            mOptions.paddingCount = padding.size();
-            mOptions.padding = padding.data();
-        }
-        if (!strides.empty()) {
-            mOptions.stridesCount = strides.size();
-            mOptions.strides = strides.data();
-        }
-        if (!dilations.empty()) {
-            mOptions.dilationsCount = dilations.size();
-            mOptions.dilations = dilations.data();
-        }
-        mOptions.layout = layout;
-        return &mOptions;
-    }
-};
-
 TEST_F(Pool2dTests, MaxPool2d) {
     const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
     const webnn::Operand x = utils::BuildInput(builder, "x", {1, 1, 4, 4});
-    Pool2dOptions options;
+    utils::Pool2dOptions options;
     options.windowDimensions = {3, 3};
     const webnn::Operand y = builder.MaxPool2d(x, options.AsPtr());
     const webnn::Model model = utils::CreateModel(builder, {{"y", y}});
@@ -64,7 +33,7 @@ TEST_F(Pool2dTests, MaxPool2d) {
 TEST_F(Pool2dTests, MaxPool2dDilations) {
     const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
     const webnn::Operand x = utils::BuildInput(builder, "x", {1, 1, 4, 4});
-    Pool2dOptions options;
+    utils::Pool2dOptions options;
     options.windowDimensions = {2, 2};
     options.dilations = {2, 2};
     const webnn::Operand y = builder.MaxPool2d(x, options.AsPtr());
@@ -81,7 +50,7 @@ TEST_F(Pool2dTests, MaxPool2dDilations) {
 TEST_F(Pool2dTests, MaxPool2dPads) {
     const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
     const webnn::Operand x = utils::BuildInput(builder, "x", {1, 1, 5, 5});
-    Pool2dOptions options;
+    utils::Pool2dOptions options;
     options.windowDimensions = {5, 5};
     options.padding = {2, 2, 2, 2};
     const webnn::Operand y = builder.MaxPool2d(x, options.AsPtr());
@@ -100,7 +69,7 @@ TEST_F(Pool2dTests, MaxPool2dPads) {
 TEST_F(Pool2dTests, MaxPool2dStrides) {
     const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
     const webnn::Operand x = utils::BuildInput(builder, "x", {1, 1, 5, 5});
-    Pool2dOptions options;
+    utils::Pool2dOptions options;
     options.windowDimensions = {2, 2};
     options.strides = {2, 2};
     const webnn::Operand y = builder.MaxPool2d(x, options.AsPtr());
@@ -118,7 +87,7 @@ TEST_F(Pool2dTests, MaxPool2dStrides) {
 TEST_F(Pool2dTests, AveragePool2d) {
     const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
     const webnn::Operand x = utils::BuildInput(builder, "x", {1, 1, 4, 4});
-    Pool2dOptions options;
+    utils::Pool2dOptions options;
     options.windowDimensions = {3, 3};
     const webnn::Operand y = builder.AveragePool2d(x, options.AsPtr());
     const webnn::Model model = utils::CreateModel(builder, {{"y", y}});
@@ -134,7 +103,7 @@ TEST_F(Pool2dTests, AveragePool2d) {
 TEST_F(Pool2dTests, AveragePool2dPads) {
     const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
     const webnn::Operand x = utils::BuildInput(builder, "x", {1, 1, 5, 5});
-    Pool2dOptions options;
+    utils::Pool2dOptions options;
     options.windowDimensions = {5, 5};
     options.padding = {2, 2, 2, 2};
     const webnn::Operand y = builder.AveragePool2d(x, options.AsPtr());
@@ -154,7 +123,7 @@ TEST_F(Pool2dTests, AveragePool2dPads) {
 TEST_F(Pool2dTests, AveragePool2dStrides) {
     const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
     const webnn::Operand x = utils::BuildInput(builder, "x", {1, 1, 5, 5});
-    Pool2dOptions options;
+    utils::Pool2dOptions options;
     options.windowDimensions = {2, 2};
     options.strides = {2, 2};
     const webnn::Operand y = builder.AveragePool2d(x, options.AsPtr());

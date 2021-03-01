@@ -14,41 +14,13 @@
 
 class Conv2dTests : public WebnnTest {};
 
-struct Conv2dOptions {
-    std::vector<int32_t> padding;
-    std::vector<int32_t> strides;
-    std::vector<int32_t> dilations;
-    int32_t groups = 1;
-    webnn::OperandLayout layout = webnn::OperandLayout::Nchw;
-
-    webnn::Conv2dOptions mOptions;
-
-    const webnn::Conv2dOptions* AsPtr() {
-        if (!padding.empty()) {
-            mOptions.paddingCount = padding.size();
-            mOptions.padding = padding.data();
-        }
-        if (!strides.empty()) {
-            mOptions.stridesCount = strides.size();
-            mOptions.strides = strides.data();
-        }
-        if (!dilations.empty()) {
-            mOptions.dilationsCount = dilations.size();
-            mOptions.dilations = dilations.data();
-        }
-        mOptions.groups = groups;
-        mOptions.layout = layout;
-        return &mOptions;
-    }
-};
-
 TEST_F(Conv2dTests, Conv2dWithPadding) {
     const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
     const webnn::Operand input = utils::BuildInput(builder, "input", {1, 1, 5, 5});
     const std::vector<float> filterData(9, 1);
     const webnn::Operand filter = utils::BuildConstant(builder, {1, 1, 3, 3}, filterData.data(),
                                                        filterData.size() * sizeof(float));
-    Conv2dOptions options;
+    utils::Conv2dOptions options;
     options.padding = {1, 1, 1, 1};
     const webnn::Operand output = builder.Conv2d(input, filter, options.AsPtr());
     const webnn::Model model = utils::CreateModel(builder, {{"output", output}});
@@ -92,7 +64,7 @@ TEST_F(Conv2dTests, Conv2dWithStrides2AndPadding) {
     const std::vector<float> filterData(9, 1);
     const webnn::Operand filter = utils::BuildConstant(builder, {1, 1, 3, 3}, filterData.data(),
                                                        filterData.size() * sizeof(float));
-    Conv2dOptions options;
+    utils::Conv2dOptions options;
     options.padding = {1, 1, 1, 1};
     options.strides = {2, 2};
     const webnn::Operand output = builder.Conv2d(input, filter, options.AsPtr());

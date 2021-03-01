@@ -23,9 +23,9 @@ LeNet::LeNet() {
     mContext = CreateCppNeuralNetworkContext();
     mContext.SetUncapturedErrorCallback(
         [](WebnnErrorType type, char const* message, void* userData) {
-            LeNet* lenet = reinterpret_cast<LeNet*>(userData);
-            DAWN_ASSERT(lenet);
-            lenet->OnError(type, message);
+            if (type != WebnnErrorType_NoError) {
+                dawn::ErrorLog() << "Error type is " << type << ", message is " << message;
+            }
         },
         this);
 }
@@ -38,142 +38,108 @@ bool LeNet::Load(const std::string& weigthsPath) {
     }
 
     std::unique_ptr<char> weightsData(new char[WEIGHTS_LENGTH]);
-    size_t size = fread(weightsData.get(), sizeof(char), WEIGHTS_LENGTH, fp);
+    const size_t readSize = fread(weightsData.get(), sizeof(char), WEIGHTS_LENGTH, fp);
     fclose(fp);
-    if (size != WEIGHTS_LENGTH) {
+    if (readSize != WEIGHTS_LENGTH) {
         dawn::ErrorLog() << "The expected size of weights file is " << WEIGHTS_LENGTH
-                         << ", but got " << size;
+                         << ", but got " << readSize;
         return false;
     }
 
-    webnn::ModelBuilder builder = mContext.CreateModelBuilder();
+    const webnn::ModelBuilder builder = mContext.CreateModelBuilder();
 
     uint32_t byteOffset = 0;
-    std::vector<int32_t> inputShape = {1, 1, 28, 28};
-    webnn::OperandDescriptor inputDesc = {webnn::OperandType::Float32, inputShape.data(),
-                                          (uint32_t)inputShape.size()};
+    const webnn::Operand input = utils::BuildInput(builder, "input", {1, 1, 28, 28});
 
-    webnn::Operand input = builder.Input("input", &inputDesc);
+    const std::vector<int32_t> conv2d1FilterShape = {20, 1, 5, 5};
+    const float* conv2d1FilterData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    const uint32_t conv2d1FilterDataLength = product(conv2d1FilterShape) * sizeof(float);
+    byteOffset += conv2d1FilterDataLength;
+    const webnn::Operand conv2d1FilterConstant = utils::BuildConstant(
+        builder, conv2d1FilterShape, conv2d1FilterData, conv2d1FilterDataLength);
+    const webnn::Operand conv1 = builder.Conv2d(input, conv2d1FilterConstant);
 
-    std::vector<int32_t> conv2d1FilterShape = {20, 1, 5, 5};
-    float* conv2d1FilterData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
-    byteOffset += product(conv2d1FilterShape) * sizeof(float);
-    webnn::OperandDescriptor conv2d1FilterDesc = {webnn::OperandType::Float32,
-                                                  conv2d1FilterShape.data(),
-                                                  (uint32_t)conv2d1FilterShape.size()};
-    webnn::Operand conv2d1FilterConstant = builder.Constant(
-        &conv2d1FilterDesc, conv2d1FilterData, product(conv2d1FilterShape) * sizeof(float));
-    webnn::Conv2dOptions conv2d1Options = {};
-    webnn::Operand conv1 = builder.Conv2d(input, conv2d1FilterConstant, &conv2d1Options);
+    const std::vector<int32_t> add1BiasShape = {1, 20, 1, 1};
+    const float* add1BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    const uint32_t add1BiasDataLength = product(add1BiasShape) * sizeof(float);
+    byteOffset += add1BiasDataLength;
+    const webnn::Operand add1BiasConstant =
+        utils::BuildConstant(builder, add1BiasShape, add1BiasData, add1BiasDataLength);
+    const webnn::Operand add1 = builder.Add(conv1, add1BiasConstant);
 
-    std::vector<int32_t> add1BiasShape = {1, 20, 1, 1};
-    float* add1BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
-    byteOffset += product(add1BiasShape) * sizeof(float);
-    webnn::OperandDescriptor add1BiasDesc = {webnn::OperandType::Float32, add1BiasShape.data(),
-                                             (uint32_t)add1BiasShape.size()};
-    webnn::Operand add1BiasConstant =
-        builder.Constant(&add1BiasDesc, add1BiasData, product(add1BiasShape) * sizeof(float));
-    webnn::Operand add1 = builder.Add(conv1, add1BiasConstant);
+    utils::Pool2dOptions pool1Options;
+    pool1Options.windowDimensions = {2, 2};
+    pool1Options.strides = {2, 2};
+    const webnn::Operand pool1 = builder.MaxPool2d(add1, pool1Options.AsPtr());
 
-    webnn::Pool2dOptions options = {};
-    std::vector<int32_t> windowDimensions = {2, 2};
-    options.windowDimensions = windowDimensions.data();
-    options.windowDimensionsCount = windowDimensions.size();
-    std::vector<int32_t> strides = {2, 2};
-    options.strides = strides.data();
-    options.stridesCount = strides.size();
-    std::vector<int32_t> padding = {0, 0, 0, 0};
-    options.padding = padding.data();
-    options.paddingCount = padding.size();
-    webnn::Operand pool1 = builder.MaxPool2d(add1, &options);
+    const std::vector<int32_t> conv2d2FilterShape = {50, 20, 5, 5};
+    const float* conv2d2FilterData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    const uint32_t conv2d2FilterDataLength = product(conv2d2FilterShape) * sizeof(float);
+    byteOffset += conv2d2FilterDataLength;
+    const webnn::Operand conv2d2FilterConstant = utils::BuildConstant(
+        builder, conv2d2FilterShape, conv2d2FilterData, conv2d2FilterDataLength);
+    const webnn::Operand conv2 = builder.Conv2d(pool1, conv2d2FilterConstant);
 
-    std::vector<int32_t> conv2d2FilterShape = {50, 20, 5, 5};
-    float* conv2d2FilterData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
-    byteOffset += product(conv2d2FilterShape) * sizeof(float);
-    webnn::OperandDescriptor conv2d2FilterDesc = {webnn::OperandType::Float32,
-                                                  conv2d2FilterShape.data(),
-                                                  (uint32_t)conv2d2FilterShape.size()};
-    webnn::Operand conv2d2FilterConstant = builder.Constant(
-        &conv2d2FilterDesc, conv2d2FilterData, product(conv2d2FilterShape) * sizeof(float));
-    webnn::Conv2dOptions conv2d2Options = {};
-    webnn::Operand conv2 = builder.Conv2d(pool1, conv2d2FilterConstant, &conv2d2Options);
+    const std::vector<int32_t> add2BiasShape = {1, 50, 1, 1};
+    const float* add2BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    const uint32_t add2BiasDataLength = product(add2BiasShape) * sizeof(float);
+    byteOffset += add2BiasDataLength;
+    const webnn::Operand add2BiasConstant =
+        utils::BuildConstant(builder, add2BiasShape, add2BiasData, add2BiasDataLength);
+    const webnn::Operand add2 = builder.Add(conv2, add2BiasConstant);
 
-    std::vector<int32_t> add2BiasShape = {1, 50, 1, 1};
-    float* add2BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
-    byteOffset += product(add2BiasShape) * sizeof(float);
-    webnn::OperandDescriptor add2BiasDesc = {webnn::OperandType::Float32, add2BiasShape.data(),
-                                             (uint32_t)add2BiasShape.size()};
-    webnn::Operand add2BiasConstant =
-        builder.Constant(&add2BiasDesc, add2BiasData, product(add2BiasShape) * sizeof(float));
-    webnn::Operand add2 = builder.Add(conv2, add2BiasConstant);
+    utils::Pool2dOptions pool2Options;
+    pool2Options.windowDimensions = {2, 2};
+    pool2Options.strides = {2, 2};
+    const webnn::Operand pool2 = builder.MaxPool2d(add2, pool2Options.AsPtr());
 
-    webnn::Pool2dOptions options2 = {};
-    std::vector<int32_t> windowDimensions2 = {2, 2};
-    options2.windowDimensions = windowDimensions2.data();
-    options2.windowDimensionsCount = windowDimensions2.size();
-    std::vector<int32_t> strides2 = {2, 2};
-    options2.strides = strides2.data();
-    options2.stridesCount = strides2.size();
-    std::vector<int32_t> padding2 = {0, 0, 0, 0};
-    options2.padding = padding2.data();
-    options2.paddingCount = padding2.size();
-    webnn::Operand pool2 = builder.MaxPool2d(add2, &options2);
-
-    std::vector<int32_t> newShape = {1, -1};
-    webnn::Operand reshape1 = builder.Reshape(pool2, newShape.data(), newShape.size());
+    const std::vector<int32_t> newShape = {1, -1};
+    const webnn::Operand reshape1 = builder.Reshape(pool2, newShape.data(), newShape.size());
     // skip the new shape, 2 int64 values
     byteOffset += 2 * 8;
 
-    std::vector<int32_t> matmulShape = {500, 800};
-    float* matmulData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
-    byteOffset += product(matmulShape) * sizeof(float);
-    webnn::OperandDescriptor matmulDataDesc = {webnn::OperandType::Float32, matmulShape.data(),
-                                               (uint32_t)matmulShape.size()};
-    webnn::Operand matmulWeights =
-        builder.Constant(&matmulDataDesc, matmulData, product(matmulShape) * sizeof(float));
+    const std::vector<int32_t> matmul1Shape = {500, 800};
+    const float* matmul1Data = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    const uint32_t matmul1DataLength = product(matmul1Shape) * sizeof(float);
+    byteOffset += matmul1DataLength;
+    const webnn::Operand matmul1Weights =
+        utils::BuildConstant(builder, matmul1Shape, matmul1Data, matmul1DataLength);
+    const webnn::Operand matmul1WeightsTransposed = builder.Transpose(matmul1Weights);
+    const webnn::Operand matmul1 = builder.Matmul(reshape1, matmul1WeightsTransposed);
 
-    webnn::Operand matmul1WeightsTransposed = builder.Transpose(matmulWeights);
-    webnn::Operand matmul1 = builder.Matmul(reshape1, matmul1WeightsTransposed);
+    const std::vector<int32_t> add3BiasShape = {1, 500};
+    const float* add3BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    const uint32_t add3BiasDataLength = product(add3BiasShape) * sizeof(float);
+    byteOffset += add3BiasDataLength;
+    const webnn::Operand add3BiasConstant =
+        utils::BuildConstant(builder, add3BiasShape, add3BiasData, add3BiasDataLength);
+    const webnn::Operand add3 = builder.Add(matmul1, add3BiasConstant);
 
-    std::vector<int32_t> add3BiasShape = {1, 500};
-    float* add3BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
-    byteOffset += product(add3BiasShape) * sizeof(float);
-    webnn::OperandDescriptor add3BiasDesc = {webnn::OperandType::Float32, add3BiasShape.data(),
-                                             (uint32_t)add3BiasShape.size()};
-    webnn::Operand add3BiasConstant =
-        builder.Constant(&add3BiasDesc, add3BiasData, product(add3BiasShape) * sizeof(float));
-    webnn::Operand add3 = builder.Add(matmul1, add3BiasConstant);
+    const webnn::Operand relu = builder.Relu(add3);
 
-    webnn::Operand relu = builder.Relu(add3);
+    const std::vector<int32_t> newShape2 = {1, -1};
+    const webnn::Operand reshape2 = builder.Reshape(relu, newShape2.data(), newShape2.size());
 
-    std::vector<int32_t> newShape2 = {1, -1};
-    webnn::Operand reshape2 = builder.Reshape(relu, newShape2.data(), newShape2.size());
+    const std::vector<int32_t> matmul2Shape = {10, 500};
+    const float* matmul2Data = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    const uint32_t matmul2DataLength = product(matmul2Shape) * sizeof(float);
+    byteOffset += matmul2DataLength;
+    const webnn::Operand matmul2Weights =
+        utils::BuildConstant(builder, matmul2Shape, matmul2Data, matmul2DataLength);
+    const webnn::Operand matmul2WeightsTransposed = builder.Transpose(matmul2Weights);
+    const webnn::Operand matmul2 = builder.Matmul(reshape2, matmul2WeightsTransposed);
 
-    std::vector<int32_t> matmulShape2 = {10, 500};
-    float* matmulData2 = reinterpret_cast<float*>(weightsData.get() + byteOffset);
-    byteOffset += product(matmulShape2) * sizeof(float);
-    webnn::OperandDescriptor matmulData2Desc = {webnn::OperandType::Float32, matmulShape2.data(),
-                                                (uint32_t)matmulShape2.size()};
-    webnn::Operand matmulWeights2 =
-        builder.Constant(&matmulData2Desc, matmulData2, product(matmulShape2) * sizeof(float));
+    const std::vector<int32_t> add4BiasShape = {1, 10};
+    const float* add4BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
+    const uint32_t add4BiasDataLength = product(add4BiasShape) * sizeof(float);
+    byteOffset += add4BiasDataLength;
+    const webnn::Operand add4BiasConstant =
+        utils::BuildConstant(builder, add4BiasShape, add4BiasData, add4BiasDataLength);
+    const webnn::Operand add4 = builder.Add(matmul2, add4BiasConstant);
 
-    webnn::Operand matmul1WeightsTransposed2 = builder.Transpose(matmulWeights2);
-    webnn::Operand matmul2 = builder.Matmul(reshape2, matmul1WeightsTransposed2);
+    const webnn::Operand softmax = builder.Softmax(add4);
 
-    std::vector<int32_t> add4BiasShape = {1, 10};
-    float* add4BiasData = reinterpret_cast<float*>(weightsData.get() + byteOffset);
-    byteOffset += product(add4BiasShape) * sizeof(float);
-    webnn::OperandDescriptor add4BiasDesc = {webnn::OperandType::Float32, add4BiasShape.data(),
-                                             (uint32_t)add4BiasShape.size()};
-    webnn::Operand add4BiasConstant =
-        builder.Constant(&add4BiasDesc, add4BiasData, product(add4BiasShape) * sizeof(float));
-    webnn::Operand add4 = builder.Add(matmul2, add4BiasConstant);
-
-    webnn::Operand softmax = builder.Softmax(add4);
-
-    webnn::NamedOperands namedOperands = CreateCppNamedOperands();
-    namedOperands.Set("output", softmax);
-    mModel = builder.CreateModel(namedOperands);
+    mModel = utils::CreateModel(builder, {{"output", softmax}});
     return true;
 }
 
@@ -182,20 +148,13 @@ bool LeNet::Compile(webnn::CompilationOptions const* options) {
         dawn::ErrorLog() << "Model is not ready.";
         return false;
     }
-    std::chrono::time_point<std::chrono::high_resolution_clock> startTime =
+    const std::chrono::time_point<std::chrono::high_resolution_clock> startTime =
         std::chrono::high_resolution_clock::now();
-    mModel.Compile(
-        [](WebnnCompileStatus status, WebnnCompilation impl, char const* message, void* userData) {
-            LeNet* lenet = reinterpret_cast<LeNet*>(userData);
-            DAWN_ASSERT(lenet);
-            lenet->OnCompileDone(status, impl, message);
-        },
-        this, options);
-    mCompileAsync.Wait();
+    mCompilation = utils::AwaitCompile(mModel, options);
     if (!mCompilation) {
         return false;
     }
-    std::chrono::duration<double, std::milli> elapsedTime =
+    const std::chrono::duration<double, std::milli> elapsedTime =
         std::chrono::high_resolution_clock::now() - startTime;
     dawn::InfoLog() << "Compilation Time: " << elapsedTime.count() << " ms";
     return true;
@@ -206,53 +165,14 @@ webnn::Result LeNet::Compute(const void* inputData, size_t inputLength) {
         dawn::ErrorLog() << "Compilation is not ready.";
         return webnn::Result();
     }
-    webnn::Input input;
-    input.buffer = inputData;
-    input.size = inputLength;
-    webnn::NamedInputs inputs = CreateCppNamedInputs();
-    inputs.Set("input", &input);
-    std::chrono::time_point<std::chrono::high_resolution_clock> startTime =
+    const std::chrono::time_point<std::chrono::high_resolution_clock> startTime =
         std::chrono::high_resolution_clock::now();
-    mCompilation.Compute(
-        inputs,
-        [](WebnnComputeStatus status, WebnnNamedResults impl, char const* message, void* userData) {
-            LeNet* lenet = reinterpret_cast<LeNet*>(userData);
-            DAWN_ASSERT(lenet);
-            lenet->OnComputeDone(status, impl, message);
-        },
-        this, nullptr);
-    mComputeAsync.Wait();
+    mResults = utils::AwaitCompute(mCompilation, {{"input", {inputData, inputLength}}});
     if (!mResults) {
         return webnn::Result();
     }
-    std::chrono::duration<double, std::milli> elapsedTime =
+    const std::chrono::duration<double, std::milli> elapsedTime =
         std::chrono::high_resolution_clock::now() - startTime;
     dawn::InfoLog() << "Execution Time: " << elapsedTime.count() << " ms";
     return mResults.Get("output");
-}
-
-void LeNet::OnError(WebnnErrorType type, char const* message) {
-    if (type != WebnnErrorType_NoError) {
-        dawn::ErrorLog() << "Error type is " << type << ", message is " << message;
-    }
-}
-
-void LeNet::OnCompileDone(WebnnCompileStatus status, WebnnCompilation impl, char const* message) {
-    if (status != WebnnCompileStatus_Success) {
-        dawn::ErrorLog() << "Compile failed: " << message;
-    } else {
-        mCompilation = mCompilation.Acquire(impl);
-    }
-    mCompileAsync.Finish();
-    return;
-}
-
-void LeNet::OnComputeDone(WebnnComputeStatus status, WebnnNamedResults impl, char const* message) {
-    if (status != WebnnComputeStatus_Success) {
-        dawn::ErrorLog() << "Compute failed: " << message;
-    } else {
-        mResults = mResults.Acquire(impl);
-    }
-    mComputeAsync.Finish();
-    return;
 }
