@@ -89,50 +89,6 @@ namespace utils {
         return true;
     }
 
-    class WrappedModel : public RefCounted {
-      public:
-        WrappedModel();
-        ~WrappedModel() = default;
-
-        void SetInput(std::vector<int32_t> shape, std::vector<float> buffer);
-        webnn::OperandDescriptor* InputDesc();
-        std::vector<float> InputBuffer();
-
-        void SetConstant(std::vector<int32_t> shape, std::vector<float> buffer);
-        webnn::OperandDescriptor* ConstantDesc();
-        void const* ConstantBuffer();
-        size_t ConstantLength();
-
-        virtual webnn::Operand GenerateOutput(webnn::ModelBuilder nn);
-        void SetOutputShape(std::vector<int32_t> shape);
-        std::vector<int32_t> OutputShape();
-
-        void SetExpectedBuffer(std::vector<float> buffer);
-        std::vector<float> ExpectedBuffer();
-
-        void SetExpectedShape(std::vector<int32_t> shape);
-        std::vector<int32_t> ExpectedShape();
-
-        void SetComputedResult(bool expected);
-
-        bool GetComputedResult();
-
-      private:
-        webnn::ModelBuilder mModelBuilder;
-        std::vector<int32_t> mInputShape;
-        std::vector<float> mInputBuffer;
-        webnn::OperandDescriptor mInputDesc;
-        webnn::OperandDescriptor mConstantDesc;
-        std::vector<int32_t> mConstantShape;
-        std::vector<float> mConstantBuffer;
-        std::vector<int32_t> mOutputShape;
-        std::vector<float> mExpectedBuffer;
-        std::vector<int32_t> mExpectedShape;
-        bool mOutputExpected;
-    };
-
-    bool Test(WrappedModel* model);
-
     class Async {
       public:
         Async() : mDone(false) {
@@ -146,7 +102,6 @@ namespace utils {
         std::mutex mMutex;
         bool mDone;
     };
-
 }  // namespace utils
 
 #endif  // WEBNN_NATIVE_EXAMPLES_SAMPLE_UTILS_H_
