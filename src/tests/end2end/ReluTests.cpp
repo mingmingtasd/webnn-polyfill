@@ -10,24 +10,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "examples/SampleUtils.h"
-#include "gtest/gtest.h"
+#include "src/tests/WebnnTest.h"
 
-class ReluTests : public testing::Test {};
-
-class ReluModel : public utils::WrappedModel {
-  public:
-    ReluModel() = default;
-    webnn::Operand GenerateOutput(webnn::ModelBuilder nn) override {
-        webnn::Operand input = nn.Input("input", InputDesc());
-        return nn.Relu(input);
-    }
-};
+class ReluTests : public WebnnTest {};
 
 TEST_F(ReluTests, Relu) {
-    ReluModel* relu = new ReluModel();
-    relu->SetInput(
-        {3, 4, 5},
+    const webnn::ModelBuilder builder = GetContext().CreateModelBuilder();
+    const webnn::Operand a = utils::BuildInput(builder, "a", {3, 4, 5});
+    const webnn::Operand b = builder.Relu(a);
+    const webnn::Model model = utils::CreateModel(builder, {{"b", b}});
+    const webnn::Compilation compiledModel = utils::AwaitCompile(model);
+    const std::vector<float> data(
         {-1.483762,   0.6447428,   -1.2266507,  -1.7132527,  0.9777725,   -0.34438756, -0.99921757,
          -1.2882805,  1.3725083,   -0.06386258, -0.44738683, -0.6776338,  0.5027815,   -1.0428967,
          -1.4220539,  0.00880813,  -1.2053454,  1.1644533,   -1.6577007,  -0.33448243, 0.69386536,
@@ -37,7 +30,10 @@ TEST_F(ReluTests, Relu) {
          0.7993208,   -0.31359985, 0.9019325,   -0.02042965, 0.5222995,   1.3394557,   -1.0482218,
          1.1774449,   0.8999488,   -1.1143959,  1.0122099,   -0.48604885, -0.06009902, -0.1766853,
          1.4515465,   -0.7182982,  2.0361354,   0.7899623});
-    relu->SetExpectedBuffer(
+    const webnn::Input input = {data.data(), data.size() * sizeof(float)};
+    const webnn::Result result = utils::AwaitCompute(compiledModel, {{"a", input}}).Get("b");
+    EXPECT_TRUE(utils::CheckShape(result, {3, 4, 5}));
+    const std::vector<float> expectedData(
         {0.,        0.6447428, 0.,        0.,        0.9777725,  0.,         0.,         0.,
          1.3725083, 0.,        0.,        0.,        0.5027815,  0.,         0.,         0.00880813,
          0.,        1.1644533, 0.,        0.,        0.69386536, 0.06171616, 0.,         1.0620342,
@@ -46,6 +42,5 @@ TEST_F(ReluTests, Relu) {
          0.,        0.,        0.7993208, 0.,        0.9019325,  0.,         0.5222995,  1.3394557,
          0.,        1.1774449, 0.8999488, 0.,        1.0122099,  0.,         0.,         0.,
          1.4515465, 0.,        2.0361354, 0.7899623});
-    relu->SetExpectedShape({3, 4, 5});
-    EXPECT_TRUE(utils::Test(relu));
+    EXPECT_TRUE(utils::CheckValue(result, expectedData));
 }
