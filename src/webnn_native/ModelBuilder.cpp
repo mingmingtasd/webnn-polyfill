@@ -104,6 +104,9 @@ namespace webnn_native {
     ModelBase* ModelBuilderBase::CreateModel(NamedOperandsBase const* namedOperands) {
         Ref<ModelBase> model = AcquireRef(CreateModelImpl());
         std::vector<const OperandBase*> outputs;
+        if (namedOperands->GetRecords().empty()) {
+            return ModelBase::MakeError(this);
+        }
         for (auto& namedOutput : namedOperands->GetRecords()) {
             outputs.push_back(namedOutput.second);
         }
