@@ -1,46 +1,35 @@
 {
-  "name": "webnn-napi",
-  "main": "index.js",
+  "name": "webnn-node",
   "version": "0.1.0",
-  "engines": {
-    "node": ">= 13.0.0"
+  "description": "Webnn Binding for Node.js*",
+  "main": "lib/webnn.js",
+  "author": "Webnn",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webmachinelearning/webnn-native.git"
+  },
+  "directories": {
+    "example": "examples",
+    "lib": "lib",
+    "test": "test"
   },
   "scripts": {
     "build": "node-gyp configure && node-gyp build",
-    "tests": "node --experimental-modules tests/index.mjs",
     "start": "http-server",
     "test": "mocha ./test/ops"
-  },
-  "devDependencies": {
-    "gl-matrix": "^3.3.0",
-    "ncp": "^2.0.0",
-    "node-addon-api": "^3.0.2",
-    "nunjucks": "^3.2.2",
-    "chai": "^4.2.0",
-    "http-server": "^0.12.3",
-    "mocha": "^7.1.1"
   },
   "dependencies": {
     "bindings": "^1.5.0"
   },
-  "description": "WebNN-NAPI",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Kings-Distributed-Systems/webnn-napi"
+  "gypfile": true,
+  "engines": {
+    "node": ">= 12.20.1"
   },
-  "keywords": [
-    "webnn",
-    "webnn"
-  ],
-  "author": "Dominic Cerisano",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Kings-Distributed-Systems/webnn-napi/issues"
-  },
-  "homepage": "https://github.com/Kings-Distributed-Systems/webnn-napi#readme",
-  "directories": {
-    "example": "examples",
-    "lib": "lib",
-    "test": "tests"
+  "devDependencies": {
+    "node-addon-api": "^3.0.2",
+    "chai": "^4.2.0",
+    "http-server": "^0.12.3",
+    "mocha": "^7.1.1"
   }
 }

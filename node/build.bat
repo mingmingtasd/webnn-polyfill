@@ -1,10 +1,10 @@
 
 :: Go to webnn-native directory.
 cd ../
-set "DAWN_DIR=%cd%"
-echo "%DAWN_DIR%\out\Shared"
+set "WEBNN_NATIVE_DIR=%cd%"
+echo "%WEBNN_NATIVE_DIR%\out\Shared"
 
-set PATH=%DAWN_DIR%\out\Shared;%PATH%
+set PATH=%WEBNN_NATIVE_DIR%\out\Shared;%PATH%
 ::setup openvino
 set "OPENVINO_DIR=%ProgramFiles(x86)%\IntelSWTools\openvino"
 if exist "%OPENVINO_DIR%\bin\setupvars.bat" (
@@ -24,7 +24,7 @@ echo
 ninja -C out/Shared
 
 cd node
-echo | set /p path=%DAWN_DIR% > PATH_TO_DAWN
+::echo | set /p path=%WEBNN_NATIVE_DIR% > PATH_TO_WEBNN_NATIVE
 
 if not exist "node_modules" (
   npm install

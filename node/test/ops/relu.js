@@ -1,5 +1,5 @@
 'use strict';
-const webNN = require("../../index");
+const webNN = require("../../lib/webnn");
 const utils = require("../utils");
 
 describe('test relu', function() {
