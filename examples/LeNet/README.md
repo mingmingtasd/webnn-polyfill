@@ -15,6 +15,7 @@ Options:
     -h                      Print this message.
     -i "<path>"             Required. Path to an image.
     -m "<path>"             Required. Path to a .bin file with trained weights.
+    -n "<integer>"          Optional. Number of iterations. The default value is 1, and should not be less than 1.
 
 ```
 

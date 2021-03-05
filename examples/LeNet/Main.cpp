@@ -74,12 +74,17 @@ void ShowUsage() {
               << "Required. Path to an image." << std::endl;
     std::cout << "    -m \"<path>\"             "
               << "Required. Path to a .bin file with trained weights." << std::endl;
+    std::cout
+        << "    -n \"<integer>\"          "
+        << "Optional. Number of iterations. The default value is 1, and should not be less than 1."
+        << std::endl;
 }
 
 int main(int argc, const char* argv[]) {
     DumpMemoryLeaks();
 
     std::string imagePath, modelPath;
+    size_t nIter = 1;
     for (int i = 1; i < argc; ++i) {
         if (strcmp("-h", argv[i]) == 0) {
             ShowUsage();
@@ -89,10 +94,12 @@ int main(int argc, const char* argv[]) {
             imagePath = argv[i + 1];
         } else if (strcmp("-m", argv[i]) == 0 && i + 1 < argc) {
             modelPath = argv[i + 1];
+        } else if (strcmp("-n", argv[i]) == 0 && i + 1 < argc) {
+            nIter = atoi(argv[i + 1]);
         }
     }
 
-    if (imagePath.empty() || modelPath.empty()) {
+    if (imagePath.empty() || modelPath.empty() || nIter < 1) {
         dawn::ErrorLog() << "Invalid options.";
         ShowUsage();
         return -1;
@@ -114,15 +121,35 @@ int main(int argc, const char* argv[]) {
         dawn::ErrorLog() << "Failed to load LeNet.";
         return -1;
     }
+
+    const std::chrono::time_point<std::chrono::high_resolution_clock> compilationStartTime =
+        std::chrono::high_resolution_clock::now();
     if (!lenet.Compile()) {
         dawn::ErrorLog() << "Failed to compile LeNet.";
         return -1;
     }
+    const std::chrono::duration<double, std::milli> compilationElapsedTime =
+        std::chrono::high_resolution_clock::now() - compilationStartTime;
+    dawn::InfoLog() << "Compilation Time: " << compilationElapsedTime.count() << " ms";
+
     std::vector<float> input(reader.GetData().get(), reader.GetData().get() + reader.Size());
-    webnn::Result result = lenet.Compute(input.data(), input.size() * sizeof(float));
-    if (!result) {
-        dawn::ErrorLog() << "Failed to compute LeNet.";
-        return -1;
+    webnn::Result result;
+    const std::chrono::time_point<std::chrono::high_resolution_clock> executionStartTime =
+        std::chrono::high_resolution_clock::now();
+    for (size_t i = 0; i < nIter; ++i) {
+        result = lenet.Compute(input.data(), input.size() * sizeof(float));
+        if (!result) {
+            dawn::ErrorLog() << "Failed to compute LeNet.";
+            return -1;
+        }
+    }
+    const std::chrono::duration<double, std::milli> executionElapsedTime =
+        (std::chrono::high_resolution_clock::now() - executionStartTime) / nIter;
+    if (nIter > 1) {
+        dawn::InfoLog() << "Average Execution Time for " << nIter
+                        << " Iterations: " << executionElapsedTime.count() << " ms";
+    } else {
+        dawn::InfoLog() << "Execution Time: " << executionElapsedTime.count() << " ms";
     }
     PrintResult(result);
     dawn::InfoLog() << "Done.";
