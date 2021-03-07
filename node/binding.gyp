@@ -1,22 +1,22 @@
 {
-  "variables": {
-    "WEBNN_NATIVE_DIR": "<@(module_root_dir)/../",
+  'variables': {
+    'WEBNN_NATIVE_DIR': '<@(module_root_dir)/../',
   },
-  "conditions": [
+  'conditions': [
     [ 'OS=="win"',  {
-      "variables": { 
-        "WEBNN_NATIVE_LIBRARY": "-lwebnn_native.dll.lib",
-        "WEBNN_PROC_LIBRARY": "-lwebnn_proc.dll.lib",
+      'variables': { 
+        'WEBNN_NATIVE_LIBRARY': '-lwebnn_native.dll.lib',
+        'WEBNN_PROC_LIBRARY': '-lwebnn_proc.dll.lib',
       }}
     ],
     [ 'OS=="linux"', {
-      "variables": { 
-        "WEBNN_NATIVE_LIBRARY": "-lwebnn_native",
-        "WEBNN_PROC_LIBRARY": "-lwebnn_proc",
+      'variables': { 
+        'WEBNN_NATIVE_LIBRARY': '-lwebnn_native',
+        'WEBNN_PROC_LIBRARY': '-lwebnn_proc',
       }}
     ]
   ],
-  "make_global_settings": [
+  'make_global_settings': [
     ['CXX','/usr/bin/clang++'],
     ['LINK','/usr/bin/clang++'],
   ],
@@ -52,11 +52,11 @@
       },
       'include_dirs' : [
         '<!@(node -p "require(\'node-addon-api\').include")',
-        "<(WEBNN_NATIVE_DIR)/src/include",
-        "<(WEBNN_NATIVE_DIR)/out/Shared/gen/src/include",
+        '<(WEBNN_NATIVE_DIR)/src/include',
+        '<(WEBNN_NATIVE_DIR)/out/Shared/gen/src/include',
       ],
       'library_dirs' : [
-        "<(WEBNN_NATIVE_DIR)/out/Shared",
+        '<(WEBNN_NATIVE_DIR)/out/Shared',
       ],
       'libraries' : [
         '<(WEBNN_NATIVE_LIBRARY)',

@@ -1,10 +1,10 @@
 {
   "name": "webnn-node",
   "version": "0.1.0",
-  "description": "Webnn Binding for Node.js*",
+  "description": "WebNN-native Binding for Node.js*",
   "main": "lib/webnn.js",
-  "author": "Webnn",
-  "license": "MIT",
+  "author": "WebNN-native Authors",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/webmachinelearning/webnn-native.git"
