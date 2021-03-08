@@ -84,7 +84,7 @@ int main(int argc, const char* argv[]) {
     DumpMemoryLeaks();
 
     std::string imagePath, modelPath;
-    size_t nIter = 1;
+    int nIter = 1;
     for (int i = 1; i < argc; ++i) {
         if (strcmp("-h", argv[i]) == 0) {
             ShowUsage();
@@ -136,7 +136,7 @@ int main(int argc, const char* argv[]) {
     webnn::Result result;
     const std::chrono::time_point<std::chrono::high_resolution_clock> executionStartTime =
         std::chrono::high_resolution_clock::now();
-    for (size_t i = 0; i < nIter; ++i) {
+    for (int i = 0; i < nIter; ++i) {
         result = lenet.Compute(input.data(), input.size() * sizeof(float));
         if (!result) {
             dawn::ErrorLog() << "Failed to compute LeNet.";
