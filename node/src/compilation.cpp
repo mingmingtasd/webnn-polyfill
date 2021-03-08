@@ -7,24 +7,25 @@
 // Hold Promise::Deferred with AsyncWorker.
 class ComputeAsyncWorker : public Napi::AsyncWorker {
  public:
-  ComputeAsyncWorker(Napi::Env& env,
-                     Napi::Promise::Deferred& deferred,
-                     WebnnCompilation compilation,
-                     WebnnNamedInputs named_inputs,
-                     WebnnNamedOutputs named_outputs,
-                     std::vector<std::string>& output_names,
-                     const Napi::CallbackInfo& info)
-      : Napi::AsyncWorker(env),
-        env_(env),
-        deferred_(deferred),
-        compilation_(compilation),
-        named_inputs_(named_inputs),
-        named_outputs_(named_outputs),
-        output_names_(output_names) {
-    if (info.Length() > 1) {
-      output_objects_ = info[1].ToObject();
-    }
-  }
+   ComputeAsyncWorker(Napi::Env& env,
+                      Napi::Promise::Deferred& deferred,
+                      WebnnCompilation compilation,
+                      std::vector<WebnnInput> inputs,
+                      std::vector<WebnnOutput> outputs,
+                      WebnnNamedInputs named_inputs,
+                      WebnnNamedOutputs named_outputs,
+                      std::vector<std::string>& output_names)
+       : Napi::AsyncWorker(env),
+         env_(env),
+         deferred_(deferred),
+         compilation_(compilation),
+         inputs_(std::move(inputs)),
+         outputs_(std::move(outputs)),
+         named_inputs_(named_inputs),
+         named_outputs_(named_outputs),
+         output_names_(output_names) {
+   }
+
   ~ComputeAsyncWorker() { webnnNamedResultsRelease(named_results_); }
 
   void Execute() {
@@ -39,17 +40,17 @@ class ComputeAsyncWorker : public Napi::AsyncWorker {
         reinterpret_cast<void*>(this), named_outputs_);
   }
   void OnOK() {
-    if (output_objects_.IsEmpty()) {
-      Napi::Object obj = Napi::Object::New(env_);
-      for (auto& name : output_names_) {
-        WebnnResult result = webnnNamedResultsGet(named_results_, name.data());
-        obj.Set(name, OutputItem(env_, result));
-        webnnResultRelease(result);
+      if (outputs_.empty()) {
+          Napi::Object obj = Napi::Object::New(env_);
+          for (auto& name : output_names_) {
+              WebnnResult result = webnnNamedResultsGet(named_results_, name.data());
+              obj.Set(name, OutputItem(env_, result));
+              webnnResultRelease(result);
+          }
+          deferred_.Resolve(obj);
+      } else {
+          deferred_.Resolve(Env().Null());
       }
-      deferred_.Resolve(obj);
-    } else {
-      deferred_.Resolve(output_objects_);
-    }
   }
   void SetNamedResults(WebnnNamedResults named_results) {
     named_results_ = named_results;
@@ -69,11 +70,12 @@ class ComputeAsyncWorker : public Napi::AsyncWorker {
   Napi::Env env_;
   Napi::Promise::Deferred deferred_;
   WebnnCompilation compilation_;
+  std::vector<WebnnInput> inputs_;
+  std::vector<WebnnOutput> outputs_;
   WebnnNamedInputs named_inputs_;
   WebnnNamedOutputs named_outputs_;
   std::vector<std::string>& output_names_;
   WebnnNamedResults named_results_;
-  Napi::Object output_objects_;
 };
 
 Napi::FunctionReference Compilation::constructor;
@@ -101,37 +103,35 @@ Napi::Value Compilation::Compute(const Napi::CallbackInfo& info) {
   // The WebnnInput struct need to be kept until compute.
   std::vector<WebnnInput> inputs;
   if (info[0].IsObject()) {
-    Napi::Object obj = info[0].As<Napi::Object>();
-    Napi::Array property_names = obj.GetPropertyNames();
-    for (size_t j = 0; j < property_names.Length(); ++j) {
-      std::string name = property_names.Get(j).As<Napi::String>().Utf8Value();
-      inputs.push_back(ParseOperand<WebnnInput>(obj, name));
-      webnnNamedInputsSet(named_inputs, name.data(), &inputs[j]);
-    }
+      Napi::Object obj = info[0].As<Napi::Object>();
+      Napi::Array property_names = obj.GetPropertyNames();
+
+      for (size_t j = 0; j < property_names.Length(); ++j) {
+        std::string name = property_names.Get(j).As<Napi::String>().Utf8Value();
+        inputs.push_back(ParseOperand<WebnnInput>(obj, name));
+        webnnNamedInputsSet(named_inputs, name.data(), &inputs[j]);
+      }
   }
 
   // The WebnnOutput struct need to be kept until compute.
   std::vector<WebnnOutput> outputs;
   WebnnNamedOutputs named_outputs = nullptr;
-  if (info.Length() > 1) {
-    named_outputs = webnn_native::CreateNamedOutputs();
-    if (info[1].IsObject()) {
+  if (info.Length() > 1 && info[1].IsObject()) {
+      named_outputs = webnn_native::CreateNamedOutputs();
       Napi::Object obj = info[1].As<Napi::Object>();
       Napi::Array property_names = obj.GetPropertyNames();
       for (size_t j = 0; j < property_names.Length(); ++j) {
-        std::string name = property_names.Get(j).As<Napi::String>().Utf8Value();
-        outputs.push_back(ParseOperand<WebnnOutput>(obj, name));
-        webnnNamedOutputsSet(named_outputs, name.data(), &outputs[j]);
+          std::string name = property_names.Get(j).As<Napi::String>().Utf8Value();
+          outputs.push_back(ParseOperand<WebnnOutput>(obj, name));
+          webnnNamedOutputsSet(named_outputs, name.data(), &outputs[j]);
       }
-    }
   }
-
   Napi::Env env = info.Env();
   auto deferred = Napi::Promise::Deferred::New(env);
   Model* model = Napi::ObjectWrap<Model>::Unwrap(model_object_.Value());
   compute_worker_ =
-      new ComputeAsyncWorker(env, deferred, compilation_, named_inputs,
-                             named_outputs, model->GetOutputName(), info);
+      new ComputeAsyncWorker(env, deferred, compilation_, std::move(inputs), std::move(outputs),
+                             named_inputs, named_outputs, model->GetOutputName());
   compute_worker_->Queue();
 
   return deferred.Promise();

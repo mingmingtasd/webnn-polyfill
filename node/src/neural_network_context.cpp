@@ -10,8 +10,9 @@ NeuralNetworkContext::NeuralNetworkContext(const Napi::CallbackInfo &info)
   webnnProcSetProcs(&backendProcs);
   context_ = webnn_native::CreateNeuralNetworkContext();
   if (context_ == nullptr) {
-    Napi::Error::New(env, "Failed to create neural network context").ThrowAsJavaScriptException();
-    return;
+      Napi::Env env = info.Env();
+      Napi::Error::New(env, "Failed to create neural network context").ThrowAsJavaScriptException();
+      return;
   }
 }
 

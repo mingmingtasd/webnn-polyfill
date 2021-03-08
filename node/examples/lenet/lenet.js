@@ -1,7 +1,7 @@
 
 'use strict';
 
-const webNN = require("../../index");
+const webNN = require("../../lib/webnn");
 
 const nn = webNN.ML.getNeuralNetworkContext();
 
