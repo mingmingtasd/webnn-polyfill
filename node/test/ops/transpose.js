@@ -1,9 +1,9 @@
 'use strict';
-const webNN = require("../../lib/webnn");
+const navigator = require("../../lib/webnn");
 const utils = require("../utils");
 
 describe('test transpose', function() {
-  const nn = webNN.ML.getNeuralNetworkContext();
+  const nn = navigator.ml.getNeuralNetworkContext();
 
   async function checkTranspose(
       inputShape, inputData, expectedShape, expected, permutation = undefined) {
@@ -14,7 +14,7 @@ describe('test transpose', function() {
     const compiledModel = await model.compile();
     const inputs = {'x': {buffer: new Float32Array(inputData)}};
     const outputs = await compiledModel.compute(inputs);
-    // utils.checkShape(outputs.y.dimensions, expectedShape);
+    utils.checkShape(outputs.y.dimensions, expectedShape);
     utils.checkValue(outputs.y.buffer, expected);
   }
 

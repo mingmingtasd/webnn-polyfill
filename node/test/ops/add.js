@@ -1,9 +1,9 @@
 'use strict';
-const webNN = require("../../lib/webnn");
+const navigator = require("../../lib/webnn");
 const utils = require("../utils");
 
 describe('test add', function() {
-  const nn = webNN.ML.getNeuralNetworkContext();
+  const nn = navigator.ml.getNeuralNetworkContext();
 
   it('add constant and input', async function() {
     const builder = nn.createModelBuilder();
@@ -45,7 +45,7 @@ describe('test add', function() {
       },
     };
     const outputs = await compiledModel.compute(inputs);
-    // utils.checkShape(outputs.c.dimensions, [3, 4, 5]);
+    utils.checkShape(outputs.c.dimensions, [3, 4, 5]);
     const expected = [
       -0.48879138, -2.0812354,  0.6382897,   0.07346585,  -0.93846387,
       2.9300475,   0.84765005,  1.2585825,   -1.7465117,  2.0591164,
@@ -105,7 +105,7 @@ describe('test add', function() {
       },
     };
     const outputs = await compiledModel.compute(inputs);
-    // utils.checkShape(outputs.c.dimensions, [3, 4, 5]);
+    utils.checkShape(outputs.c.dimensions, [3, 4, 5]);
     const expected = [
       -0.48879138, -2.0812354,  0.6382897,   0.07346585,  -0.93846387,
       2.9300475,   0.84765005,  1.2585825,   -1.7465117,  2.0591164,
@@ -158,7 +158,7 @@ describe('test add', function() {
       },
     };
     const outputs = await compiledModel.compute(inputs);
-    // utils.checkShape(outputs.c.dimensions, [3, 4, 5]);
+    utils.checkShape(outputs.c.dimensions, [3, 4, 5]);
     const expected = [
       0.5484205,   1.7485408, -2.6178582, -0.7418642,  0.32369673,
       2.123247,    1.7987677, -3.585476,  0.0313431,   0.7035562,

@@ -1,9 +1,9 @@
 'use strict';
-const webNN = require("../../lib/webnn");
+const navigator = require("../../lib/webnn");
 const utils = require("../utils");
 
 describe('test softmax', function() {
-  const nn = webNN.ML.getNeuralNetworkContext();
+  const nn = navigator.ml.getNeuralNetworkContext();
 
   it('softmax', async function() {
     const builder = nn.createModelBuilder();
@@ -30,7 +30,7 @@ describe('test softmax', function() {
       },
     };
     const outputs = await compiledModel.compute(inputs);
-    // utils.checkShape(outputs.y.dimensions, [3, 4]);
+    utils.checkShape(outputs.y.dimensions, [3, 4]);
     const expected = [
       0.32165375,
       0.36157736,

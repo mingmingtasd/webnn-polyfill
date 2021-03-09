@@ -5,7 +5,7 @@
 namespace op {
 
 Node::Node(const Napi::CallbackInfo &info) {
-  for (int i = 0; i < info.Length(); ++i) {
+  for (size_t i = 0; i < info.Length(); ++i) {
     if (info[i].IsObject()) {
       Napi::Object object = info[i].As<Napi::Object>();
       if (object.InstanceOf(Operand::constructor.Value())) {

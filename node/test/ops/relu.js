@@ -1,9 +1,9 @@
 'use strict';
-const webNN = require("../../lib/webnn");
+const navigator = require("../../lib/webnn");
 const utils = require("../utils");
 
 describe('test relu', function() {
-  const nn = webNN.ML.getNeuralNetworkContext();
+  const nn = navigator.ml.getNeuralNetworkContext();
 
   it('relu', async function() {
     const builder = nn.createModelBuilder();
@@ -30,7 +30,7 @@ describe('test relu', function() {
       },
     };
     const outputs = await compiledModel.compute(inputs);
-    // utils.checkShape(outputs.y.dimensions, [3, 4, 5]);
+    utils.checkShape(outputs.y.dimensions, [3, 4, 5]);
     const expected = [
       0.,        0.6447428, 0.,         0.,         0.9777725, 0.,
       0.,        0.,        1.3725083,  0.,         0.,        0.,

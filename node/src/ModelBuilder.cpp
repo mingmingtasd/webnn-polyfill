@@ -166,8 +166,6 @@ Napi::Value ModelBuilder::Transpose(const Napi::CallbackInfo &info) {
 }
 
 Napi::Value ModelBuilder::CreateModel(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
-
   WebnnNamedOperands named_operands =
       GetNamedOperands(info[0].As<Napi::Object>());
   std::vector<napi_value> args = {info[0].As<Napi::Value>()};

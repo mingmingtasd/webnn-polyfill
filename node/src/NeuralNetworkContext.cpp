@@ -23,7 +23,6 @@ NeuralNetworkContext::~NeuralNetworkContext() {
 WebnnNeuralNetworkContext NeuralNetworkContext::GetContext() { return context_; }
 
 Napi::Value NeuralNetworkContext::CreateModelBuilder(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
   std::vector<napi_value> args = {info.This().As<Napi::Value>()};
   Napi::Object model_builder = ModelBuilder::constructor.New(args);
 

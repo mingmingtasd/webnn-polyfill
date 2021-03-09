@@ -1,18 +1,26 @@
 #ifndef __Compilation_H__
 #define __Compilation_H__
 
+#include <iostream>
+#include <map>
+
 #include "Base.h"
 
 template <typename T>
-T ParseOperand(Napi::Object item, const std::string& name) {
-  Napi::Object obj = item.Get(name).As<Napi::Object>();
-  // The Buffer can't be set with DescriptorDecoder
-  Napi::TypedArray array = obj.Get("buffer").As<Napi::TypedArray>();
-  Napi::ArrayBuffer buffer = array.ArrayBuffer();
-  T operand;
-  operand.buffer = reinterpret_cast<void*>(buffer.Data());
-  operand.size = buffer.ByteLength();
-  return operand;
+std::map<std::string, T> GetNamedOperands(Napi::Object obj) {
+    std::map<std::string, T> namedOperands;
+    Napi::Array property_names = obj.GetPropertyNames();
+    for (size_t i = 0; i < property_names.Length(); ++i) {
+        std::string name = property_names.Get(i).As<Napi::String>().Utf8Value();
+        Napi::Object item = obj.Get(name).As<Napi::Object>();
+        Napi::TypedArray array = item.Get("buffer").As<Napi::TypedArray>();
+        Napi::ArrayBuffer buffer = array.ArrayBuffer();
+        T operand;
+        operand.buffer = reinterpret_cast<void*>(buffer.Data());
+        operand.size = buffer.ByteLength();
+        namedOperands[name] = operand;
+    }
+    return namedOperands;
 }
 
 class ComputeAsyncWorker;
