@@ -1,8 +1,8 @@
-#include "compilation.h"
+#include "Compilation.h"
 
 #include <iostream>
 
-#include "model.h"
+#include "Model.h"
 
 // Hold Promise::Deferred with AsyncWorker.
 class ComputeAsyncWorker : public Napi::AsyncWorker {

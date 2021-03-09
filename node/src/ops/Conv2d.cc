@@ -1,9 +1,9 @@
-#include "conv2d.h"
+#include "Conv2d.h"
 
 #include <iostream>
 #include <unordered_map>
 
-#include "../operand.h"
+#include "../Operand.h"
 
 namespace op {
 

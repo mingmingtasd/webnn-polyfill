@@ -2,18 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "input.h"
-
-#include <unordered_map>
+#include "Constant.h"
 
 namespace op {
 
-Input::Input(const Napi::CallbackInfo &info) : Node(info) {
-  // name
-  name_ = info[0].As<Napi::String>().Utf8Value();
-  
+Constant::Constant(const Napi::CallbackInfo &info) : Node(info) {
+  Napi::Object obj = info[0].As<Napi::Object>();
   // type
-  Napi::Object obj = info[1].As<Napi::Object>();
   descriptor_.type = getOperandType(obj.Get("type"));
   // dimensions
   Napi::Array array = obj.Get("dimensions").As<Napi::Array>();
@@ -24,10 +19,17 @@ Input::Input(const Napi::CallbackInfo &info) : Node(info) {
   }
   descriptor_.dimensions = dimensions_.data();
   descriptor_.dimensionsCount = dimensions_.size();
+
+  // constant value
+  value_ = getTypedArrayData<float>(info[1].As<Napi::Value>(), &size_);
 }
 
-const WebnnOperandDescriptor *Input::GetOperandDescriptor() { return &descriptor_; }
+const WebnnOperandDescriptor *Constant::GetOperandDescriptor() {
+  return &descriptor_;
+}
 
-std::string &Input::GetName() { return name_; }
+void const *Constant::GetValue() { return value_; }
+
+size_t Constant::GetSize() { return size_; }
 
 } // namespace op

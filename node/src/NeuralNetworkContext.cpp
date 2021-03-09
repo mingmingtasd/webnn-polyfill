@@ -1,6 +1,6 @@
-#include "neural_network_context.h"
+#include "NeuralNetworkContext.h"
 
-#include "model_builder.h"
+#include "ModelBuilder.h"
 
 Napi::FunctionReference NeuralNetworkContext::constructor;
 

@@ -1,7 +1,7 @@
 #ifndef ___OPS_POOL2D_H__
 #define ___OPS_POOL2D_H__
 
-#include "node.h"
+#include "Node.h"
 
 namespace op {
 

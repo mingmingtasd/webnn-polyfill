@@ -7,7 +7,7 @@
 
 #include <napi.h>
 
-#include "node.h"
+#include "Node.h"
 
 namespace op {
 

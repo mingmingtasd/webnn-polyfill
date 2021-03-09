@@ -1,6 +1,6 @@
-#include "node.h"
+#include "Node.h"
 
-#include "../operand.h"
+#include "../Operand.h"
 
 namespace op {
 

@@ -1,17 +1,17 @@
-#include "model_builder.h"
+#include "ModelBuilder.h"
 
 #include <iostream>
 #include <vector>
 
-#include "model.h"
-#include "neural_network_context.h"
-#include "operand.h"
-#include "ops/constant.h"
-#include "ops/conv2d.h"
-#include "ops/input.h"
-#include "ops/pool2d.h"
-#include "ops/reshape.h"
-#include "ops/transpose.h"
+#include "Model.h"
+#include "NeuralNetworkContext.h"
+#include "Operand.h"
+#include "ops/Constant.h"
+#include "ops/Conv2d.h"
+#include "ops/Input.h"
+#include "ops/Pool2d.h"
+#include "ops/Reshape.h"
+#include "ops/Transpose.h"
 
 Napi::FunctionReference ModelBuilder::constructor;
 

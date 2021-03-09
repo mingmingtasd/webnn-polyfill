@@ -1,9 +1,9 @@
-#include "transpose.h"
+#include "Transpose.h"
 
 #include <iostream>
 
-#include "../operand.h"
-#include "conv2d.h"
+#include "../Operand.h"
+#include "Conv2d.h"
 
 namespace op {
 

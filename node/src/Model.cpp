@@ -1,8 +1,8 @@
-#include "model.h"
+#include "Model.h"
 
 #include <iostream>
 
-#include "compilation.h"
+#include "Compilation.h"
 
 Napi::FunctionReference Model::constructor;
 

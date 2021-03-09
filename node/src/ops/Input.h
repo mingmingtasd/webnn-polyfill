@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-#include "node.h"
+#include "Node.h"
 
 namespace op {
 
