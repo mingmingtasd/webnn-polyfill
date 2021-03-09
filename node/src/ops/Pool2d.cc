@@ -1,10 +1,10 @@
-#include "pool2d.h"
+#include "Pool2d.h"
 
 #include <iostream>
 #include <unordered_map>
 
-#include "../operand.h"
-#include "conv2d.h"
+#include "../Operand.h"
+#include "Conv2d.h"
 
 namespace op {
 

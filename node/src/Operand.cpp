@@ -1,4 +1,4 @@
-#include "operand.h"
+#include "Operand.h"
 
 Napi::FunctionReference Operand::constructor;
 

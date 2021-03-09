@@ -1,6 +1,6 @@
-#include "ml.h"
+#include "Ml.h"
 
-#include "neural_network_context.h"
+#include "NeuralNetworkContext.h"
 
 Napi::FunctionReference ML::constructor;
 

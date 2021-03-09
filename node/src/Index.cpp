@@ -1,12 +1,12 @@
 
-#include "index.h"
+#include "Index.h"
 
-#include "ml.h"
-#include "neural_network_context.h"
-#include "model_builder.h"
-#include "model.h"
-#include "compilation.h"
-#include "operand.h"
+#include "Ml.h"
+#include "NeuralNetworkContext.h"
+#include "ModelBuilder.h"
+#include "Model.h"
+#include "Compilation.h"
+#include "Operand.h"
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
 

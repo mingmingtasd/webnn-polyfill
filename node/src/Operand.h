@@ -1,7 +1,7 @@
 #ifndef __OPERAND_H__
 #define __OPERAND_H__
 
-#include "ops/node.h"
+#include "ops/Node.h"
 
 class Operand : public Napi::ObjectWrap<Operand> {
 public:
