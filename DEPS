@@ -11,6 +11,9 @@ vars = {
 }
 
 deps = {
+  'node/webnn-polyfill': {
+    'url': '{github_git}/webmachinelearning/webnn-polyfill.git@cd9cba8bf3b4ee0a5d98a44e40108bbd79f6bc17'
+  },
   'third_party/dawn': {
     'url': '{dawn_git}/dawn.git@bf1c0cf52377b4db2bf3a433dc5056620aad7cdd'
   },
