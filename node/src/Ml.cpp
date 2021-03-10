@@ -8,7 +8,6 @@ ML::ML(const Napi::CallbackInfo& info) : Napi::ObjectWrap<ML>(info) { }
 ML::~ML() { }
 
 Napi::Value ML::GetNeuralNetworkContext(const Napi::CallbackInfo &info) {
-  Napi::Env env = info.Env();
   Napi::Object context = NeuralNetworkContext::constructor.New({
       info.This().As<Napi::Value>()});
 
@@ -17,7 +16,7 @@ Napi::Value ML::GetNeuralNetworkContext(const Napi::CallbackInfo &info) {
 
 Napi::Object ML::Initialize(Napi::Env env, Napi::Object exports) {
   Napi::HandleScope scope(env);
-  Napi::Function func = DefineClass(env, "ML", {
+  Napi::Function func = DefineClass(env, "ml", {
     StaticMethod(
       "getNeuralNetworkContext",
       &ML::GetNeuralNetworkContext,
@@ -26,6 +25,6 @@ Napi::Object ML::Initialize(Napi::Env env, Napi::Object exports) {
   });
   constructor = Napi::Persistent(func);
   constructor.SuppressDestruct();
-  exports.Set("ML", func);
+  exports.Set("ml", func);
   return exports;
 }

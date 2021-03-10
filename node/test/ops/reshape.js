@@ -1,9 +1,9 @@
 'use strict';
-const webNN = require("../../lib/webnn");
+const navigator = require("../../lib/webnn");
 const utils = require("../utils");
 
 describe('test reshape', function() {
-  const nn = webNN.ML.getNeuralNetworkContext();
+  const nn = navigator.ml.getNeuralNetworkContext();
 
   async function testReshape(oldShape, newShape, expectedShape) {
     const builder = nn.createModelBuilder();
@@ -18,8 +18,8 @@ describe('test reshape', function() {
     }
     const inputs = {'x': {buffer: inputBuffer}};
     const outputs = await compiledModel.compute(inputs);
-    // utils.checkShape(
-    //     outputs.y.dimensions, expectedShape ? expectedShape : newShape);
+    utils.checkShape(
+        outputs.y.dimensions, expectedShape ? expectedShape : newShape);
     utils.checkValue(outputs.y.buffer, inputBuffer);
   }
 

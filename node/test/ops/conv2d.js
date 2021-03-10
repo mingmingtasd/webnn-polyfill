@@ -1,9 +1,9 @@
 'use strict';
-const webNN = require("../../lib/webnn");
+const navigator = require("../../lib/webnn");
 const utils = require("../utils");
 
 describe('test conv2d', function() {
-  const nn = webNN.ML.getNeuralNetworkContext();
+  const nn = navigator.ml.getNeuralNetworkContext();
 
   it('conv2d with padding', async function() {
     const builder = nn.createModelBuilder();
@@ -25,7 +25,7 @@ describe('test conv2d', function() {
       },
     };
     const outputs = await compiledModel.compute(inputs);
-    // utils.checkShape(outputs.output.dimensions, [1, 1, 5, 5]);
+    utils.checkShape(outputs.output.dimensions, [1, 1, 5, 5]);
     const expected = [
       12.,  21., 27., 33.,  24.,  33.,  54.,  63., 72.,  51.,  63.,  99., 108.,
       117., 81., 93., 144., 153., 162., 111., 72., 111., 117., 123., 84.,
@@ -52,7 +52,7 @@ describe('test conv2d', function() {
       },
     };
     const outputs = await compiledModel.compute(inputs);
-    // utils.checkShape(outputs.output.dimensions, [1, 1, 3, 3]);
+    utils.checkShape(outputs.output.dimensions, [1, 1, 3, 3]);
     const expected = [54., 63., 72., 99., 108., 117., 144., 153., 162.];
     utils.checkValue(outputs.output.buffer, expected);
   });
@@ -79,9 +79,36 @@ describe('test conv2d', function() {
       },
     };
     const outputs = await compiledModel.compute(inputs);
-    // utils.checkShape(outputs.output.dimensions, [1, 1, 4, 3]);
+    utils.checkShape(outputs.output.dimensions, [1, 1, 4, 3]);
     const expected =
         [12., 27., 24., 63., 108., 81., 123., 198., 141., 112., 177., 124.];
     utils.checkValue(outputs.output.buffer, expected);
   });
+
+  it('conv2d with strides=2 and asymetric padding', async function() {
+    const builder = nn.createModelBuilder();
+    const input =
+        builder.input('input', {type: 'float32', dimensions: [1, 1, 5, 5]});
+    const filter = builder.constant(
+        {type: 'float32', dimensions: [1, 1, 4, 2]},
+        new Float32Array(8).fill(1));
+    const padding = [1, 2, 0, 1];
+    const strides = [2, 2];
+    const output = builder.conv2d(input, filter, {padding, strides});
+    const model = builder.createModel({output});
+    const compiledModel = await model.compile();
+    const inputs = {
+      'input': {
+        buffer: new Float32Array([
+          0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+          13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        ]),
+      },
+    };
+    const outputs = await compiledModel.compute(inputs);
+    utils.checkShape(outputs.output.dimensions, [1, 1, 3, 3]);
+    const expected = [33, 45, 27, 104, 120, 66, 72, 80, 43];
+    utils.checkValue(outputs.output.buffer, expected);
+  });
 });
+

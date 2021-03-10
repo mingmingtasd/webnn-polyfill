@@ -1,4 +1,5 @@
 'use strict';
+
 const assert = require('assert').strict;
 
 function almostEqual(
@@ -25,12 +26,14 @@ function sizeOfShape(array) {
 }
 
 function checkShape(shape, expected) {
-  assert.isTrue(shape.length === expected.length);
+  assert.ok(shape.length === expected.length);
   for (let i = 0; i < shape.length; ++i) {
-    assert.isTrue(shape[i] === expected[i]);
+    assert.ok(shape[i] === expected[i]);
   }
 }
 
 module.exports = {
-  checkValue
+  checkValue,
+  sizeOfShape,
+  checkShape,
 }
