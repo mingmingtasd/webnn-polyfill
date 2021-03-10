@@ -12,12 +12,14 @@
   "directories": {
     "example": "examples",
     "lib": "lib",
-    "test": "test"
+    "test": "webnn-polyfill/test"
   },
   "scripts": {
     "build": "node-gyp configure && node-gyp build",
     "start": "http-server",
-    "test": "mocha ./test/ops"
+    "test": "cross-env NODE_ENV=test mocha --require ./node_setup.js --exit webnn-polyfill/test/*/*.js webnn-polyfill/test/cts/from_nnapi/tests/cts.js webnn-polyfill/test/models/**/*.js",
+    "test-cts": "cross-env NODE_ENV=test mocha --require ./node_setup.js --exit webnn-polyfill/test/cts/from_nnapi/tests/cts.js",
+    "test-models": "cross-env NODE_ENV=test mocha --require ./node_setup.js --exit webnn-polyfill/test/models/**/*.js"
   },
   "dependencies": {
     "bindings": "^1.5.0"
@@ -30,6 +32,7 @@
     "node-addon-api": "^3.0.2",
     "chai": "^4.2.0",
     "http-server": "^0.12.3",
-    "mocha": "^7.1.1"
+    "mocha": "^7.1.1",
+    "cross-env": "^7.0.3"
   }
 }
