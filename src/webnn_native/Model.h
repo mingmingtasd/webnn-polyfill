@@ -33,6 +33,7 @@ namespace webnn_native {
         class Reshape;
         class Transpose;
         class Unary;
+        class LeakyRelu;
     }  // namespace op
 
     class ModelBase : public ObjectBase {
@@ -57,6 +58,7 @@ namespace webnn_native {
         virtual MaybeError AddReshape(const op::Reshape* relu);
         virtual MaybeError AddTranspose(const op::Transpose* transpose);
         virtual MaybeError AddUnary(const op::Unary* unary);
+        virtual MaybeError AddLeakyRelu(const op::LeakyRelu* leakyRelu);
         virtual MaybeError Finish();
 
       private:

@@ -26,6 +26,7 @@
 #include "webnn_native/ops/Constant.h"
 #include "webnn_native/ops/Conv2d.h"
 #include "webnn_native/ops/Input.h"
+#include "webnn_native/ops/LeakyRelu.h"
 #include "webnn_native/ops/Pool2d.h"
 #include "webnn_native/ops/Reshape.h"
 #include "webnn_native/ops/Transpose.h"
@@ -99,6 +100,10 @@ namespace webnn_native {
 
     OperandBase* ModelBuilderBase::Transpose(OperandBase* input, TransposeOptions const* options) {
         DAWN_VALIDATE_AND_INFER_TYPES(new op::Transpose(this, input, options));
+    }
+
+    OperandBase* ModelBuilderBase::LeakyRelu(OperandBase* input, LeakyReluOptions const* options) {
+        DAWN_VALIDATE_AND_INFER_TYPES(new op::LeakyRelu(this, input, options));
     }
 
     ModelBase* ModelBuilderBase::CreateModel(NamedOperandsBase const* namedOperands) {

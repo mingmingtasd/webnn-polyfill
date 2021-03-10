@@ -41,6 +41,7 @@ namespace webnn_native {
         OperandBase* Reshape(OperandBase*, int32_t const*, size_t);
         OperandBase* Softmax(OperandBase*);
         OperandBase* Transpose(OperandBase*, TransposeOptions const* options);
+        OperandBase* LeakyRelu(OperandBase*, LeakyReluOptions const* options);
         ModelBase* CreateModel(NamedOperandsBase const* named_operands);
 
       private:

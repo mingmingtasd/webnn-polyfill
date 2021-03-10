@@ -123,6 +123,8 @@ source_set("webnn_native_sources") {
     "ops/Conv2d.h",
     "ops/Input.cpp",
     "ops/Input.h",
+    "ops/LeakyRelu.cpp",
+    "ops/LeakyRelu.h",
     "ops/Pool2d.cpp",
     "ops/Pool2d.h",
     "ops/Reshape.cpp",
