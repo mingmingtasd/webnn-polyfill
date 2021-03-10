@@ -77,6 +77,10 @@ namespace webnn_native {
         UNREACHABLE();
     }
 
+    MaybeError ModelBase::AddLeakyRelu(const op::LeakyRelu* leakyRelu) {
+        UNREACHABLE();
+    }
+
     MaybeError ModelBase::Finish() {
         UNREACHABLE();
     }

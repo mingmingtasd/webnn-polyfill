@@ -30,6 +30,9 @@
   "int32_t": {
     "category": "native"
   },
+  "float": {
+    "category": "native"
+  },
   "size_t": {
     "category": "native"
   },
@@ -162,6 +165,12 @@
       {"name": "layout", "type": "operand layout", "default": "nchw"}
     ]
   },
+  "leakyRelu options": {
+    "category": "structure",
+    "members": [
+      {"name": "alpha", "type": "float", "default": 0.01}
+    ]
+  },
   "transpose options": {
     "category": "structure",
     "members": [
@@ -230,6 +239,15 @@
           {"name": "options", "type": "pool2d options", "annotation": "const*", "optional": true}
         ]
       },
+      {
+        "name": "leaky relu",
+        "returns": "operand",
+        "args": [
+          {"name": "input", "type": "operand"},
+          {"name": "options", "type": "leakyRelu options", "annotation": "const*", "optional": true}
+        ]
+      },
+
       {
         "name": "max pool2d",
         "returns": "operand",
