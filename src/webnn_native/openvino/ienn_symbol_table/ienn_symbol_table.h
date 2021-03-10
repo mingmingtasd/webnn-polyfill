@@ -39,6 +39,7 @@ namespace webnn_native {
   X(ie_model_add_reshape)          \
   X(ie_model_add_softmax)          \
   X(ie_model_add_transpose)        \
+  X(ie_model_add_leakyRelu)        \
   X(ie_model_get_outputs_number)   \
   X(ie_model_get_output_name)      \
   X(ie_model_free_name)            \

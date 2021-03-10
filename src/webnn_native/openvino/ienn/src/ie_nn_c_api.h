@@ -117,6 +117,10 @@ typedef struct ie_transpose_options {
   int32_t const* permutation;
 } ie_transpose_options_t;
 
+typedef struct ie_leaky_relu_options {
+  float alpha = 0.01;
+} ie_leaky_relu_options_t;
+
 typedef struct ie_model ie_model_t;
 typedef struct ie_compilation ie_compilation_t;
 
@@ -300,6 +304,19 @@ NEURAL_NETWORK_C_API(IEStatusCode)
 ie_model_add_transpose(ie_model_t* model,
                        ie_operand_t* input,
                        ie_transpose_options* options,
+                       ie_operand_t** operand);
+
+/**
+ * @brief Add leakyRelu node to nGraph. Use the ie_operand_free() method to
+ *  free the operand memory.
+ * @ingroup model
+ * @param ie_operand_t The input operand.
+ * @return Status code of the operation: OK(0) for success.
+ */
+NEURAL_NETWORK_C_API(IEStatusCode)
+ie_model_add_leakyRelu(ie_model_t* model,
+                       ie_operand_t* input,
+                       ie_leaky_relu_options* options,
                        ie_operand_t** operand);
 
 /**

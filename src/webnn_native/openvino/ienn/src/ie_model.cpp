@@ -294,6 +294,18 @@ ie_operand_t* Model::AddTranspose(ie_operand_t* input,
   return CreateOperand(node_name);
 }
 
+ie_operand_t* Model::AddLeakyRelu(ie_operand_t* input,
+                                  ie_leaky_relu_options_t* options) {
+  auto input_node = name_node_map_[input->name];
+  const auto alpha_node =
+      op::Constant::create(element::f32, Shape{1}, {options->alpha});
+  auto leaky_relu_node =
+      std::make_shared<op::v0::PRelu>(input_node, alpha_node);
+  std::string node_name = leaky_relu_node->get_name();
+  name_node_map_[node_name] = leaky_relu_node->output(0);
+  return CreateOperand(node_name);
+}
+
 void Model::Finish() {
   auto ngraph_function =
       std::make_shared<Function>(ngraph_outputs_, ngraph_inputs_);

@@ -53,6 +53,8 @@ class Model {
   ie_operand_t* AddSoftmax(ie_operand_t* input);
   ie_operand_t* AddTranspose(ie_operand_t* input,
                              ie_transpose_options_t* options);
+  ie_operand_t* AddLeakyRelu(ie_operand_t* input,
+                             ie_leaky_relu_options_t* options);
   void Finish();
   size_t GetOutputsNumber();
   IEStatusCode GetOutputName(const size_t number, char** name);

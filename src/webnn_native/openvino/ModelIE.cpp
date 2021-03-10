@@ -67,6 +67,14 @@ namespace webnn_native { namespace ie {
             return ieOptions;
         }
 
+        ie_leaky_relu_options LeakyReluOptionsForIE(LeakyReluOptions const* options) {
+            if (options == nullptr)
+                return {};
+            ie_leaky_relu_options ieOptions;
+            ieOptions.alpha = options->alpha;
+            return ieOptions;
+        }
+
         ie_pool2d_options Pool2dOptionsForIE(Pool2dOptions const* options) {
             ie_pool2d_options ieOptions;
             ieOptions.windowDimensions = options->windowDimensions;
@@ -214,6 +222,19 @@ namespace webnn_native { namespace ie {
         DAWN_TRY(CheckStatusCode(code, "IE add transpose"));
 
         mOperandIdMap[transpose] = std::string(ieOperand->name);
+        return {};
+    }
+
+    MaybeError Model::AddLeakyRelu(const op::LeakyRelu* leakyRelu) {
+        auto inputs = leakyRelu->Inputs();
+        ie_operand_t input;
+        input.name = const_cast<char*>(mOperandIdMap[inputs[0].Get()].c_str());
+        ie_operand_t* ieOperand;
+        ie_leaky_relu_options_t ieOptions = LeakyReluOptionsForIE(leakyRelu->GetOptions());
+        IEStatusCode code = IE(ie_model_add_leakyRelu)(mIeModel, &input, &ieOptions, &ieOperand);
+        DAWN_TRY(CheckStatusCode(code, "IE add leakyRelu"));
+
+        mOperandIdMap[leakyRelu] = std::string(ieOperand->name);
         return {};
     }
 
