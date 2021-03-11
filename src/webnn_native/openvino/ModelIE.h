@@ -25,6 +25,7 @@
 #include "webnn_native/ops/Constant.h"
 #include "webnn_native/ops/Conv2d.h"
 #include "webnn_native/ops/Input.h"
+#include "webnn_native/ops/LeakyRelu.h"
 #include "webnn_native/ops/Pool2d.h"
 #include "webnn_native/ops/Reshape.h"
 #include "webnn_native/ops/Transpose.h"
@@ -46,6 +47,7 @@ namespace webnn_native { namespace ie {
         virtual MaybeError AddReshape(const op::Reshape* relu) override;
         virtual MaybeError AddTranspose(const op::Transpose* transpose) override;
         virtual MaybeError AddUnary(const op::Unary* unary) override;
+        virtual MaybeError AddLeakyRelu(const op::LeakyRelu* leakyRelu) override;
         virtual MaybeError Finish() override;
 
         ie_model_t* GetInferenceEngineModel();
