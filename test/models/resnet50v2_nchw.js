@@ -116,7 +116,7 @@ describe('test resnet50v2 nchw', function() {
           builder.input('input', {type: 'float32', dimensions: [1, 3, 224, 224]});
       const bn1 = await buildBatchNorm(data, '0', '', false);
       const conv0 = await buildConv(
-          bn1, '0', '', {pading: [3, 3, 3, 3], strides: [2, 2]});
+          bn1, '0', '', {padding: [3, 3, 3, 3], strides: [2, 2]});
       const bn2 = await buildBatchNorm(conv0, '1', '');
       const pool1 = await builder.maxPool2d(bn2,
           {windowDimensions: [3, 3], padding: [1, 1, 1, 1], strides: [2, 2]});
@@ -165,7 +165,7 @@ describe('test resnet50v2 nchw', function() {
       const pool2 = await builder.averagePool2d(bn3);
       const reshape = builder.reshape(pool2, [1, -1]);
       const gemm = await buildGemm(reshape, '0');
-      return builder.build({gemm});
+      return builder.build({conv0});
     }
 
     graph = await buildResNet();
@@ -193,34 +193,34 @@ describe('test resnet50v2 nchw', function() {
     const inputs = {
       'input': await utils.createTypedArrayFromNpy(new URL(inputFile, url))};
     const outputs = {
-      'gemm': new Float32Array(utils.sizeOfShape([1, 1000]))};
+      'conv0': new Float32Array(utils.sizeOfShape([1,64,109,109]))};
     graph.compute(inputs, outputs);
     const expected =
         await utils.createTypedArrayFromNpy(new URL(expectedFile, url));
     utils.checkValue(
-        outputs.gemm, expected,
+        outputs.conv0, expected,
         // refer to onnx
         // https://github.com/onnx/models/blob/master/workflow_scripts/ort_test_dir_utils.py#L239
         new utils.AccuracyCriterion(1e-3, 1e-3));
   }
 
-  it.skip('test_data_set_0', async function() {
+  it.only('test_data_set_0', async function() {
     await testResNet50V2(
         graph, `${testDataDir}/test_data_set/0/input_0.npy`,
         `${testDataDir}/test_data_set/0/output_0.npy`);
   });
 
-  it.skip('test_data_set_1', async function() {
-    await testResNet50V2(
-        graph, `${testDataDir}/test_data_set/1/input_0.npy`,
-        `${testDataDir}/test_data_set/1/output_0.npy`);
-  });
+  // it('test_data_set_1', async function() {
+  //   await testResNet50V2(
+  //       graph, `${testDataDir}/test_data_set/1/input_0.npy`,
+  //       `${testDataDir}/test_data_set/1/output_0.npy`);
+  // });
 
-  it.skip('test_data_set_2', async function() {
-    await testResNet50V2(
-        graph, `${testDataDir}/test_data_set/2/input_0.npy`,
-        `${testDataDir}/test_data_set/2/output_0.npy`);
-  });
+  // it('test_data_set_2', async function() {
+  //   await testResNet50V2(
+  //       graph, `${testDataDir}/test_data_set/2/input_0.npy`,
+  //       `${testDataDir}/test_data_set/2/output_0.npy`);
+  // });
 
   it.skip('test_data_set_0 (fused ops)', async function() {
     await testResNet50V2(
