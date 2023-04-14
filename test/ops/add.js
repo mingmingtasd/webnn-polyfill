@@ -4,7 +4,7 @@ import * as utils from '../utils.js';
 describe('test add', () => {
   let context;
   before(async () => {
-    context = await navigator.ml.createContext();
+    context = await navigator.ml.createContext({devicePreference: 'gpu'});
   });
 
   it('add constant and input', async () => {

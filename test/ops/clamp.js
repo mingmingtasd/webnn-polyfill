@@ -4,7 +4,7 @@ import * as utils from '../utils.js';
 describe('test clamp', () => {
   let context;
   before(async () => {
-    context = await navigator.ml.createContext();
+    context = await navigator.ml.createContext({devicePreference: 'gpu'});
   });
 
   async function testClamp(inputShape, inputValue, expected, options = {}) {

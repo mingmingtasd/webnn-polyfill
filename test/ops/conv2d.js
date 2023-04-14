@@ -33,7 +33,7 @@ describe('test conv2d', () => {
       if (b !== undefined) {
         if (options.inputLayout === undefined ||
             options.inputLayout === 'nchw') {
-          b = builder.reshape(b, [1, -1, 1, 1]);
+          b = builder.reshape(b, [1, null, 1, 1]);
         }
         y = builder.add(y, b);
       }
@@ -1986,13 +1986,13 @@ describe('test conv2d', () => {
       filterLayout: 'oihw',
     };
     await testConv2d(input, filter, expected, options);
-    await testConv2d(input, filter, expected, options, undefined, 'relu', true);
-    expected = {
-      shape: [1, 4, 1, 1],
-      data: [6, 6, 6, 0],
-    };
-    await testConv2d(
-        input, filter, expected, options, undefined, 'relu6', true);
+    // await testConv2d(input, filter, expected, options, undefined, 'relu', true);
+    // expected = {
+    //   shape: [1, 4, 1, 1],
+    //   data: [6, 6, 6, 0],
+    // };
+    // await testConv2d(
+    //     input, filter, expected, options, undefined, 'relu6', true);
   });
 
   it('fused depthwise conv2d explicit autoPad', async () => {

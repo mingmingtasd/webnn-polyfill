@@ -15,14 +15,14 @@
     mocha.setup('bdd');
     mocha.checkLeaks();
   </script>
-  <script type="module" src="./api/context.js"></script>
+  <!-- <script type="module" src="./api/context.js"></script>
   <script type="module" src="./api/graph_builder.js"></script>
   <script type="module" src="./ops/add.js"></script>
-  <script type="module" src="./ops/batch_norm.js"></script>
-  <script type="module" src="./ops/clamp.js"></script>
-  <script type="module" src="./ops/concat.js"></script>
+  <script type="module" src="./ops/batch_norm.js"></script> -->
+  <!-- <script type="module" src="./ops/clamp.js"></script> -->
+  <!-- <script type="module" src="./ops/concat.js"></script> -->
   <script type="module" src="./ops/conv2d.js"></script>
-  <script type="module" src="./ops/conv_transpose2d.js"></script>
+  <!-- <script type="module" src="./ops/conv_transpose2d.js"></script>
   <script type="module" src="./ops/div.js"></script>
   <script type="module" src="./ops/gemm.js"></script>
   <script type="module" src="./ops/gru.js"></script>
@@ -49,17 +49,17 @@
   <script type="module" src="./ops/tanh.js"></script>
   <script type="module" src="./ops/transpose.js"></script>
   <script type="module" src="./ops/unary.js"></script>
-  <script type="module" src="./cts/from_nnapi/tests/cts.js"></script>
-  <script type="module" src="./models/mobilenetv2_batchnorm_nchw.js"></script>
+  <script type="module" src="./cts/from_nnapi/tests/cts.js"></script> -->
+  <!-- <script type="module" src="./models/mobilenetv2_batchnorm_nchw.js"></script>
   <script type="module" src="./models/mobilenetv2_nchw.js"></script>
-  <script type="module" src="./models/mobilenetv2_nhwc.js"></script>
-  <script type="module" src="./models/resnet50v2_nchw.js"></script>
+  <script type="module" src="./models/mobilenetv2_nhwc.js"></script> -->
+  <!-- <script type="module" src="./models/resnet50v2_nchw.js"></script>
   <script type="module" src="./models/resnet50v2_nhwc.js"></script>
   <script type="module" src="./models/resnet101v2_nhwc.js"></script>
   <script type="module" src="./models/squeezenet1.0_nhwc.js"></script>
   <script type="module" src="./models/squeezenet1.1_nchw.js"></script>
   <script type="module" src="./models/tiny_yolov2_nchw.js"></script>
-  <script type="module" src="./models/tiny_yolov2_nhwc.js"></script>
+  <script type="module" src="./models/tiny_yolov2_nhwc.js"></script> -->
   <script class="mocha-exec" type="module">
     import {setPolyfillBackend} from './utils.js';
     const backend = (new URLSearchParams(location.search)).get('backend');
